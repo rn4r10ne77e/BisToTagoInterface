@@ -1,0 +1,22 @@
+package com.geon.bis.tago.bistotagointerface.netty.handler;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@ChannelHandler.Sharable
+public class OutboundHandler extends ChannelOutboundHandlerAdapter {
+
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        log.info("OutboundHandler write : \n{}", ByteBufUtil.prettyHexDump((ByteBuf) msg));
+        ctx.write(msg, promise);
+    }
+}

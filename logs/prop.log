@@ -1,0 +1,317 @@
+2024-08-05T14:52:11.625+09:00  INFO 16928 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 16928 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T14:52:11.627+09:00  INFO 16928 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T14:52:11.674+09:00  INFO 16928 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T14:52:12.522+09:00  WARN 16928 --- [BisToTagoInterface] [restartedMain] s.c.a.AnnotationConfigApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'applicationStartupTask' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\config\ApplicationStartupTask.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'nettyServerSocket' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyServerSocket.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'serverBootstrap' defined in class path resource [com/geon/bis/tago/bistotagointerface/netty/config/NettyConfiguration.class]: Unsatisfied dependency expressed through method 'serverBootstrap' parameter 0: Error creating bean with name 'nettyChannelInitializer' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyChannelInitializer.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'inboundHandler' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\handler\InboundHandler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+2024-08-05T14:52:12.530+09:00  INFO 16928 --- [BisToTagoInterface] [restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2024-08-05T14:52:12.570+09:00 ERROR 16928 --- [BisToTagoInterface] [restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'applicationStartupTask' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\config\ApplicationStartupTask.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'nettyServerSocket' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyServerSocket.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'serverBootstrap' defined in class path resource [com/geon/bis/tago/bistotagointerface/netty/config/NettyConfiguration.class]: Unsatisfied dependency expressed through method 'serverBootstrap' parameter 0: Error creating bean with name 'nettyChannelInitializer' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyChannelInitializer.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'inboundHandler' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\handler\InboundHandler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:971) ~[spring-context-6.1.11.jar:6.1.11]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625) ~[spring-context-6.1.11.jar:6.1.11]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.3.2.jar:3.3.2]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.3.2.jar:3.3.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335) ~[spring-boot-3.3.2.jar:3.3.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363) ~[spring-boot-3.3.2.jar:3.3.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352) ~[spring-boot-3.3.2.jar:3.3.2]
+	at com.geon.bis.tago.bistotagointerface.BisToTagoInterfaceApplication.main(BisToTagoInterfaceApplication.java:10) ~[main/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.3.2.jar:3.3.2]
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'nettyServerSocket' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyServerSocket.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'serverBootstrap' defined in class path resource [com/geon/bis/tago/bistotagointerface/netty/config/NettyConfiguration.class]: Unsatisfied dependency expressed through method 'serverBootstrap' parameter 0: Error creating bean with name 'nettyChannelInitializer' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyChannelInitializer.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'inboundHandler' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\handler\InboundHandler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 23 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'serverBootstrap' defined in class path resource [com/geon/bis/tago/bistotagointerface/netty/config/NettyConfiguration.class]: Unsatisfied dependency expressed through method 'serverBootstrap' parameter 0: Error creating bean with name 'nettyChannelInitializer' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyChannelInitializer.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'inboundHandler' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\handler\InboundHandler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:542) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 37 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'nettyChannelInitializer' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\config\NettyChannelInitializer.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'inboundHandler' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\handler\InboundHandler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 51 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'inboundHandler' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\netty\handler\InboundHandler.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 65 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'testMapper' defined in file [C:\prj\BisToTagoInterface\build\classes\java\main\com\geon\bis\tago\bistotagointerface\mapper\TestMapper.class]: Cannot resolve reference to bean 'sqlSessionTemplate' while setting bean property 'sqlSessionTemplate'
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:377) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1705) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1454) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 79 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'sqlSessionTemplate' defined in class path resource [org/mybatis/spring/boot/autoconfigure/MybatisAutoConfiguration.class]: Unsatisfied dependency expressed through method 'sqlSessionTemplate' parameter 0: Error creating bean with name 'sqlSessionFactory' defined in class path resource [org/mybatis/spring/boot/autoconfigure/MybatisAutoConfiguration.class]: Failed to instantiate [org.apache.ibatis.session.SqlSessionFactory]: Factory method 'sqlSessionFactory' threw exception with message: Failed to parse mapping resource: 'file [C:\prj\BisToTagoInterface\build\resources\main\mybatis\mapper\TestMapper.xml]'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:542) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 93 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sqlSessionFactory' defined in class path resource [org/mybatis/spring/boot/autoconfigure/MybatisAutoConfiguration.class]: Failed to instantiate [org.apache.ibatis.session.SqlSessionFactory]: Factory method 'sqlSessionFactory' threw exception with message: Failed to parse mapping resource: 'file [C:\prj\BisToTagoInterface\build\resources\main\mybatis\mapper\TestMapper.xml]'
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:648) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:636) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 103 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.apache.ibatis.session.SqlSessionFactory]: Factory method 'sqlSessionFactory' threw exception with message: Failed to parse mapping resource: 'file [C:\prj\BisToTagoInterface\build\resources\main\mybatis\mapper\TestMapper.xml]'
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:178) ~[spring-beans-6.1.11.jar:6.1.11]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:644) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 117 common frames omitted
+Caused by: java.io.IOException: Failed to parse mapping resource: 'file [C:\prj\BisToTagoInterface\build\resources\main\mybatis\mapper\TestMapper.xml]'
+	at org.mybatis.spring.SqlSessionFactoryBean.buildSqlSessionFactory(SqlSessionFactoryBean.java:700) ~[mybatis-spring-3.0.3.jar:3.0.3]
+	at org.mybatis.spring.SqlSessionFactoryBean.afterPropertiesSet(SqlSessionFactoryBean.java:577) ~[mybatis-spring-3.0.3.jar:3.0.3]
+	at org.mybatis.spring.SqlSessionFactoryBean.getObject(SqlSessionFactoryBean.java:720) ~[mybatis-spring-3.0.3.jar:3.0.3]
+	at org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration.sqlSessionFactory(MybatisAutoConfiguration.java:189) ~[mybatis-spring-boot-autoconfigure-3.0.3.jar:3.0.3]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:146) ~[spring-beans-6.1.11.jar:6.1.11]
+	... 118 common frames omitted
+Caused by: org.apache.ibatis.builder.BuilderException: Error parsing Mapper XML. The XML location is 'file [C:\prj\BisToTagoInterface\build\resources\main\mybatis\mapper\TestMapper.xml]'. Cause: org.apache.ibatis.builder.BuilderException: Mapper's namespace cannot be empty
+	at org.apache.ibatis.builder.xml.XMLMapperBuilder.configurationElement(XMLMapperBuilder.java:127) ~[mybatis-3.5.14.jar:3.5.14]
+	at org.apache.ibatis.builder.xml.XMLMapperBuilder.parse(XMLMapperBuilder.java:100) ~[mybatis-3.5.14.jar:3.5.14]
+	at org.mybatis.spring.SqlSessionFactoryBean.buildSqlSessionFactory(SqlSessionFactoryBean.java:698) ~[mybatis-spring-3.0.3.jar:3.0.3]
+	... 126 common frames omitted
+Caused by: org.apache.ibatis.builder.BuilderException: Mapper's namespace cannot be empty
+	at org.apache.ibatis.builder.xml.XMLMapperBuilder.configurationElement(XMLMapperBuilder.java:117) ~[mybatis-3.5.14.jar:3.5.14]
+	... 128 common frames omitted
+
+2024-08-05T14:52:46.449+09:00  INFO 15428 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 15428 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T14:52:46.452+09:00  INFO 15428 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T14:52:46.494+09:00  INFO 15428 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T14:52:47.565+09:00  WARN 15428 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T14:52:47.588+09:00  INFO 15428 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.512 seconds (process running for 2.128)
+2024-08-05T14:56:09.698+09:00  INFO 6484 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 6484 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T14:56:09.701+09:00  INFO 6484 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T14:56:09.746+09:00  INFO 6484 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T14:56:10.824+09:00  WARN 6484 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T14:56:10.847+09:00  INFO 6484 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.521 seconds (process running for 2.133)
+2024-08-05T14:56:10.850+09:00  INFO 6484 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : org.springframework.boot.context.event.ApplicationReadyEvent[source=org.springframework.boot.SpringApplication@2d78f406]
+2024-08-05T14:56:47.661+09:00  INFO 11372 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 11372 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T14:56:47.663+09:00  INFO 11372 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T14:56:47.704+09:00  INFO 11372 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T14:56:48.787+09:00  WARN 11372 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T14:56:48.810+09:00  INFO 11372 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.524 seconds (process running for 2.128)
+2024-08-05T14:56:48.813+09:00  INFO 11372 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.527S
+2024-08-05T14:59:34.462+09:00  INFO 33712 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 33712 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T14:59:34.464+09:00  INFO 33712 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T14:59:34.508+09:00  INFO 33712 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T14:59:35.627+09:00  WARN 33712 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T14:59:35.650+09:00  INFO 33712 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.567 seconds (process running for 2.205)
+2024-08-05T14:59:35.653+09:00  INFO 33712 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.571S
+2024-08-05T14:59:48.448+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerAdded
+2024-08-05T14:59:48.449+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelActive for /127.0.0.1:24707
+2024-08-05T14:59:57.135+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 97
+2024-08-05T14:59:57.135+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 97
+2024-08-05T14:59:57.135+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 97
+2024-08-05T14:59:57.135+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 97
+2024-08-05T14:59:57.135+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 97
+2024-08-05T14:59:57.136+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelReadComplete 호출 : 수신 완료
+2024-08-05T15:00:07.141+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : Invalid bound statement (not found): com.geon.bis.tago.bistotagointerface.mapper.TestMapper.list
+2024-08-05T15:00:07.141+09:00  INFO 33712 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerRemoved
+2024-08-05T15:02:27.520+09:00  INFO 29576 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 29576 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:02:27.522+09:00  INFO 29576 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:02:27.567+09:00  INFO 29576 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T15:02:28.705+09:00  WARN 29576 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:02:28.728+09:00  INFO 29576 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.597 seconds (process running for 2.218)
+2024-08-05T15:02:28.731+09:00  INFO 29576 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.6S
+2024-08-05T15:02:37.175+09:00  INFO 29576 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerAdded
+2024-08-05T15:02:37.176+09:00  INFO 29576 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelActive for /127.0.0.1:25031
+2024-08-05T15:02:47.186+09:00  INFO 29576 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : Invalid bound statement (not found): com.geon.bis.tago.bistotagointerface.mapper.TestMapper.list
+2024-08-05T15:02:47.193+09:00  INFO 29576 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerRemoved
+2024-08-05T15:06:32.076+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 23864 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:06:32.079+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:06:32.123+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T15:06:33.284+09:00  WARN 23864 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:06:33.307+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.622 seconds (process running for 2.267)
+2024-08-05T15:06:33.310+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.625S
+2024-08-05T15:07:06.322+09:00  INFO 23864 --- [BisToTagoInterface] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 3 class path changes (0 additions, 0 deletions, 3 modifications)
+2024-08-05T15:07:10.464+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 23864 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:07:10.465+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:07:10.761+09:00  WARN 23864 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:07:10.773+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 0.341 seconds (process running for 39.734)
+2024-08-05T15:07:10.775+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT0.342S
+2024-08-05T15:07:48.742+09:00  INFO 23864 --- [BisToTagoInterface] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2024-08-05T15:07:53.494+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 2912 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:07:53.497+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:07:53.538+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T15:07:54.641+09:00  WARN 2912 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:07:54.663+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.547 seconds (process running for 2.164)
+2024-08-05T15:07:54.666+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.55S
+2024-08-05T15:14:06.460+09:00  INFO 2912 --- [BisToTagoInterface] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (0 additions, 6 deletions, 0 modifications)
+2024-08-05T15:14:10.768+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 2912 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:14:10.768+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:14:11.076+09:00  WARN 2912 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:14:11.085+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 0.352 seconds (process running for 378.585)
+2024-08-05T15:14:11.086+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT0.353S
+2024-08-05T15:14:12.508+09:00  INFO 2912 --- [BisToTagoInterface] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (6 additions, 0 deletions, 0 modifications)
+2024-08-05T15:14:14.527+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2024-08-05T15:14:16.612+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 2912 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:14:16.613+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:14:16.872+09:00  WARN 2912 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:14:16.879+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 0.294 seconds (process running for 384.38)
+2024-08-05T15:14:16.880+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT0.295S
+2024-08-05T15:15:11.243+09:00  INFO 2912 --- [BisToTagoInterface] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (0 additions, 6 deletions, 0 modifications)
+2024-08-05T15:15:13.347+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2024-08-05T15:15:15.435+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 2912 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:15:15.436+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:15:15.680+09:00  WARN 2912 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:15:15.688+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 0.279 seconds (process running for 443.188)
+2024-08-05T15:15:15.689+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT0.279S
+2024-08-05T15:15:17.115+09:00  INFO 2912 --- [BisToTagoInterface] [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (6 additions, 0 deletions, 0 modifications)
+2024-08-05T15:15:19.125+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2024-08-05T15:15:21.216+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 2912 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:15:21.217+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:15:21.461+09:00  WARN 2912 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:15:21.468+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 0.278 seconds (process running for 448.968)
+2024-08-05T15:15:21.469+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT0.278S
+2024-08-05T15:16:37.891+09:00  INFO 2912 --- [BisToTagoInterface] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2024-08-05T15:17:01.500+09:00  INFO 26968 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 26968 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:17:01.503+09:00  INFO 26968 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:17:01.547+09:00  INFO 26968 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T15:17:02.670+09:00  WARN 26968 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:17:02.692+09:00  INFO 26968 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.561 seconds (process running for 2.186)
+2024-08-05T15:17:02.695+09:00  INFO 26968 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.564S
+2024-08-05T15:18:43.078+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerAdded
+2024-08-05T15:18:43.079+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelActive for /127.0.0.1:25434
+2024-08-05T15:18:47.034+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:18:47.034+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:18:47.034+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:18:47.034+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:18:47.035+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelReadComplete 호출 : 수신 완료
+2024-08-05T15:18:57.053+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-08-05T15:18:57.200+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@170f4564
+2024-08-05T15:18:57.202+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-08-05T15:18:57.226+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : db connection result com.geon.bis.tago.bistotagointerface.mapper.model.BusComp@c6cc33f
+2024-08-05T15:18:57.227+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : '/127.0.0.1:25434'로부터 '10'초 동안 입력이 없음
+2024-08-05T15:18:57.227+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : 나 지금 '1'번째 물어봤어
+2024-08-05T15:19:07.050+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : db connection result com.geon.bis.tago.bistotagointerface.mapper.model.BusComp@312d7c0b
+2024-08-05T15:19:07.050+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : '/127.0.0.1:25434'로부터 '10'초 동안 입력이 없음
+2024-08-05T15:19:07.050+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : 나 지금 '2'번째 물어봤어
+2024-08-05T15:19:17.063+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : db connection result com.geon.bis.tago.bistotagointerface.mapper.model.BusComp@7cd2cb36
+2024-08-05T15:19:17.064+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : '/127.0.0.1:25434'로부터 '10'초 동안 입력이 없음
+2024-08-05T15:19:17.064+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : 두번 물어봤는데 답이 없어? 그럼 꺼져
+2024-08-05T15:19:17.065+09:00  INFO 26968 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerRemoved
+2024-08-05T15:19:36.088+09:00  INFO 26968 --- [BisToTagoInterface] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-08-05T15:19:36.091+09:00  INFO 26968 --- [BisToTagoInterface] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2024-08-05T15:21:32.991+09:00  INFO 26580 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Starting BisToTagoInterfaceApplication using Java 17.0.11 with PID 26580 (C:\prj\BisToTagoInterface\build\classes\java\main started by itp-001 in C:\prj\BisToTagoInterface)
+2024-08-05T15:21:32.994+09:00  INFO 26580 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : The following 1 profile is active: "local"
+2024-08-05T15:21:33.039+09:00  INFO 26580 --- [BisToTagoInterface] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-08-05T15:21:34.153+09:00  WARN 26580 --- [BisToTagoInterface] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : Unable to start LiveReload server
+2024-08-05T15:21:34.176+09:00  INFO 26580 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.BisToTagoInterfaceApplication  : Started BisToTagoInterfaceApplication in 1.568 seconds (process running for 2.191)
+2024-08-05T15:21:34.180+09:00  INFO 26580 --- [BisToTagoInterface] [restartedMain] c.g.b.t.b.config.ApplicationStartupTask  : PT1.571S
+2024-08-05T15:21:58.262+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerAdded
+2024-08-05T15:21:58.262+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelActive for /127.0.0.1:25479
+2024-08-05T15:22:01.905+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:22:01.905+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:22:01.905+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:22:01.905+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.TestDecoder      : 65
+2024-08-05T15:22:01.906+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : channelReadComplete 호출 : 수신 완료
+2024-08-05T15:22:11.933+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-08-05T15:22:12.079+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@35ad66c7
+2024-08-05T15:22:12.080+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-08-05T15:22:12.104+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : db connection result 한일교통
+2024-08-05T15:22:12.104+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : '/127.0.0.1:25479'로부터 '10'초 동안 입력이 없음
+2024-08-05T15:22:12.104+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : 나 지금 '1'번째 물어봤어
+2024-08-05T15:22:21.920+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : db connection result 한일교통
+2024-08-05T15:22:21.921+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : '/127.0.0.1:25479'로부터 '10'초 동안 입력이 없음
+2024-08-05T15:22:21.921+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : 나 지금 '2'번째 물어봤어
+2024-08-05T15:22:31.937+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : db connection result 한일교통
+2024-08-05T15:22:31.937+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : '/127.0.0.1:25479'로부터 '10'초 동안 입력이 없음
+2024-08-05T15:22:31.937+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.IdleHandler      : 두번 물어봤는데 답이 없어? 그럼 꺼져
+2024-08-05T15:22:31.939+09:00  INFO 26580 --- [BisToTagoInterface] [nioEventLoopGroup-3-1] c.g.b.t.b.netty.handler.InboundHandler   : handlerRemoved

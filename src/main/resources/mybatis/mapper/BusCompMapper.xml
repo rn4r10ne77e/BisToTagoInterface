@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geon.bis.tago.bistotagointerface.mapper.BusCompMapper">
+    <select id="select" resultType="BusComp">
+        SELECT
+            company_id AS companyId,
+            company_nm AS companyNm,
+            phone_no AS phoneNo,
+            fax_no AS faxNo,
+            address AS address,
+            ceo_nm AS ceoNm,
+            bus_cnt AS busCnt,
+            reg_cnt AS regCnt,
+            spare_cnt AS spareCnt
+        FROM
+            bus_comp
+        WHERE
+            company_id = '292000001'
+    </select>
+</mapper>
