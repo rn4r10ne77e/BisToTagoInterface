@@ -44,7 +44,7 @@ public class IdleHandler extends ChannelDuplexHandler {
         if(evt instanceof IdleStateEvent e){
             switch (e.state()) {
                 case READER_IDLE -> {
-                    log.info("db connection result {}", busCompMapper.select().getCompanyNm());
+                    log.info("db connection result {}", busCompMapper.find().getCompanyNm());
                     log.info("'{}'로부터 '{}'초 동안 입력이 없음", ctx.channel().remoteAddress(), idleReadTime);
                     Integer count = ctx.channel().attr(HEARTBEAT_COUNT).get();
                     if( count == null ) count = 0;

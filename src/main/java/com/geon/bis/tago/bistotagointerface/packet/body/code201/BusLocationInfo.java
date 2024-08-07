@@ -1,15 +1,15 @@
 package com.geon.bis.tago.bistotagointerface.packet.body.code201;
 
-import com.geon.bis.tago.bistotagointerface.packet.body.code201.model.BusEvenCodeNumber;
+import com.geon.bis.tago.bistotagointerface.packet.body.cmm.BusEventCodeNumber;
 import com.geon.bis.tago.bistotagointerface.packet.body.code201.model.BusLocationInfoChoice;
 import com.geon.bis.tago.bistotagointerface.packet.body.code201.model.BusRunCodeNumber;
 import lombok.*;
 
 /**
  * 버스 위치 정보
- * 메세지 코드 201(버스 위치 정보)
+ * 메세지 코드 201
  * 아래 링크 참조 국가법령정보센터 > 행정규칙 > 본문
- * <a href="https://www.law.go.kr/admRulLsInfoP.do?admRulId=32717&efYd=0">...</a>
+ * <a href="https://www.law.go.kr/admRulLsInfoP.do?admRulId=32717&efYd=0">국가법령정보센터 > 행정규칙 > 본문</a>
  */
 @Getter
 @Setter
@@ -23,8 +23,8 @@ public class BusLocationInfo<T extends BusLocationInfoChoice> {
     private T choice;
     /** 노선 ID */
     private String routeId;
-    /** 이벤트 분류코드 */
-    private BusEvenCodeNumber busEvenCodeNumber;
+    /** 이벤트 분류코드 | tpfc-BusEventCodeNumber | ENUMERATED */
+    private BusEventCodeNumber busEventCodeNumber;
     /** 운행 조건코드 */
     private BusRunCodeNumber busRunCodeNumber;
     /** 막차 정보 */

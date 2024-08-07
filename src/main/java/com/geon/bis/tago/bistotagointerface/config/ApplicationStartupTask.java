@@ -2,7 +2,7 @@ package com.geon.bis.tago.bistotagointerface.config;
 
 import com.geon.bis.tago.bistotagointerface.netty.config.NettyServerSocket;
 import com.geon.bis.tago.bistotagointerface.packet.body.code201.BusLocationInfo;
-import com.geon.bis.tago.bistotagointerface.packet.body.code201.model.BusEvenCodeNumber;
+import com.geon.bis.tago.bistotagointerface.packet.body.cmm.BusEventCodeNumber;
 import com.geon.bis.tago.bistotagointerface.packet.body.code201.model.BusLocationPolling;
 import com.geon.bis.tago.bistotagointerface.packet.body.code201.model.BusRunCodeNumber;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,10 @@ public class ApplicationStartupTask implements ApplicationListener<ApplicationRe
                         .collectionCycleTime("30")
                         .build())
                 .busRunCodeNumber(BusRunCodeNumber.normalRun)
-                .busEvenCodeNumber(BusEvenCodeNumber.enterBusStop)
+                .busEventCodeNumber(BusEventCodeNumber.enterBusStop)
                 .build();
+
+
         nettyServerSocket.start();
     }
 }
