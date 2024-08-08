@@ -39,7 +39,9 @@ dependencies {
     // 의존성 추가
 
     implementation 'io.netty:netty-all:4.1.111.Final' // Netty
-    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.78.1'//-- ANS.1 BER TLV 라이브러리
+    implementation files('lib/oss.jar')
+//    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.78.1'//-- ANS.1 BER TLV 라이브러리
+
 
 
 }
