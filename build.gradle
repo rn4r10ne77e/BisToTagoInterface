@@ -37,6 +37,9 @@ dependencies {
 
 
     // 의존성 추가
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
 
     implementation 'io.netty:netty-all:4.1.111.Final' // Netty
     implementation files('lib/oss.jar')

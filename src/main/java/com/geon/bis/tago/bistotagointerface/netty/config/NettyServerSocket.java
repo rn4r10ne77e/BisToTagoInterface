@@ -20,10 +20,10 @@ public class NettyServerSocket {
 
     public void start() {
         try {
-            // ChannelFuture: I/O operation의 결과나 상태를 제공하는 객체
-            // 지정한 host, port로 소켓을 바인딩하고 incoming connections을 받도록 준비함
+            // ChannelFuture: I/O operation 의 결과나 상태를 제공하는 객체
+            // 지정한 host, port 로 소켓을 바인딩하고 incoming connections 을 받도록 준비함
             ChannelFuture serverChannelFuture = serverBootstrap.bind(tcpPort).sync();
-//            ChannelFuture d = serverBootstrap.bind(tcpPort);
+            // ChannelFuture d = serverBootstrap.bind(tcpPort);
 
             // 서버 소켓이 닫힐 때까지 기다림
             serverChannel = serverChannelFuture.channel().closeFuture().sync().channel();

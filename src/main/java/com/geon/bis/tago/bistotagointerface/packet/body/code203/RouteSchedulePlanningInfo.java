@@ -13,5 +13,5 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteSchedulePlanningInfo {
-    
+    private String test;
 }

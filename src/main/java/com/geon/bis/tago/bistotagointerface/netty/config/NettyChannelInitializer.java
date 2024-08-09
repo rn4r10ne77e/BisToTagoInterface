@@ -7,6 +7,8 @@ import com.geon.bis.tago.bistotagointerface.netty.handler.TestDecoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,10 +30,14 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
 
-        pipeline.addLast("idleStateHandler", new IdleStateHandler(idleReadTime, idleWriteTime,0));
-        pipeline.addLast("idleHandler", idleHandler);
-        pipeline.addLast("TestDecoder", new TestDecoder()); //
+//        pipeline.addLast("idleStateHandler", new IdleStateHandler(idleReadTime, idleWriteTime,0));
+//        pipeline.addLast("idleHandler", idleHandler);
+//        pipeline.addLast("TestDecoder", new TestDecoder()); //
+        pipeline.addLast("StringEncoder", new StringEncoder());
         pipeline.addLast(outboundHandler);
+        pipeline.addLast("StringDecoder", new StringDecoder());
         pipeline.addLast(inboundHandler);
+
+
     }
 }

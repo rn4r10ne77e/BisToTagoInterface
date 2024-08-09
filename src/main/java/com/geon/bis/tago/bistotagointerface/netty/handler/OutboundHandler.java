@@ -1,7 +1,5 @@
 package com.geon.bis.tago.bistotagointerface.netty.handler;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -16,7 +14,7 @@ public class OutboundHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        log.info("OutboundHandler write : \n{}", ByteBufUtil.prettyHexDump((ByteBuf) msg));
+        log.info("OutboundHandler write : {}", msg);
         ctx.write(msg, promise);
     }
 }

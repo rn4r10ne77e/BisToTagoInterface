@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: BisToTagoInterface
+  profiles:
+    active: local
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: cnbus
+    password: cnbus
+    url: jdbc:postgresql://localhost:5434/cnbus
+
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 10000
+      idle-timeout: 10000
+mybatis:
+  config-location: classpath:mybatis/sqlmap-config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.geon.bis.tago.bistotagointerface.mapper.model
+
+server:
+  host: 127.0.0.1
+  port: 9999
+  netty:
+    boss-count: 1
+    worker-count: 10
+    keep-alive: false
+    backlog: 30
+
+logging:
+  file:
+    name: logs/prop.log
+  level:
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
+
+setting:
+  idle:
+    read-time: 10
+    write-time: 10
