@@ -26,6 +26,9 @@ server:
     worker-count: 10
     keep-alive: false
     backlog: 30
+  datagram-size: 1024
+
+
 
 logging:
   file:
