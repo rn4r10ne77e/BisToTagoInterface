@@ -20,6 +20,7 @@
 
 package com.geon.bis.link.tago.datex.iso14827_1;
 
+import com.geon.bis.link.tago.datex.businfomation.ArrivalPredictionTimeInfo;
 import com.oss.asn1.AbstractData;
 import com.oss.asn1.SequenceOf;
 import com.oss.metadata.*;
@@ -29,7 +30,7 @@ import com.oss.metadata.*;
  * @see SequenceOf
  */
 
-public class Message_MESSAGE_BODY_2 extends SequenceOf<datex.businfomation.ArrivalPredictionTimeInfo> {
+public class Message_MESSAGE_BODY_2 extends SequenceOf<ArrivalPredictionTimeInfo> {
     
     /**
      * The default constructor.
@@ -41,7 +42,7 @@ public class Message_MESSAGE_BODY_2 extends SequenceOf<datex.businfomation.Arriv
     /**
      * Construct from an array of components.
      */
-    public Message_MESSAGE_BODY_2(datex.businfomation.ArrivalPredictionTimeInfo[] elements)
+    public Message_MESSAGE_BODY_2(ArrivalPredictionTimeInfo[] elements)
     {
 	super(elements);
     }
@@ -51,7 +52,7 @@ public class Message_MESSAGE_BODY_2 extends SequenceOf<datex.businfomation.Arriv
      */
     public AbstractData createInstance()
     {
-	return (AbstractData)new datex.businfomation.ArrivalPredictionTimeInfo();
+	return (AbstractData)new ArrivalPredictionTimeInfo();
     }
     
     /**

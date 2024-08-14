@@ -1,26 +1,21 @@
 package com.geon.bis.link.netty.handler;
 
+import com.geon.bis.link.TagoService;
 import com.geon.bis.link.tago.datex.iso14827_2.C2CAuthenticatedMessage;
-import com.geon.bis.link.tago.datex.iso14827_2.DatexDataPacket;
-import com.geon.bis.link.tago.config.Util;
-import com.geon.bis.link.mapper.BusLocationInfo;
-import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
-import com.oss.asn1.Coder;
+import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.oss.asn1.DecodeFailedException;
 import com.oss.asn1.DecodeNotSupportedException;
-import com.oss.asn1.OctetString;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.group.ChannelGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.io.ByteArrayInputStream;
 
 @Slf4j
 @Component
@@ -28,11 +23,9 @@ import java.io.ByteArrayInputStream;
 @RequiredArgsConstructor
 public class InboundHandler extends ChannelInboundHandlerAdapter {
 
-    private final BusLocationInfo busLocationInfo;
-    private final Util util;
-    private final Coder coder;
-
-
+    private final BusLocationInfoMapper busLocationInfoMapper;
+    private final TagoService tagoService;
+    private final ChannelGroup channelGroup;
 
     @Value("${datagram-size}")
     private int DATAGRAM_SIZE;
@@ -56,12 +49,13 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
 //        ctx.channel().attr(SCHEDULED_FUTURE).get().cancel(false);
-        log.info("handlerRemoved");
+        channelGroup.remove(ctx.channel());
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         byteBuf = PooledByteBufAllocator.DEFAULT.directBuffer(DATAGRAM_SIZE, DATAGRAM_SIZE*2);
+        channelGroup.add(ctx.channel());
     }
 
     @Override
@@ -79,12 +73,10 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 //            ctx.close();
 //            return ResultBusLocationInfo.builder().build();
 //        });
-        busLocationInfo.delay();
-        ctx.channel().writeAndFlush(busLocationInfo.find(ParamBusLocationInfo.builder().build()).getResultStr());
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) {
+    public void channelReadComplete(ChannelHandlerContext ctx) throws DecodeNotSupportedException, DecodeFailedException {
         if ( byteBuf.readableBytes() == 0 ){
             return;
         }
@@ -93,49 +85,25 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
         byteBuf.readBytes(bytes);
         byteBuf.clear();
 
-        decodeData(bytes);
+        C2CAuthenticatedMessage c2c = tagoService.decodeData(bytes, null);
 
+        // Logout에 대해 처리한다.
+        if (c2c.getPdu().hasLogout()) {
+//            stopAllTimer();
+            ctx.close();
+        }
+        C2CAuthenticatedMessage rC2c = tagoService.processData(c2c, ctx);
+        if( rC2c != null ){
+            // 서브스크립션 처리
+            if (rC2c.getPdu().hasAccept()) {
+                tagoService.processSubscription(rC2c.getPdu().getSubscription(), ctx);
+            }
+            ctx.writeAndFlush(c2c);
+        }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(cause));
     }
-
-    private void decodeData(byte[] bytes) {
-        C2CAuthenticatedMessage c2c = null;
-
-        try {
-            if (bytes != null) {
-                ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-
-                DatexDataPacket datexDataPacket = null;
-                datexDataPacket = coder.decode(bais, new DatexDataPacket());
-                datexDataPacket.getDatex_Version_number(); // nothing
-                OctetString datex_Data = datexDataPacket.getDatex_Data();
-                OctetString Crc = new OctetString(util.getCrc16(datex_Data.byteArrayValue()));
-
-                if (!Crc.equalTo(datexDataPacket.getDatex_Crc_nbr())) {
-                    log.warn("[CRC error] Correct = " + Crc.toString() + ", Wrong = "
-                            + datexDataPacket.getDatex_Crc_nbr().toString());
-                }
-
-                bais = new ByteArrayInputStream(datex_Data.byteArrayValue());
-
-                c2c = (C2CAuthenticatedMessage) coder.decode(bais, new C2CAuthenticatedMessage());
-            }
-        } catch (DecodeFailedException | DecodeNotSupportedException e) {
-            log.error(e.getMessage());
-            return;
-        }
-
-        //processData(c2c);
-    }
-
-
-
-
-
-
-
 }

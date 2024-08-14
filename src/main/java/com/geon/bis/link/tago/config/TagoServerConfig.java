@@ -1,23 +1,20 @@
 package com.geon.bis.link.tago.config;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-@Component
 @Getter
+@Component
 public class TagoServerConfig {
-	
-	@Value("${server.serverPort}")
-	private int serverPort;
-	
+
 	@Value("${server.sender}")
 	private String sender;
 	
 	@Value("${server.origin}")
 	private String[] origin;
 	
-	@Value("${server.datagramSize}")
+	@Value("${server.datagram-size}")
 	private int datagramSize;
 	
 	@Value("${server.sendCnt}")

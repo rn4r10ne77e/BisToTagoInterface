@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.geon.bis.link.mapper.BusLocationInfo">
+<mapper namespace="com.geon.bis.link.mapper.BusLocationInfoMapper">
     <select id="delay" resultType="String">
         select pg_sleep(10)
     </select>

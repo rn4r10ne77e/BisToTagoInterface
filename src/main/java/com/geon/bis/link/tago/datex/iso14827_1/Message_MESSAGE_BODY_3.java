@@ -20,6 +20,7 @@
 
 package com.geon.bis.link.tago.datex.iso14827_1;
 
+import com.geon.bis.link.tago.datex.businfomation.BusBaseInformationVersion;
 import com.oss.asn1.AbstractData;
 import com.oss.asn1.SequenceOf;
 import com.oss.metadata.*;
@@ -29,7 +30,7 @@ import com.oss.metadata.*;
  * @see SequenceOf
  */
 
-public class Message_MESSAGE_BODY_3 extends SequenceOf<datex.businfomation.BusBaseInformationVersion> {
+public class Message_MESSAGE_BODY_3 extends SequenceOf<BusBaseInformationVersion> {
     
     /**
      * The default constructor.
@@ -41,7 +42,7 @@ public class Message_MESSAGE_BODY_3 extends SequenceOf<datex.businfomation.BusBa
     /**
      * Construct from an array of components.
      */
-    public Message_MESSAGE_BODY_3(datex.businfomation.BusBaseInformationVersion[] elements)
+    public Message_MESSAGE_BODY_3(BusBaseInformationVersion[] elements)
     {
 	super(elements);
     }
@@ -51,7 +52,7 @@ public class Message_MESSAGE_BODY_3 extends SequenceOf<datex.businfomation.BusBa
      */
     public AbstractData createInstance()
     {
-	return (AbstractData)new datex.businfomation.BusBaseInformationVersion();
+	return (AbstractData)new BusBaseInformationVersion();
     }
     
     /**

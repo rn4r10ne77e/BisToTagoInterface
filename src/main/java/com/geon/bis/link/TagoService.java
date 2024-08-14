@@ -1,0 +1,570 @@
+package com.geon.bis.link;
+
+import com.geon.bis.link.config.Account;
+import com.geon.bis.link.config.AccountProperties;
+import com.geon.bis.link.tago.config.Common;
+import com.geon.bis.link.tago.config.Util;
+import com.geon.bis.link.tago.datex.iso14827_2.*;
+import com.oss.asn1.*;
+import com.oss.util.ASN1ValueFormat;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
+
+import static com.geon.bis.link.config.ChannelAttribute.*;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class TagoService {
+
+    private final Coder coder;
+    private final Util util;
+    private final AccountProperties accountProperties;
+    private final ChannelGroup channelGroup;
+
+    private int dataPacketNumber = 0;
+
+    @Value("${server.sender}")
+    private String sender;
+    @Value("${server.server-login-pass}")
+    private boolean isServerLoginPass;
+
+    private String destination;
+    private String encodingRules;
+
+
+
+    public C2CAuthenticatedMessage decodeData(byte[] bytes, InputStream is) throws DecodeNotSupportedException, DecodeFailedException {
+        C2CAuthenticatedMessage c2c = null;
+        if (bytes != null) {
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+
+            DatexDataPacket datexDataPacket = null;
+            datexDataPacket = (DatexDataPacket) coder.decode(bais, new DatexDataPacket());
+            datexDataPacket.getDatex_Version_number(); // nothing
+            OctetString datex_Data = datexDataPacket.getDatex_Data();
+            OctetString Crc = new OctetString(util.getCrc16(datex_Data.byteArrayValue()));
+
+            if (!Crc.equalTo(datexDataPacket.getDatex_Crc_nbr())) {
+                log.warn("[CRC error] Correct = " + Crc.toString() + ", Wrong = "
+                        + datexDataPacket.getDatex_Crc_nbr().toString());
+            }
+
+            bais = new ByteArrayInputStream(datex_Data.byteArrayValue());
+
+            c2c = (C2CAuthenticatedMessage) coder.decode(bais, new C2CAuthenticatedMessage());
+        }
+        if (is != null) {
+            c2c = (C2CAuthenticatedMessage) coder.decode(is, new C2CAuthenticatedMessage());
+        }
+        return c2c;
+    }
+
+    public C2CAuthenticatedMessage processData(C2CAuthenticatedMessage c2c, ChannelHandlerContext ctx) {
+
+        switch (c2c.getPdu().getChosenFlag()) {
+            /*
+            case PDUs.datex_initiate_null_chosen:
+                break;
+            */
+            case PDUs.login_chosen:
+                log.info("[Login] received");
+                log.debug(c2c.toString());
+                InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+                String clientIp = inetSocketAddress.getAddress().getHostAddress();
+                return responseLogin(c2c, ctx, clientIp);
+
+            case PDUs.fred_chosen:
+                log.info("[FrED] received");
+                log.debug(c2c.toString());
+                return responseFrED();
+                /*
+                case PDUs.terminate_chosen:
+                    break;
+                */
+            case PDUs.logout_chosen:
+                log.info("[Logout] received");
+                log.debug(c2c.toString());
+                return responseLogout(c2c);
+
+            case PDUs.subscription_chosen:
+                log.info("[Subscription] received");
+                log.debug(c2c.toString());
+                return responseSubscription(c2c, ctx);
+                // requestTerminate(Terminate.serverRequested);
+
+            case PDUs.transfer_done_chosen:
+                log.info("[TransferDone] received");
+                log.debug(c2c.toString());
+                return responseTransferDone(c2c);
+
+            case PDUs.accept_chosen:
+            case PDUs.reject_chosen:
+                log.debug(c2c.toString());
+                acceptRejectPublication(c2c);
+                break;
+            /*
+            case PDUs.publication_chosen:
+                break;
+            */
+            default:
+                log.info("[" + c2c.getPdu().getChosenFlag() + "] received");
+                log.debug(c2c.toString());
+
+                break;
+        }
+        return null;
+    }
+
+    private C2CAuthenticatedMessage requestInit() {
+        log.info("[Initiate] request");
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_AuthenticationInfo_text(new OctetString());
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        Initiate initiate = new Initiate();
+        initiate.setDatex_Sender_txt(new UTF8String16(sender));
+        initiate.setDatex_Destination_txt(new UTF8String16("dest"));
+
+        c2c.setPdu(PDUs.createPDUsWithDatex_initiate_null(initiate));
+
+        return c2c;
+    }
+
+    private C2CAuthenticatedMessage responseLogin(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx, String clientIp) {
+        log.info("[Login] response");
+
+        Login login = (Login) c2CAuthMsg.getPdu().getLogin();
+
+        String _sender = login.getDatex_Sender_txt().stringValue();
+        String _destination = login.getDatex_Destination_txt().stringValue();
+        String userName = new String(login.getDatexLogin_UserName_txt().byteArrayValue());
+        String password = new String(login.getDatexLogin_Password_txt().byteArrayValue());
+        ctx.channel().attr(HEARTBEAT_DURATION_MAX).set((int) login.getDatexLogin_HeartbeatDurationMax_qty());
+        ctx.channel().attr(RESPONSE_TIMEOUT).set((int) login.getDatexLogin_ResponseTimeOut_qty());
+        int datagramSize = (int) login.getDatexLogin_DatagramSize_qty();
+
+        // matching id & password
+        boolean isMatchIdAndPassword = false;
+
+
+
+        for(Account el : accountProperties.getAccounts() ){
+            if (el.getIp().equals(clientIp) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
+                isMatchIdAndPassword = true;
+                ctx.channel().attr(ORIGIN).set(el.getOrigins());
+                ctx.channel().attr(DESTINATION).set(el.getUsername());
+                destination = el.getUsername();
+                break;
+            }
+        }
+
+
+        if (isMatchIdAndPassword) {
+            log.debug("[Login] id & password are correct");
+        } else {
+            log.debug("[Login] id or password is not matched");
+        }
+
+        // process reject
+        Reject reject = new Reject();
+        RejectType.DatexReject_Login_cd datexReject_Login_cd = RejectType.DatexReject_Login_cd.other;
+
+        if (!_sender.equals(destination) && !_destination.equals(sender)) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.unknownDomainName;
+        } else if (!isMatchIdAndPassword) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.invalidNamePassword;
+        } else if (ctx.channel().attr(RESPONSE_TIMEOUT).get() < Common.RESPONSE_TIMEOUT_MIN) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.timeoutTooSmall;
+        } else if (ctx.channel().attr(RESPONSE_TIMEOUT).get() > Common.RESPONSE_TIMEOUT_MAX) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.timeoutTooLarge;
+        } else if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() < Common.HEARTBEAT_DURATION_MIN && ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() != 0) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.heartbeatTooSmall;
+        } else if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() > Common.HEARTBEAT_DURATION_MAX) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.heartbeatTooLarge;
+        } else if (ctx.channel().attr(IS_SESSION_CONNECTED).get()) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.sessionExists;
+        } else if (channelGroup.size() > Common.MAX_SESSION_COUNT) {
+            datexReject_Login_cd = RejectType.DatexReject_Login_cd.maxSessionReached;
+        }
+
+//        if (datagramSize > Common.DEFAULT_DATAGRAM_SIZE) {
+//            byteBuf.capacity(datagramSize);
+//        }
+
+        reject.setDatexReject_Type(RejectType.createRejectTypeWithDatexReject_Login_cd(datexReject_Login_cd));
+
+        log.debug("[Login] reject code : " + reject.getDatexReject_Type().getDatexReject_Login_cd());
+
+        // process accept
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        if ((reject.getDatexReject_Type().getDatexReject_Login_cd() == RejectType.DatexReject_Login_cd.other) || this.isServerLoginPass ) {
+            c2c.setDatex_AuthenticationInfo_text(new OctetString());
+
+            Accept accept = new Accept();
+            accept.setDatexAccept_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
+            try {
+                accept.setDatexAccept_Type(Accept.DatexAccept_Type.createDatexAccept_TypeWithLogIn(new ObjectIdentifier(Common.BER_OID)));
+            } catch (BadObjectIdentifierException e) {
+                log.error(e.getMessage());
+            }
+
+            c2c.setPdu(PDUs.createPDUsWithAccept(accept));
+
+            ctx.channel().attr(IS_SESSION_CONNECTED).set(true);
+
+            if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() != 0) {
+                ctx.pipeline().addBefore("serverHandler", "readTimeout",
+                        new ReadTimeoutHandler(ctx.channel().attr(HEARTBEAT_DURATION_MAX).get()));
+            }
+        } else {
+            c2c.setDatex_AuthenticationInfo_text(new OctetString());
+
+            reject.setDatexReject_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
+
+            c2c.setPdu(PDUs.createPDUsWithReject(reject));
+        }
+
+        return c2c;
+    }
+
+    /**
+     * 서브스크립션에 대한 응답을 한다.
+     * @param c2CAuthMsg 설명
+     * @return C2CAuthenticatedMessage 설명
+     */
+    private C2CAuthenticatedMessage responseSubscription(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
+        log.info("[Subscription] Response");
+
+        // responseSubscription cancel process
+        if (c2CAuthMsg.getPdu().getSubscription().getDatexSubscribe_Type().hasDatexSubscribe_CancelReason_cd()) {
+            return  responseSubscriptionCancel(c2CAuthMsg);
+        }
+
+        // subscription_chosen
+        SubscriptionData subscriptionData = c2CAuthMsg.getPdu().getSubscription().getDatexSubscribe_Type()
+                .getSubscription();
+
+        String endAppMsgId = subscriptionData.getDatexSubscribe_Pdu().getEndApplication_Message_id()
+                .toString(new ASN1ValueFormat().excludeValueAssignment());
+        int datexSubscribeMode = subscriptionData.getDatexSubscribe_Mode().getChosenFlag();
+
+        // process reject
+        Reject reject = new Reject();
+        RejectType.DatexReject_Subscription_cd datexReject_Subscription_cd = RejectType.DatexReject_Subscription_cd.other;
+
+        // datexReject_Subscription_cd = DatexReject_Subscription_cd.unknownSubscriptionNbr;
+        // datexReject_Subscription_cd = DatexReject_Subscription_cd.invalidTimes;
+        // datexReject_Subscription_cd = DatexReject_Subscription_cd.frequencyTooSmall;
+        // datexReject_Subscription_cd = DatexReject_Subscription_cd.frequencyTooLarge;
+        if (datexSubscribeMode < SubscriptionMode.single_chosen || datexSubscribeMode > SubscriptionMode.periodic_chosen) {
+            // single, event-driven, periodic
+            datexReject_Subscription_cd = RejectType.DatexReject_Subscription_cd.invalid_mode;
+        } else if (subscriptionData
+                .getDatexSubscribe_PublishFormat_cd() != SubscriptionData.DatexSubscribe_PublishFormat_cd.dataPacket) {
+            // other, ftp, tftp, dataPacket
+            datexReject_Subscription_cd = RejectType.DatexReject_Subscription_cd.publishFormatNotSupported;
+        } else if (!endAppMsgId.equals(Common.BUS_LOC_INFO_REQ)
+                && !endAppMsgId.equals(Common.ARR_PRE_TIME_INFO_REQ)
+                && !endAppMsgId.equals(Common.BASE_INFO_VERSION_REQ)
+                && !endAppMsgId.equals(Common.BASE_INFO_REQ)) {
+            datexReject_Subscription_cd = RejectType.DatexReject_Subscription_cd.invalidSubscriptionMsgId;
+        }
+        // datexReject_Subscription_cd = DatexReject_Subscription_cd.unknownSubscriptionMsgId;
+        // datexReject_Subscription_cd = DatexReject_Subscription_cd.invalidSubscriptionContent;
+
+        reject.setDatexReject_Type(
+                RejectType.createRejectTypeWithDatexReject_Subscription_cd(datexReject_Subscription_cd));
+
+        log.debug("[Subscription] reject code : {}",reject.getDatexReject_Type().getDatexReject_Subscription_cd());
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        // process accept
+        if (reject.getDatexReject_Type().getDatexReject_Subscription_cd() == RejectType.DatexReject_Subscription_cd.other) {
+            c2c.setDatex_AuthenticationInfo_text(new OctetString());
+
+            Accept accept = new Accept();
+            accept.setDatexAccept_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
+
+            if (subscriptionData.getDatexSubscribe_Mode().hasSingle()) {
+                log.debug("[서브스크립션 모드] 싱글");
+                accept.setDatexAccept_Type(
+                        Accept
+                                .DatexAccept_Type
+                                .createDatexAccept_TypeWithSingle_subscription(new Null())
+                );
+
+            } else if (subscriptionData.getDatexSubscribe_Mode().hasPeriodic()) {
+                log.debug("[서브스크립션 모드] 주기방식");
+
+                int UpdateDelay_qty = (int) subscriptionData
+                        .getDatexSubscribe_Mode()
+                        .getPeriodic()
+                        .getContinuous()
+                        .getDatexRegistered_UpdateDelay_qty();
+
+                accept.setDatexAccept_Type(
+                        Accept
+                                .DatexAccept_Type
+                                .createDatexAccept_TypeWithRegistered_subscription(UpdateDelay_qty)
+                );
+            } else if (subscriptionData.getDatexSubscribe_Mode().hasEvent_driven()) {
+                log.debug("[서브스크립션 모드] 이벤트 방식");
+                accept.setDatexAccept_Type(
+                        Accept
+                                .DatexAccept_Type
+                                .createDatexAccept_TypeWithRegistered_subscription(0)
+                );
+            }
+            c2c.setPdu(PDUs.createPDUsWithAccept(accept));
+        } else {
+            c2c.setDatex_AuthenticationInfo_text(new OctetString());
+
+            reject.setDatexReject_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
+
+            c2c.setPdu(PDUs.createPDUsWithReject(reject));
+        }
+
+        return c2c;
+    }
+    /**
+     * 서브스크립션을 처리한다.
+     * @param subscription
+     */
+    public void processSubscription(Subscription subscription, ChannelHandlerContext ctx) {
+        log.info("[Subscription] process");
+        long subSerialNbr = subscription.getDatexSubscribe_Serial_nbr();
+        SubscriptionMode subscriptionMode = subscription
+                .getDatexSubscribe_Type()
+                .getSubscription()
+                .getDatexSubscribe_Mode();
+
+        String oId = subscription
+                .getDatexSubscribe_Type().
+                getSubscription()
+                .getDatexSubscribe_Pdu()
+                .getEndApplication_Message_id()
+                .toString(new ASN1ValueFormat().excludeValueAssignment());
+
+        switch (oId) {
+            case Common.BUS_LOC_INFO_REQ -> {
+                if (subscriptionMode.hasSingle()) {
+
+
+                } else if (subscriptionMode.hasPeriodic()) {
+
+                }
+                ctx.channel().attr(PERIOD_PUBLISH).set(ctx.executor().scheduleWithFixedDelay(() -> {
+
+                }, 0, 0, TimeUnit.SECONDS));  //버스위치정보
+                //
+//
+//
+//            subBusList = new ArrayList<TagoServerBuslocation>(); //버스위치정보 구독리스트 초기화
+//            // 제공하는 origins 목록에 맞추어 데이터 제공
+//            for(String origin : origins) {
+//                TagoServerBuslocation subBus = new TagoServerBuslocation(subscriptionMode, subSerialNbr, origin, destination, this);
+//                subBusList.add(subBus);
+//            }
+            }
+            case Common.ARR_PRE_TIME_INFO_REQ -> {
+                subArrList = new ArrayList<TagoServerArrPrediction>(); //버스도착예정정보 구독리스트 초기화
+
+                for (String origin : origins) {
+                    TagoServerArrPrediction subArr = new TagoServerArrPrediction(subscriptionMode, subSerialNbr, origin, destination, this);
+                    subArrList.add(subArr);
+                }  //버스도착예정정보
+            }
+            case Common.BASE_INFO_VERSION_REQ -> {
+                subBivList = new ArrayList<TagoServerBaseinfoVersion>(); //기반정보버전정보 구독리스트 초기화
+
+                for (String origin : origins) {
+                    TagoServerBaseinfoVersion subBiv = new TagoServerBaseinfoVersion(subscriptionMode, subSerialNbr, origin, destination, this);
+                    subBivList.add(subBiv);
+                }  //기반정보버전정보
+            }
+            case Common.BASE_INFO_REQ -> {
+                for (String origin : origins) {
+                    TagoServerBaseinfo subBase = new TagoServerBaseinfo(subscriptionMode, subSerialNbr, origin, destination, this);
+                }  //기반정보
+            }
+            default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
+        }
+
+    }
+
+    /**
+     * 서브스크립션 취소에 대한 처리와 응답을 한다.
+     * @param c2CAuthMsg
+     * @return
+     */
+    private C2CAuthenticatedMessage responseSubscriptionCancel(C2CAuthenticatedMessage c2CAuthMsg) {
+        log.info("[Subscription] Cancel");
+
+        // 구독 프로세스 종료
+        for(TagoServerBuslocation subBus:subBusList) {
+            subBus.close(); // 버스 스케쥴 종료
+        }
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_AuthenticationInfo_text(new OctetString());
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        Accept accept = new Accept();
+        accept.setDatexAccept_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
+        accept.setDatexAccept_Type(Accept.DatexAccept_Type.createDatexAccept_TypeWithRegistered_subscription(5));
+
+        c2c.setPdu(PDUs.createPDUsWithAccept(accept));
+
+        return c2c;
+    }
+
+    /**
+     * Logout에 대한 응답을 한다.
+     * @param c2CAuthMsg
+     * @return
+     */
+    private C2CAuthenticatedMessage responseLogout(C2CAuthenticatedMessage c2CAuthMsg) {
+        log.info("[Logout] response");
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_AuthenticationInfo_text(new OctetString());
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        c2c.setPdu(PDUs.createPDUsWithFred(c2CAuthMsg.getDatex_DataPacket_number()));
+        return c2c;
+    }
+
+    /**
+     * 입력된 Terminate 타입에 따라 Terminate를 요청한다.
+     * @return
+     */
+    private C2CAuthenticatedMessage requestTerminate(Terminate terminate) {
+        log.info("[Terminate] request");
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_AuthenticationInfo_text(new OctetString());
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        c2c.setPdu(PDUs.createPDUsWithTerminate(terminate));
+
+        return c2c;
+    }
+
+    /**
+     * FrED에 응답을 한다.
+     * @return
+     */
+    private C2CAuthenticatedMessage responseFrED() {
+        log.info("[FrED] response");
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_AuthenticationInfo_text(new OctetString());
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        c2c.setPdu(PDUs.createPDUsWithFred(0));
+
+        return c2c;
+    }
+
+    /**
+     * TransferDone에 대한 응답을 처리한다.
+     * @param c2CAuthMsg
+     * @return
+     */
+    private C2CAuthenticatedMessage responseTransferDone(C2CAuthenticatedMessage c2CAuthMsg) {
+        log.info("[TransferDone] response");
+
+        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
+        c2c.setDatex_AuthenticationInfo_text(new OctetString());
+        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacketPriority_number(0);
+
+        c2c.setOptions(getOptions(null));
+
+        c2c.setPdu(PDUs.createPDUsWithFred(c2CAuthMsg.getPdu().getTransfer_done()
+                .getDatexTransferDone_Publication_nbr()));
+
+        return c2c;
+    }
+
+    /**
+     * 퍼블리케이션에 대한 Accept와 Reject를 처리한다.(별도 처리없이 로그만 출력)
+     * @param c2CAuthMsg
+     */
+    private void acceptRejectPublication(C2CAuthenticatedMessage c2CAuthMsg) {
+
+        if (c2CAuthMsg.getPdu().hasAccept()) {
+            if (c2CAuthMsg.getPdu().getAccept().getDatexAccept_Type().hasPublication()) {
+
+                log.info("[Accept] Publication");
+
+            }
+        } else if (c2CAuthMsg.getPdu().hasReject()) {
+            if (c2CAuthMsg.getPdu().getReject().getDatexReject_Type().hasDatexReject_Publication_cd()) {
+
+                log.info("[Reject] Publication");
+
+            }
+        }
+    }
+    /**
+     * HeaderOptions을 만든다.
+     *
+     * @return
+     */
+    public HeaderOptions getOptions(String origin) {
+        HeaderOptions options = new HeaderOptions();
+        options.setDatex_Sender_text(new UTF8String16(sender));
+        if (destination != null) {
+            options.setDatex_Destination_text(new UTF8String16(destination));
+        }
+        if (origin != null) {
+            options.setDatex_Origin_text(new UTF8String16(origin));
+        }
+        options.setDatex_DataPacket_time(util.getCurrentAsnTime());
+
+        return options;
+    }
+
+
+
+
+
+}

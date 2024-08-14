@@ -5,6 +5,8 @@ import com.geon.bis.link.tago.datex.iso14827_2.Time;
 import com.oss.asn1.Coder;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,17 +19,19 @@ import java.util.Calendar;
 import java.util.Date;
 
 @Slf4j
+@Getter
 @Component
 public class Util {
+
+	private final TagoServerConfig tagoServerConfig;
+	private final Coder coder;
+
+
+
 	
-	@Getter
-	public Coder coder;
-	
-	@Autowired @Getter
-	public TagoServerConfig serverEnv;
-	
-	public Util() {
-		coder = Datex.getBERCoder();
+	public Util(TagoServerConfig tagoServerConfig) {
+        this.tagoServerConfig = tagoServerConfig;
+        coder = Datex.getBERCoder();
 		coder.enableAutomaticEncoding(); // for OpenType
 		coder.enableAutomaticDecoding(); // for OpenType
 		coder.disableContainedValueDecoding();
@@ -246,4 +250,8 @@ public class Util {
 			log.trace(str);
 		}
 	}
+
+	@Getter
+	@Setter
+	private int dataPacketNumber = 0;
 }

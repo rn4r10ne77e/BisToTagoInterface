@@ -26,6 +26,8 @@ import com.oss.asn1.OpenType;
 import com.oss.asn1.Sequence;
 import com.oss.metadata.*;
 
+import static com.geon.bis.link.tago.datex.iso14827_1.ISO14827_1.message;
+
 /**
  * Define the ASN1 Type EndApplicationMessage from ASN1 Module ISO14827_2.
  * @see Sequence
@@ -139,7 +141,7 @@ public class EndApplicationMessage extends Sequence {
 			    ),
 			    800787,
 			    new TableConstraint (
-				datex.iso14827_1.ISO14827_1.message,
+				message,
 				8
 			    ),
 			    null
@@ -169,7 +171,7 @@ public class EndApplicationMessage extends Sequence {
 			    1849363,
 			    new ComponentRelationConstraint (
 				new TableConstraint (
-				    datex.iso14827_1.ISO14827_1.message,
+				    message,
 				    2
 				),
 				new ComponentRelations (
@@ -190,7 +192,7 @@ public class EndApplicationMessage extends Sequence {
 			    ),
 			    new ComponentRelationConstraint (
 				new TableConstraint (
-				    datex.iso14827_1.ISO14827_1.message,
+				    message,
 				    2
 				),
 				new ComponentRelations (

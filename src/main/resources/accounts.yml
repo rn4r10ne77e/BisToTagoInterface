@@ -1,0 +1,10 @@
+accounts: 
+  account: 
+    - username: tago   
+      password: tago
+      ip: 127.0.0.1
+      origins: [gunsan]
+    - username: cnbis
+      password: cnbis
+      ip: 127.0.0.1
+      origins: [tsbis]
