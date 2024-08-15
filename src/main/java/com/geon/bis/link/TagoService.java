@@ -4,9 +4,10 @@ import com.geon.bis.link.config.Account;
 import com.geon.bis.link.config.AccountProperties;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
-import com.geon.bis.link.tago.datex.iso14827_2.*;
 import com.oss.asn1.*;
 import com.oss.util.ASN1ValueFormat;
+import datex.iso14827_2.*;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -70,7 +71,7 @@ public class TagoService {
         return c2c;
     }
 
-    public C2CAuthenticatedMessage processData(C2CAuthenticatedMessage c2c, ChannelHandlerContext ctx) {
+    public C2CAuthenticatedMessage processData(C2CAuthenticatedMessage c2c, ByteBuf buf, ChannelHandlerContext ctx) {
 
         switch (c2c.getPdu().getChosenFlag()) {
             /*
@@ -82,7 +83,7 @@ public class TagoService {
                 log.debug(c2c.toString());
                 InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
                 String clientIp = inetSocketAddress.getAddress().getHostAddress();
-                return responseLogin(c2c, ctx, clientIp);
+                return responseLogin(c2c, ctx );
 
             case PDUs.fred_chosen:
                 log.info("[FrED] received");
@@ -145,10 +146,9 @@ public class TagoService {
         return c2c;
     }
 
-    private C2CAuthenticatedMessage responseLogin(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx, String clientIp) {
-        log.info("[Login] response");
+    public C2CAuthenticatedMessage responseLogin(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
 
-        Login login = (Login) c2CAuthMsg.getPdu().getLogin();
+        Login login = c2CAuthMsg.getPdu().getLogin();
 
         String _sender = login.getDatex_Sender_txt().stringValue();
         String _destination = login.getDatex_Destination_txt().stringValue();
@@ -162,8 +162,9 @@ public class TagoService {
         boolean isMatchIdAndPassword = false;
 
 
+        String clientIp = ((InetSocketAddress)(ctx.channel().remoteAddress())).getAddress().getHostAddress();
 
-        for(Account el : accountProperties.getAccounts() ){
+        for(Account el : accountProperties.getAccount() ){
             if (el.getIp().equals(clientIp) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
                 isMatchIdAndPassword = true;
                 ctx.channel().attr(ORIGIN).set(el.getOrigins());
@@ -172,7 +173,6 @@ public class TagoService {
                 break;
             }
         }
-
 
         if (isMatchIdAndPassword) {
             log.debug("[Login] id & password are correct");
@@ -202,15 +202,8 @@ public class TagoService {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.maxSessionReached;
         }
 
-//        if (datagramSize > Common.DEFAULT_DATAGRAM_SIZE) {
-//            byteBuf.capacity(datagramSize);
-//        }
-
         reject.setDatexReject_Type(RejectType.createRejectTypeWithDatexReject_Login_cd(datexReject_Login_cd));
 
-        log.debug("[Login] reject code : " + reject.getDatexReject_Type().getDatexReject_Login_cd());
-
-        // process accept
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_DataPacket_number(dataPacketNumber++);
         c2c.setDatex_DataPacketPriority_number(0);
@@ -233,7 +226,7 @@ public class TagoService {
             ctx.channel().attr(IS_SESSION_CONNECTED).set(true);
 
             if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() != 0) {
-                ctx.pipeline().addBefore("serverHandler", "readTimeout",
+                ctx.pipeline().addBefore("TagoEncoder", "readTimeout",
                         new ReadTimeoutHandler(ctx.channel().attr(HEARTBEAT_DURATION_MAX).get()));
             }
         } else {
@@ -252,7 +245,7 @@ public class TagoService {
      * @param c2CAuthMsg 설명
      * @return C2CAuthenticatedMessage 설명
      */
-    private C2CAuthenticatedMessage responseSubscription(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
+    public C2CAuthenticatedMessage responseSubscription(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
         log.info("[Subscription] Response");
 
         // responseSubscription cancel process
@@ -310,8 +303,9 @@ public class TagoService {
             Accept accept = new Accept();
             accept.setDatexAccept_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
 
+            log.info("싱글 모여야만 하ㅐ {}", subscriptionData.getDatexSubscribe_Mode());
             if (subscriptionData.getDatexSubscribe_Mode().hasSingle()) {
-                log.debug("[서브스크립션 모드] 싱글");
+                log.info("[서브스크립션 모드] 싱글");
                 accept.setDatexAccept_Type(
                         Accept
                                 .DatexAccept_Type
@@ -319,7 +313,7 @@ public class TagoService {
                 );
 
             } else if (subscriptionData.getDatexSubscribe_Mode().hasPeriodic()) {
-                log.debug("[서브스크립션 모드] 주기방식");
+                log.info("[서브스크립션 모드] 주기방식");
 
                 int UpdateDelay_qty = (int) subscriptionData
                         .getDatexSubscribe_Mode()
@@ -349,6 +343,13 @@ public class TagoService {
             c2c.setPdu(PDUs.createPDUsWithReject(reject));
         }
 
+        // 서브스크립션 처리
+        if (c2c.getPdu().hasAccept()) {
+            this.processSubscription(c2CAuthMsg.getPdu().getSubscription(), ctx);
+        }
+        ctx.writeAndFlush(c2c);
+
+
         return c2c;
     }
     /**
@@ -357,6 +358,8 @@ public class TagoService {
      */
     public void processSubscription(Subscription subscription, ChannelHandlerContext ctx) {
         log.info("[Subscription] process");
+        log.info("subscription : {}", subscription);
+
         long subSerialNbr = subscription.getDatexSubscribe_Serial_nbr();
         SubscriptionMode subscriptionMode = subscription
                 .getDatexSubscribe_Type()
@@ -375,12 +378,12 @@ public class TagoService {
                 if (subscriptionMode.hasSingle()) {
 
 
+
                 } else if (subscriptionMode.hasPeriodic()) {
+                    ctx.channel().attr(PERIOD_PUBLISH).set(ctx.executor().scheduleWithFixedDelay(() -> {
+                    }, 0, 0, TimeUnit.SECONDS));
 
-                }
-                ctx.channel().attr(PERIOD_PUBLISH).set(ctx.executor().scheduleWithFixedDelay(() -> {
-
-                }, 0, 0, TimeUnit.SECONDS));  //버스위치정보
+                }//버스위치정보
                 //
 //
 //
@@ -392,25 +395,25 @@ public class TagoService {
 //            }
             }
             case Common.ARR_PRE_TIME_INFO_REQ -> {
-                subArrList = new ArrayList<TagoServerArrPrediction>(); //버스도착예정정보 구독리스트 초기화
-
-                for (String origin : origins) {
-                    TagoServerArrPrediction subArr = new TagoServerArrPrediction(subscriptionMode, subSerialNbr, origin, destination, this);
-                    subArrList.add(subArr);
-                }  //버스도착예정정보
+//                subArrList = new ArrayList<TagoServerArrPrediction>(); //버스도착예정정보 구독리스트 초기화
+//
+//                for (String origin : origins) {
+//                    TagoServerArrPrediction subArr = new TagoServerArrPrediction(subscriptionMode, subSerialNbr, origin, destination, this);
+//                    subArrList.add(subArr);
+//                }  //버스도착예정정보
             }
             case Common.BASE_INFO_VERSION_REQ -> {
-                subBivList = new ArrayList<TagoServerBaseinfoVersion>(); //기반정보버전정보 구독리스트 초기화
-
-                for (String origin : origins) {
-                    TagoServerBaseinfoVersion subBiv = new TagoServerBaseinfoVersion(subscriptionMode, subSerialNbr, origin, destination, this);
-                    subBivList.add(subBiv);
-                }  //기반정보버전정보
+//                subBivList = new ArrayList<TagoServerBaseinfoVersion>(); //기반정보버전정보 구독리스트 초기화
+//
+//                for (String origin : origins) {
+//                    TagoServerBaseinfoVersion subBiv = new TagoServerBaseinfoVersion(subscriptionMode, subSerialNbr, origin, destination, this);
+//                    subBivList.add(subBiv);
+//                }  //기반정보버전정보
             }
             case Common.BASE_INFO_REQ -> {
-                for (String origin : origins) {
-                    TagoServerBaseinfo subBase = new TagoServerBaseinfo(subscriptionMode, subSerialNbr, origin, destination, this);
-                }  //기반정보
+//                for (String origin : origins) {
+//                    TagoServerBaseinfo subBase = new TagoServerBaseinfo(subscriptionMode, subSerialNbr, origin, destination, this);
+//                }  //기반정보
             }
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
         }
@@ -426,9 +429,9 @@ public class TagoService {
         log.info("[Subscription] Cancel");
 
         // 구독 프로세스 종료
-        for(TagoServerBuslocation subBus:subBusList) {
-            subBus.close(); // 버스 스케쥴 종료
-        }
+//        for(TagoServerBuslocation subBus:subBusList) {
+//            subBus.close(); // 버스 스케쥴 종료
+//        }
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
@@ -488,7 +491,7 @@ public class TagoService {
      * FrED에 응답을 한다.
      * @return
      */
-    private C2CAuthenticatedMessage responseFrED() {
+    public C2CAuthenticatedMessage responseFrED() {
         log.info("[FrED] response");
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
@@ -508,7 +511,7 @@ public class TagoService {
      * @param c2CAuthMsg
      * @return
      */
-    private C2CAuthenticatedMessage responseTransferDone(C2CAuthenticatedMessage c2CAuthMsg) {
+    public C2CAuthenticatedMessage responseTransferDone(C2CAuthenticatedMessage c2CAuthMsg) {
         log.info("[TransferDone] response");
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();

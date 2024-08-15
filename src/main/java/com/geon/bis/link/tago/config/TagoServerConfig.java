@@ -20,10 +20,10 @@ public class TagoServerConfig {
 	@Value("${server.sendCnt}")
 	private int sendCnt;
 	
-	@Value("${server.serverLoginPass}")
+	@Value("${server.server-login-pass}")
 	private boolean LOGIN_PASS;
 	
-	@Value("${server.serverPubTestOn}")
+	@Value("${server.server-pub-test-on}")
 	private boolean PUB_TEST_ON;
 	
 }

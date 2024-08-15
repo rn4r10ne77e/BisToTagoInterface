@@ -14,7 +14,6 @@ public class OutboundHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        log.info("OutboundHandler write : {}", msg);
         ctx.write(msg, promise);
     }
 }

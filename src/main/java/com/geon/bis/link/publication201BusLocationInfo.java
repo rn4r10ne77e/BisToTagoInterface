@@ -6,13 +6,13 @@ import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 //import com.geon.bis.link.tago.datex.iso14827_2.*;
-import com.geon.bis.link.tago.datex.businfomation.BusLocationEvent;
-import com.geon.bis.link.tago.datex.businfomation.BusLocationInfo;
-import com.geon.bis.link.tago.datex.businfomation.BusLocationPolling;
-import com.geon.bis.link.tago.datex.businfomation.NMEACoord;
-import com.geon.bis.link.tago.datex.iso14827_1.Message_MESSAGE_BODY_1;
-import com.geon.bis.link.tago.datex.iso14827_2.*;
-import com.geon.bis.link.tago.datex.iso14827_2.Publish_Format.DatexPublish_Data;
+import datex.businfomation.BusLocationEvent;
+import datex.businfomation.BusLocationInfo;
+import datex.businfomation.BusLocationPolling;
+import datex.businfomation.NMEACoord;
+import datex.iso14827_1.Message_MESSAGE_BODY_1;
+import datex.iso14827_2.*;
+import datex.iso14827_2.Publish_Format.DatexPublish_Data;
 import com.oss.asn1.*;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.geon.bis.link.config.ChannelAttribute.DESTINATION;
-import static com.geon.bis.link.tago.datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
+import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
 
 @Slf4j
 @Component
@@ -256,55 +256,55 @@ public class publication201BusLocationInfo {
                 log.debug("vo결과 : " + el.toString());
                 part.add(el);
 
-                if(part.size() >= sendCnt) {
-                    boolean result = publication(makePublishDataBusEvent(part), subSerialNbr, pubSerialNbr);
-                    // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-                    if (result) {
-                        pubSerialNbr++;
-                    }
-                    result = publication(makePublishDataPeriodPolling(part), subSerialNbr, pubSerialNbr);
-                    // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-                    if (result) {
-                        pubSerialNbr++;
-                    }
-                    part.clear();
-                }
+//                if(part.size() >= sendCnt) {
+//                    boolean result = publication(makePublishDataBusEvent(part), subSerialNbr, pubSerialNbr);
+//                    // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
+//                    if (result) {
+//                        pubSerialNbr++;
+//                    }
+//                    result = publication(makePublishDataPeriodPolling(part), subSerialNbr, pubSerialNbr);
+//                    // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
+//                    if (result) {
+//                        pubSerialNbr++;
+//                    }
+//                    part.clear();
+//                }
                 log.debug("PartList결과 : {}", part);
 
             }
 
             // 남은거 보내기
-            if(!part.isEmpty()) {
-                boolean result = publication(makePublishDataBusEvent(part), subSerialNbr, pubSerialNbr);
-                // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-                if (result) {
-                    pubSerialNbr++;
-                }
-                result = publication(makePublishDataPeriodPolling(part), subSerialNbr, pubSerialNbr);
-                // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-                if (result) {
-                    pubSerialNbr++;
-                }
-            }
+//            if(!part.isEmpty()) {
+//                boolean result = publication(makePublishDataBusEvent(part), subSerialNbr, pubSerialNbr);
+//                // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
+//                if (result) {
+//                    pubSerialNbr++;
+//                }
+//                result = publication(makePublishDataPeriodPolling(part), subSerialNbr, pubSerialNbr);
+//                // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
+//                if (result) {
+//                    pubSerialNbr++;
+//                }
+//            }
         }
     }
 
     private boolean publication(EndApplicationMessage EndAppMsg, long subSerialNbr, long pubSerialNbr, String origin, ChannelHandlerContext ctx ) {
         EndApplicationMessage DatexPublishData = EndAppMsg;
 
-        if (serverPubTestOn) {
-            log.info("[Publication Test]");
-            // 실시간 정보 테스트 데이터 생성
-            DatexPublishData = pubTestData();
-        } else {
-            // 데이터가 없을 경우 패킷을 생성하지 않음.
-            if (DatexPublishData == null) {
-                log.info("[No Publication]");
-                return false;
-            }
-
-            log.info("[Publication]");
-        }
+//        if (serverPubTestOn) {
+//            log.info("[Publication Test]");
+//            // 실시간 정보 테스트 데이터 생성
+//            DatexPublishData = pubTestData();
+//        } else {
+//            // 데이터가 없을 경우 패킷을 생성하지 않음.
+//            if (DatexPublishData == null) {
+//                log.info("[No Publication]");
+//                return false;
+//            }
+//
+//            log.info("[Publication]");
+//        }
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
@@ -329,7 +329,7 @@ public class publication201BusLocationInfo {
         datexPublish_Data.add(publicationData);
 
         Publication publication = new Publication();
-        publication.setDatexPublish_Guaranteed_bool(serverHandler.isSubGuarantee());
+//        publication.setDatexPublish_Guaranteed_bool(serverHandler.isSubGuarantee());
         publication.setDatexPublish_Format(createPublish_FormatWithDatexPublish_Data(datexPublish_Data));
 
         c2c.setPdu(PDUs.createPDUsWithPublication(publication));

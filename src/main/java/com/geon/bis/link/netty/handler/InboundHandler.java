@@ -1,10 +1,11 @@
 package com.geon.bis.link.netty.handler;
 
 import com.geon.bis.link.TagoService;
-import com.geon.bis.link.tago.datex.iso14827_2.C2CAuthenticatedMessage;
-import com.geon.bis.link.mapper.BusLocationInfoMapper;
+import com.geon.bis.link.config.ChannelAttribute;
+import datex.iso14827_2.C2CAuthenticatedMessage;
 import com.oss.asn1.DecodeFailedException;
 import com.oss.asn1.DecodeNotSupportedException;
+import datex.iso14827_2.PDUs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandler;
@@ -17,17 +18,19 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.net.InetSocketAddress;
+
 @Slf4j
 @Component
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
 public class InboundHandler extends ChannelInboundHandlerAdapter {
 
-    private final BusLocationInfoMapper busLocationInfoMapper;
     private final TagoService tagoService;
     private final ChannelGroup channelGroup;
+    private final ChannelAttribute channelAttribute;
 
-    @Value("${datagram-size}")
+    @Value("${server.datagram-size}")
     private int DATAGRAM_SIZE;
     private ByteBuf byteBuf = null;
 
@@ -36,74 +39,84 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 //    private static final AttributeKey<ScheduledFuture<?>> SCHEDULED_FUTURE = AttributeKey.valueOf("scheduledFuture");
 
     @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
-//      ctx.executor().scheduleAtFixedRate() // 실행 시간 기준
-//        ScheduledFuture<?> scheduledFuture = ctx.executor().scheduleWithFixedDelay(()->{
-//            log.info("이게 10초마다 실행{}",ctx.channel().remoteAddress());
-//            }, 0, 10, TimeUnit.SECONDS
-//        ); // 종료 시간 기준
-
-//        ctx.channel().attr(SCHEDULED_FUTURE).set(scheduledFuture);
-    }
-
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) {
-//        ctx.channel().attr(SCHEDULED_FUTURE).get().cancel(false);
-        channelGroup.remove(ctx.channel());
-    }
-
-    @Override
     public void channelActive(ChannelHandlerContext ctx) {
         byteBuf = PooledByteBufAllocator.DEFAULT.directBuffer(DATAGRAM_SIZE, DATAGRAM_SIZE*2);
+        channelAttribute.init(ctx.channel());
         channelGroup.add(ctx.channel());
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg)  {
-
-//        CompletableFuture<ResultBusLocationInfo> future = CompletableFuture.supplyAsync(()->{
-//            busLocationInfo.delay();
-//            log.info("10초 지남");
-//            return busLocationInfo.find(ParamBusLocationInfo.builder().build());
-//        });
-//        future.thenAccept( result -> ctx.writeAndFlush(result.getResultStr()) );
-//        future.exceptionally( ex -> {
-//            log.error("error : {}", ExceptionUtils.getRootCauseMessage(ex));
-//            ctx.writeAndFlush( "ERROR");
-//            ctx.close();
-//            return ResultBusLocationInfo.builder().build();
-//        });
+    public void channelInactive(ChannelHandlerContext ctx) {
+        log.info("channelInactive");
+        byteBuf.release();
+        channelGroup.remove(ctx.channel());
+        channelAttribute.release(ctx.channel());
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws DecodeNotSupportedException, DecodeFailedException {
-        if ( byteBuf.readableBytes() == 0 ){
-            return;
-        }
+    public void channelRead(ChannelHandlerContext ctx, Object msg)  {
+        C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
 
-        byte[] bytes = new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(bytes);
-        byteBuf.clear();
+        switch (c2c.getPdu().getChosenFlag()) {
 
-        C2CAuthenticatedMessage c2c = tagoService.decodeData(bytes, null);
+            case PDUs.login_chosen:
+                ctx.writeAndFlush(tagoService.responseLogin(c2c, ctx));
+                break;
 
-        // Logout에 대해 처리한다.
-        if (c2c.getPdu().hasLogout()) {
-//            stopAllTimer();
-            ctx.close();
-        }
-        C2CAuthenticatedMessage rC2c = tagoService.processData(c2c, ctx);
-        if( rC2c != null ){
-            // 서브스크립션 처리
-            if (rC2c.getPdu().hasAccept()) {
-                tagoService.processSubscription(rC2c.getPdu().getSubscription(), ctx);
-            }
-            ctx.writeAndFlush(c2c);
+            case PDUs.fred_chosen:
+                log.info("[FrED] received");
+                log.debug(c2c.toString());
+
+                ctx.writeAndFlush(tagoService.responseFrED());
+                break;
+                /*
+                case PDUs.terminate_chosen:
+                    break;
+                */
+            case PDUs.logout_chosen:
+                log.info("[Logout] received");
+                log.debug(c2c.toString());
+                break;
+//                return responseLogout(c2c);
+
+            case PDUs.subscription_chosen:
+                log.info("[Subscription] received");
+                log.debug(c2c.toString());
+                tagoService.responseSubscription(c2c, ctx);
+                break;
+            // requestTerminate(Terminate.serverRequested);
+
+            case PDUs.transfer_done_chosen:
+                log.info("[TransferDone] received");
+                log.debug(c2c.toString());
+//                return tagoService.responseTransferDone(c2c);
+                break;
+
+            case PDUs.accept_chosen:
+            case PDUs.reject_chosen:
+                log.debug(c2c.toString());
+//                tagoService.acceptRejectPublication(c2c);
+                break;
+            /*
+            case PDUs.publication_chosen:
+                break;
+            */
+            default:
+                log.info("[" + c2c.getPdu().getChosenFlag() + "] received");
+                log.debug(c2c.toString());
+
+                break;
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        channelGroup.remove(ctx.channel());
+        channelAttribute.release(ctx.channel());
+        ctx.close();
+        cause.printStackTrace();
         log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(cause));
+
+
     }
 }

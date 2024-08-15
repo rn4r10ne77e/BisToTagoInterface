@@ -49,6 +49,7 @@ logging:
   file:
     name: logs/prop.log
   level:
+    root: info
     com.zaxxer.hikari.HikariConfig: DEBUG
     com.zaxxer.hikari: TRACE
 

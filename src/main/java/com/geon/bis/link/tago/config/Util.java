@@ -1,14 +1,13 @@
 package com.geon.bis.link.tago.config;
 
-import com.geon.bis.link.tago.datex.Datex;
-import com.geon.bis.link.tago.datex.iso14827_2.Time;
+import datex.Datex;
+import datex.iso14827_2.Time;
 import com.oss.asn1.Coder;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -254,4 +253,8 @@ public class Util {
 	@Getter
 	@Setter
 	private int dataPacketNumber = 0;
+
+	@Getter
+	@Value("${server.datagram-size}")
+	private int dataGramSize;
 }

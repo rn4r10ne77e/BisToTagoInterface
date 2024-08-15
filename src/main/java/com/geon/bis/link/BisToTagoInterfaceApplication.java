@@ -1,9 +1,13 @@
 package com.geon.bis.link;
 
+import com.geon.bis.link.config.AccountProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+@EnableConfigurationProperties(AccountProperties.class)
 @SpringBootApplication
 public class BisToTagoInterfaceApplication {
 
