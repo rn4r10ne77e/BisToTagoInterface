@@ -8,6 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface BusLocationInfoMapper {
-    String delay();
     List<ResultBusLocationInfo> find(ParamBusLocationInfo param);
 }

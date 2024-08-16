@@ -1,7 +1,6 @@
 package com.geon.bis.link.mapper.model;
 
 import lombok.*;
-
 import java.sql.Timestamp;
 
 @Getter
@@ -54,10 +53,11 @@ public class ResultBusLocationInfo {
     private Timestamp PTVehicleCollectedTime = null;
     /** 정보수집주기 */
     private int PTVehicleCollectedCycleTime = -1;
+
+
     /** 메세지 기록시간(DB 서버시간) */
     private Timestamp WritedTime = null;
-    /** 막차 정보 */
-    private boolean EventSendYN = false;
 
+    private boolean EventSendYN = false;
     private boolean PreSendYN = false;
 }

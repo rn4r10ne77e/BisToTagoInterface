@@ -1,5 +1,6 @@
 package com.geon.bis.link;
 
+import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
@@ -15,21 +16,25 @@ import datex.iso14827_2.*;
 import datex.iso14827_2.Publish_Format.DatexPublish_Data;
 import com.oss.asn1.*;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.geon.bis.link.config.ChannelAttribute.DESTINATION;
+import static com.geon.bis.link.config.ChannelAttribute.INFO;
 import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class publication201BusLocationInfo {
+public class Publication201BusLocationInfo {
 
     private final BusLocationInfoMapper busLocationInfoMapper;
     private final Util util;
@@ -41,16 +46,57 @@ public class publication201BusLocationInfo {
     @Value("${server.sendCnt}")
     private int sendCnt;
 
+    public void procPeriodicPublication (ChannelHandlerContext ctx) throws Exception {
+        // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
+        // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
+        try {
+            Timestamp lastTime = new Timestamp(util.nowTime().getTime() - (10 * 60 * 1000)); // 10분전 타임
+            String origin = ctx.channel().attr(INFO).get().getOrigin().get(0);
+            log.info("start");
+            List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
+                    .dtStart(util.TimeToString(lastTime))
+                    .dtEnd(util.TimeToString(lastTime))
+                    .origin(origin)
+                    .build());
+            log.debug("list size: {}", busList.size());
+
+            if (!busList.isEmpty()) {
+                List<ResultBusLocationInfo> part = new ArrayList<>();
+                for (ResultBusLocationInfo el : busList) {
+                    // 메세지를 정의된 개수만큼 쪼개서 보내기
+                    part.add(el);
+                    if(part.size() >= sendCnt) {
+                        // 구분 할 수 있는 플래그값 필요
+    //                    ctx.writeAndFlush(publication(makePublishDataBusEvent(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx));
+                        C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                        this.testEncoding(data);
+                        ctx.writeAndFlush(data);
+
+                        part.clear();
+                    }
+                    if(!part.isEmpty()) {
+                        // 구분 할 수 있는 플래그값 필요
+    //                ctx.writeAndFlush(publication(makePublishDataBusEvent(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx));
+                        C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                        this.testEncoding(data);
+                        ctx.writeAndFlush(data);
+
+                    }
+                }
+            }
+        } catch ( Exception e) {
+            throw new Exception(e);
+        }
+    }
+
 
     private BusLocationInfo CommonDataGen(ResultBusLocationInfo el) {
 
         BusLocationInfo busLocationInfo = new BusLocationInfo();
-
         //차량 ID
         busLocationInfo.setTsfc_PTVehicleIDNumber(new UTF8String16(el.getPTVehicleIDNumber()));
         //노선 ID
         busLocationInfo.setTpif_SubRouteIdentityNumber(new UTF8String16(el.getSubRouteIdentityNumber()));
-
         //이벤트 분류코드
         if (el.getBusEventCodeNumber() != -1) {
             busLocationInfo.setTpfc_BusEventCodeNumber(
@@ -97,7 +143,6 @@ public class publication201BusLocationInfo {
 
         return busLocationInfo;
     }
-
     /**
      * 버스위치정보 이벤트메세지를 생성한다.
      *
@@ -127,7 +172,8 @@ public class publication201BusLocationInfo {
     }
     /**
      * 버스위치정보 정주기 메세지를 생성한다.
-     *
+     * @param el ResultBusLocationInfo
+     * @return EndApplicationMessage
      * @return BusLocationPolling
      */
     private BusLocationPolling pollingDataGen(ResultBusLocationInfo el) {
@@ -159,7 +205,6 @@ public class publication201BusLocationInfo {
 
         return busLocationPolling;
     }
-
     /**
      * 주기방식 버스위치정보 ( 버스이벤트 ) 퍼블리케이션을 생성한다.
      * @param BusLocationList List of ResultBusLocationInfo
@@ -182,7 +227,7 @@ public class publication201BusLocationInfo {
                     busLocationInfo.setBusLocationInfoType(BusLocationInfo.BusLocationInfoType.createBusLocationInfoTypeWithBusLocationEvent(EventDataGen(el)));
 
                     message_MESSAGEBODY_1.add(busLocationInfo);
-                    log.debug("버스이벤트 추가 : " + message_MESSAGEBODY_1.toString());
+                    log.debug("버스이벤트 추가 : " + message_MESSAGEBODY_1);
                 }
             }
         }
@@ -199,7 +244,6 @@ public class publication201BusLocationInfo {
 
         return DatexPublish_Data;
     }
-
     /**
      * 주기방식 버스위치정보 ( 정주기 ) 퍼블리케이션을 생성한다.
      *
@@ -220,7 +264,7 @@ public class publication201BusLocationInfo {
                     busLocationInfo.setBusLocationInfoType(BusLocationInfo.BusLocationInfoType.createBusLocationInfoTypeWithBusLocationPolling(pollingDataGen(el)));
 
                     message_MESSAGEBODY_1.add(busLocationInfo);
-                    log.debug("버스정주기 추가 : " + message_MESSAGEBODY_1.toString());
+                    log.debug("버스정주기 추가 : " + message_MESSAGEBODY_1);
                 }
             }
         }
@@ -237,8 +281,6 @@ public class publication201BusLocationInfo {
 
         return DatexPublish_Data;
     }
-
-
 
     private void periodicPubProc(){
         // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
@@ -269,7 +311,7 @@ public class publication201BusLocationInfo {
 //                    }
 //                    part.clear();
 //                }
-                log.debug("PartList결과 : {}", part);
+                log.debug("PartList 결과 : {}", part);
 
             }
 
@@ -289,7 +331,7 @@ public class publication201BusLocationInfo {
         }
     }
 
-    private boolean publication(EndApplicationMessage EndAppMsg, long subSerialNbr, long pubSerialNbr, String origin, ChannelHandlerContext ctx ) {
+    public C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, long subSerialNbr, long pubSerialNbr, String origin, ChannelHandlerContext ctx ) {
         EndApplicationMessage DatexPublishData = EndAppMsg;
 
 //        if (serverPubTestOn) {
@@ -317,35 +359,60 @@ public class publication201BusLocationInfo {
         publicationData.setDatexPublish_SubscribeSerial_nbr(subSerialNbr);
         publicationData.setDatexPublish_Serial_nbr(pubSerialNbr);
         publicationData.setDatexPublish_LatePublicationFlag(false);
-        publicationData.setDatexPublish_Type(
-                PublicationType.createPublicationTypeWithDatexPublish_Data(DatexPublishData));
+        publicationData.setDatexPublish_Type(PublicationType.createPublicationTypeWithDatexPublish_Data(DatexPublishData));
 		/*
 		PublicationType.createPublicationTypeWithDatexPublication_Management_cd(
 				DatexPublication_Management_cd.temporarilySuspended);
 		*/
-
-
         DatexPublish_Data datexPublish_Data = new DatexPublish_Data();
         datexPublish_Data.add(publicationData);
 
         Publication publication = new Publication();
+        publication.setDatexPublish_Guaranteed_bool(true);
 //        publication.setDatexPublish_Guaranteed_bool(serverHandler.isSubGuarantee());
         publication.setDatexPublish_Format(createPublish_FormatWithDatexPublish_Data(datexPublish_Data));
 
         c2c.setPdu(PDUs.createPDUsWithPublication(publication));
 
-        log.trace("[Publication 메세지] {}",c2c);
+        return c2c;
+    }
 
-        ctx.writeAndFlush(c2c);
+    /**
+     * 스케줄러에서 ctx.writeAndFlush 이전에 인코딩을 테스트 하기 위함.
+     *
+     * @param dummy - 인코딩할 데이터
+     * @throws EncodeFailedException - 인코딩 할때 발생하는 예외를 던짐.
+     * @throws EncodeNotSupportedException - 지원하지 않는 인코딩 포맷일 경우.
+     */
+    void testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
 
-        return true;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.reset();
+        util.getCoder().encode(dummy, baos);
+        byte[] encoding = baos.toByteArray();
+
+        DatexDataPacket datexDataPacket = new DatexDataPacket();
+        datexDataPacket.setDatex_Version_number(DatexDataPacket.Datex_Version_number.version1);
+        datexDataPacket.setDatex_Data(new OctetString(encoding));
+        datexDataPacket.setDatex_Crc_nbr(new OctetString(util.getCrc16(encoding)));
+
+        baos.reset();
+        util.getCoder().encode(datexDataPacket, baos);
+
+        if (baos.size() > util.getDataGramSize()) {
+            throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
+        }
     }
 
     public HeaderOptions getOptions(String origin, ChannelHandlerContext ctx) {
         HeaderOptions options = new HeaderOptions();
         options.setDatex_Sender_text(new UTF8String16(sender));
-        if (ctx.channel().attr(DESTINATION).get() != null) {
-            options.setDatex_Destination_text(new UTF8String16(ctx.channel().attr(DESTINATION).get()));
+
+        ChannelAttribute.ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
+
+
+        if (channelInfo.getDestination() != null) {
+            options.setDatex_Destination_text(new UTF8String16(channelInfo.getDestination()));
         }
         if (origin != null) {
             options.setDatex_Origin_text(new UTF8String16(origin));

@@ -51,7 +51,7 @@ logging:
   level:
     root: info
     com.zaxxer.hikari.HikariConfig: DEBUG
-    com.zaxxer.hikari: TRACE
+#    com.zaxxer.hikari: TRACE
 
 setting:
   idle:

@@ -11,8 +11,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.util.concurrent.ScheduledFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,6 +34,7 @@ public class TagoService {
     private final Util util;
     private final AccountProperties accountProperties;
     private final ChannelGroup channelGroup;
+    private final Publication201BusLocationInfo pub201;
 
     private int dataPacketNumber = 0;
 
@@ -149,31 +152,32 @@ public class TagoService {
     public C2CAuthenticatedMessage responseLogin(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
 
         Login login = c2CAuthMsg.getPdu().getLogin();
+        ChannelInfo channelInfo = ctx.channel().attr(INFO).get(); // 채널에 대한 설정 및 기본값 세팅
 
         String _sender = login.getDatex_Sender_txt().stringValue();
         String _destination = login.getDatex_Destination_txt().stringValue();
         String userName = new String(login.getDatexLogin_UserName_txt().byteArrayValue());
         String password = new String(login.getDatexLogin_Password_txt().byteArrayValue());
-        ctx.channel().attr(HEARTBEAT_DURATION_MAX).set((int) login.getDatexLogin_HeartbeatDurationMax_qty());
-        ctx.channel().attr(RESPONSE_TIMEOUT).set((int) login.getDatexLogin_ResponseTimeOut_qty());
+
+        channelInfo.setHeartbeatDurationMax((int) login.getDatexLogin_HeartbeatDurationMax_qty());
+        channelInfo.setResponseTimeOut((int) login.getDatexLogin_ResponseTimeOut_qty());
         int datagramSize = (int) login.getDatexLogin_DatagramSize_qty();
 
         // matching id & password
         boolean isMatchIdAndPassword = false;
-
 
         String clientIp = ((InetSocketAddress)(ctx.channel().remoteAddress())).getAddress().getHostAddress();
 
         for(Account el : accountProperties.getAccount() ){
             if (el.getIp().equals(clientIp) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
                 isMatchIdAndPassword = true;
-                ctx.channel().attr(ORIGIN).set(el.getOrigins());
-                ctx.channel().attr(DESTINATION).set(el.getUsername());
+
+                channelInfo.setOrigin(el.getOrigins());
+                channelInfo.setDestination(el.getUsername());
                 destination = el.getUsername();
                 break;
             }
         }
-
         if (isMatchIdAndPassword) {
             log.debug("[Login] id & password are correct");
         } else {
@@ -188,15 +192,15 @@ public class TagoService {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.unknownDomainName;
         } else if (!isMatchIdAndPassword) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.invalidNamePassword;
-        } else if (ctx.channel().attr(RESPONSE_TIMEOUT).get() < Common.RESPONSE_TIMEOUT_MIN) {
+        } else if (channelInfo.getResponseTimeOut() < Common.RESPONSE_TIMEOUT_MIN) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.timeoutTooSmall;
-        } else if (ctx.channel().attr(RESPONSE_TIMEOUT).get() > Common.RESPONSE_TIMEOUT_MAX) {
+        } else if (channelInfo.getResponseTimeOut() > Common.RESPONSE_TIMEOUT_MAX) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.timeoutTooLarge;
-        } else if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() < Common.HEARTBEAT_DURATION_MIN && ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() != 0) {
+        } else if (channelInfo.getHeartbeatDurationMax() < Common.HEARTBEAT_DURATION_MIN && channelInfo.getHeartbeatDurationMax() != 0) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.heartbeatTooSmall;
-        } else if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() > Common.HEARTBEAT_DURATION_MAX) {
+        } else if (channelInfo.getHeartbeatDurationMax() > Common.HEARTBEAT_DURATION_MAX) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.heartbeatTooLarge;
-        } else if (ctx.channel().attr(IS_SESSION_CONNECTED).get()) {
+        } else if (channelInfo.isSessionConnected()) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.sessionExists;
         } else if (channelGroup.size() > Common.MAX_SESSION_COUNT) {
             datexReject_Login_cd = RejectType.DatexReject_Login_cd.maxSessionReached;
@@ -223,11 +227,11 @@ public class TagoService {
 
             c2c.setPdu(PDUs.createPDUsWithAccept(accept));
 
-            ctx.channel().attr(IS_SESSION_CONNECTED).set(true);
+            channelInfo.setSessionConnected(true);
 
-            if (ctx.channel().attr(HEARTBEAT_DURATION_MAX).get() != 0) {
+            if (channelInfo.getHeartbeatDurationMax() != 0) {
                 ctx.pipeline().addBefore("TagoEncoder", "readTimeout",
-                        new ReadTimeoutHandler(ctx.channel().attr(HEARTBEAT_DURATION_MAX).get()));
+                        new ReadTimeoutHandler(channelInfo.getHeartbeatDurationMax()));
             }
         } else {
             c2c.setDatex_AuthenticationInfo_text(new OctetString());
@@ -303,7 +307,7 @@ public class TagoService {
             Accept accept = new Accept();
             accept.setDatexAccept_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
 
-            log.info("싱글 모여야만 하ㅐ {}", subscriptionData.getDatexSubscribe_Mode());
+            log.info("모드 : {}", subscriptionData.getDatexSubscribe_Mode());
             if (subscriptionData.getDatexSubscribe_Mode().hasSingle()) {
                 log.info("[서브스크립션 모드] 싱글");
                 accept.setDatexAccept_Type(
@@ -343,13 +347,6 @@ public class TagoService {
             c2c.setPdu(PDUs.createPDUsWithReject(reject));
         }
 
-        // 서브스크립션 처리
-        if (c2c.getPdu().hasAccept()) {
-            this.processSubscription(c2CAuthMsg.getPdu().getSubscription(), ctx);
-        }
-        ctx.writeAndFlush(c2c);
-
-
         return c2c;
     }
     /**
@@ -360,7 +357,9 @@ public class TagoService {
         log.info("[Subscription] process");
         log.info("subscription : {}", subscription);
 
-        long subSerialNbr = subscription.getDatexSubscribe_Serial_nbr();
+        ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
+
+//        long subSerialNbr = subscription.getDatexSubscribe_Serial_nbr();
         SubscriptionMode subscriptionMode = subscription
                 .getDatexSubscribe_Type()
                 .getSubscription()
@@ -376,15 +375,24 @@ public class TagoService {
         switch (oId) {
             case Common.BUS_LOC_INFO_REQ -> {
                 if (subscriptionMode.hasSingle()) {
-
-
-
+                    channelInfo.setPubSingle201(ctx.executor().schedule(() -> {
+                        log.info("여기에 코드를 입력하세요.");
+                    }, 5, TimeUnit.SECONDS));
                 } else if (subscriptionMode.hasPeriodic()) {
-                    ctx.channel().attr(PERIOD_PUBLISH).set(ctx.executor().scheduleWithFixedDelay(() -> {
-                    }, 0, 0, TimeUnit.SECONDS));
-
-                }//버스위치정보
-                //
+                    int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
+                    ScheduledFuture<?> ft = ctx.executor().scheduleWithFixedDelay(() -> {
+                        log.info("기간제 스케줄로 등록 {}초", interval);
+                        try {
+                            pub201.procPeriodicPublication(ctx);
+                        } catch (Exception e) {
+                            log.error("exceptionCaught: {}",ExceptionUtils.getMessage(e));
+                            log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(e));
+                            log.error("exceptionCaught: 해당 스케줄러만 종료 ( 연결은 유지 )");
+                            ctx.channel().attr(INFO).get().getPubPeriod201().cancel(true);
+                        }
+                    }, 5, interval, TimeUnit.SECONDS);
+                    channelInfo.setPubPeriod201(ft);
+                } // 버스위치정보
 //
 //
 //            subBusList = new ArrayList<TagoServerBuslocation>(); //버스위치정보 구독리스트 초기화
@@ -492,7 +500,6 @@ public class TagoService {
      * @return
      */
     public C2CAuthenticatedMessage responseFrED() {
-        log.info("[FrED] response");
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());

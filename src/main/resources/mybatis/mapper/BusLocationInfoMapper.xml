@@ -3,10 +3,31 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BusLocationInfoMapper">
-    <select id="delay" resultType="String">
-        select pg_sleep(10)
-    </select>
     <select id="find" parameterType="ParamBusLocationInfo" resultType="ResultBusLocationInfo">
-        select 'DONE' as resultStr;
+        select
+            '' as origin,
+            '' as PTVehicleIDNumber,
+            '' as SubRouteIdentityNumber,
+            -1 as BusEventCodeNumber,
+            -1 as BusRunCodeNumber,
+            false as LastPTVehicle,
+            '010000' as EndNodeZoneIDNumber,
+            -1 as EndNodeRouteSequence,
+            -1 as BusTotalSeatsNumber,
+            -1 as BusPassengerNumber,
+            -1 as BusRemainSeatsNumber,
+
+            now() as MessageGenerationTime,
+            '' as NodeZoneIDNumber,
+            -1 as NodeRouteSequence,
+            now() as NodeZoneEntryTime,
+            now() as NodeZoneExitTime,
+            -1 as NodeZoneTripTime,
+
+            36.0 as PTVehicleCoordinateLati,
+            127.0 as PTVehicleCoordinateLong,
+            now() as PTVehicleCollectedTime,
+            -1 as PTVehicleCollectedCycleTime
+
     </select>
 </mapper>

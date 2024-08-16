@@ -38,31 +38,13 @@ root \
 
 
 
+* 문제점
+  - 데이터 퍼블리케이션 생성 하는 스케줄러에서 데이터 처리 과정 중 <br>
+ctx.writeAndFlush 이후에 인코더에서 인코딩 하는 과정에 문제가 생겼을 경우
+ctx.writeAndFlush 이전에 예외가 생겼을 경우는 try ~ catch 에서 예외처리로 스케줄러의 중지가 가능하지만
+ 데이터가 인코더 핸들러로 넘어간 후에는 예외가 발생해도 스케줄러를 중지 할 수가 없다.
+
+
+
+
 ---------------------------------------------
-
-
-
-
-
-
-For further reference, please consider the following sections:
-
-* [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.3.2/gradle-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.3.2/gradle-plugin/packaging-oci-image.html)
-* [Spring Configuration Processor](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#appendix.configuration-metadata.annotation-processor)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#using.devtools)
-* [MyBatis Framework](https://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)
-
-### Guides
-
-The following guides illustrate how to use some features concretely:
-
-* [MyBatis Quick Start](https://github.com/mybatis/spring-boot-starter/wiki/Quick-Start)
-
-### Additional Links
-
-These additional references should also help you:
-
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
-

@@ -76,7 +76,7 @@ public class TagoDecoder extends ByteToMessageDecoder {
 			
 			c2c = (C2CAuthenticatedMessage) util.getCoder().decode(bais, new C2CAuthenticatedMessage());
 
-			log.info("receive: {}", c2c);
+//			log.info("receive: {}", c2c);
 			
 		} catch (DecodeFailedException | DecodeNotSupportedException e) {
 			log.error(e.getMessage());
