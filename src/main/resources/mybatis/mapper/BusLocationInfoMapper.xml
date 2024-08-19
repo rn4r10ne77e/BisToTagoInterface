@@ -5,25 +5,25 @@
 <mapper namespace="com.geon.bis.link.mapper.BusLocationInfoMapper">
     <select id="find" parameterType="ParamBusLocationInfo" resultType="ResultBusLocationInfo">
         select
-            '' as origin,
-            '' as PTVehicleIDNumber,
+            '' as origin, -- 지역코드
+            '' as PTVehicleIDNumber, -- veh_id
             '' as SubRouteIdentityNumber,
-            -1 as BusEventCodeNumber,
-            -1 as BusRunCodeNumber,
+            -1 as BusEventCodeNumber, -- event_cd
+            -1 as BusRunCodeNumber ,
             false as LastPTVehicle,
-            '010000' as EndNodeZoneIDNumber,
-            -1 as EndNodeRouteSequence,
+            '010000' as EndNodeZoneIDNumber, -- 종점 정류소 ID
+            -1 as EndNodeRouteSequence, -- 종점_노선_내 순번
             -1 as BusTotalSeatsNumber,
             -1 as BusPassengerNumber,
             -1 as BusRemainSeatsNumber,
-
+            -- 버스 이벤트 데이터
             now() as MessageGenerationTime,
             '' as NodeZoneIDNumber,
             -1 as NodeRouteSequence,
             now() as NodeZoneEntryTime,
             now() as NodeZoneExitTime,
             -1 as NodeZoneTripTime,
-
+            -- 버스 정주기 데이터
             36.0 as PTVehicleCoordinateLati,
             127.0 as PTVehicleCoordinateLong,
             now() as PTVehicleCollectedTime,

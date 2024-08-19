@@ -57,6 +57,7 @@ public class  ChannelAttribute {
     public static class ChannelInfo {
         private boolean sessionConnected;
         private int heartbeatDurationMax;
+        private boolean subGuarantee;
 
         private ScheduledFuture<?> pubSingle201;
         private ScheduledFuture<?> pubPeriod201;

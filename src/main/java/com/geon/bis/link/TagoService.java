@@ -261,6 +261,10 @@ public class TagoService {
         SubscriptionData subscriptionData = c2CAuthMsg.getPdu().getSubscription().getDatexSubscribe_Type()
                 .getSubscription();
 
+
+        ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
+        channelInfo.setSubGuarantee(subscriptionData.getDatexSubscribe_Guarantee_bool());
+
         String endAppMsgId = subscriptionData.getDatexSubscribe_Pdu().getEndApplication_Message_id()
                 .toString(new ASN1ValueFormat().excludeValueAssignment());
         int datexSubscribeMode = subscriptionData.getDatexSubscribe_Mode().getChosenFlag();

@@ -369,6 +369,7 @@ public class Publication201BusLocationInfo {
 
         Publication publication = new Publication();
         publication.setDatexPublish_Guaranteed_bool(true);
+        publication.setDatexPublish_Guaranteed_bool(ctx.channel().attr(INFO).get().isSubGuarantee());
 //        publication.setDatexPublish_Guaranteed_bool(serverHandler.isSubGuarantee());
         publication.setDatexPublish_Format(createPublish_FormatWithDatexPublish_Data(datexPublish_Data));
 
