@@ -5,29 +5,29 @@
 <mapper namespace="com.geon.bis.link.mapper.BusLocationInfoMapper">
     <select id="find" parameterType="ParamBusLocationInfo" resultType="ResultBusLocationInfo">
         select
-            '' as origin, -- 지역코드
-            '' as PTVehicleIDNumber, -- veh_id
-            '' as SubRouteIdentityNumber,
-            -1 as BusEventCodeNumber, -- event_cd
-            -1 as BusRunCodeNumber ,
-            false as LastPTVehicle,
-            '010000' as EndNodeZoneIDNumber, -- 종점 정류소 ID
-            -1 as EndNodeRouteSequence, -- 종점_노선_내 순번
-            -1 as BusTotalSeatsNumber,
-            -1 as BusPassengerNumber,
-            -1 as BusRemainSeatsNumber,
-            -- 버스 이벤트 데이터
-            now() as MessageGenerationTime,
-            '' as NodeZoneIDNumber,
-            -1 as NodeRouteSequence,
-            now() as NodeZoneEntryTime,
-            now() as NodeZoneExitTime,
-            -1 as NodeZoneTripTime,
-            -- 버스 정주기 데이터
-            36.0 as PTVehicleCoordinateLati,
-            127.0 as PTVehicleCoordinateLong,
-            now() as PTVehicleCollectedTime,
-            -1 as PTVehicleCollectedCycleTime
+            veh_id as PTVehicleIDNumber,
+            route_id as SubRouteIdentityNumber,
+            event_cd as BusEventCodeNumber,
+            bus_run_code_number as BusRunCodeNumber,
+            last_pt_vehicle as LastPTVehicle,
+            end_node_zone_id_number as EndNodeZoneIDNumber,
+            end_node_route_sequence as EndNodeRouteSequence,
+            bus_total_seats_number as BusTotalSeatsNumber,
+            bus_passenger_number as BusPassengerNumber,
+            bus_remain_seats_number as BusRemainSeatsNumber,
 
+            message_generation_time as MessageGenerationTime,
+            node_zone_id_number as NodeZoneIDNumber,
+            node_route_sequence as NodeRouteSequence,
+            node_zone_entry_time as NodeZoneEntryTime,
+            node_zone_exit_time as NodeZoneExitTime,
+            node_zone_trip_time as NodeZoneTripTime,
+
+            pt_vehicle_coordinate_lati as PTVehicleCoordinateLati,
+            pt_vehicle_coordinate_long as PTVehicleCoordinateLong,
+            pt_vehicle_collected_time as PTVehicleCollectedTime,
+            pt_vehicle_collected_cycle_time as PTVehicleCollectedCycleTime
+        from
+            public.get_bus_location_info(#{stdTime})
     </select>
 </mapper>

@@ -5,9 +5,10 @@ spring:
     active: local
   datasource:
     driver-class-name: org.postgresql.Driver
-    username: cnbus
-    password: cnbus
-    url: jdbc:postgresql://localhost:5434/cnbus
+    username: postgres
+    password: geo&0317
+    url: jdbc:postgresql://geonworks.iptime.org:33333/cnbus
+#    url: jdbc:postgresql://localhost:5434/cnbus
 
     hikari:
       maximum-pool-size: 10

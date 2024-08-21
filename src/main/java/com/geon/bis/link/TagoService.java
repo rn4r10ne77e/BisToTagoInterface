@@ -2,6 +2,8 @@ package com.geon.bis.link;
 
 import com.geon.bis.link.config.Account;
 import com.geon.bis.link.config.AccountProperties;
+import com.geon.bis.link.mapper.BusLocationInfoMapper;
+import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -12,6 +14,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.concurrent.ScheduledFuture;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -45,8 +48,6 @@ public class TagoService {
 
     private String destination;
     private String encodingRules;
-
-
 
     public C2CAuthenticatedMessage decodeData(byte[] bytes, InputStream is) throws DecodeNotSupportedException, DecodeFailedException {
         C2CAuthenticatedMessage c2c = null;
@@ -389,6 +390,7 @@ public class TagoService {
                         try {
                             pub201.procPeriodicPublication(ctx);
                         } catch (Exception e) {
+                            e.printStackTrace();
                             log.error("exceptionCaught: {}",ExceptionUtils.getMessage(e));
                             log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(e));
                             log.error("exceptionCaught: 해당 스케줄러만 종료 ( 연결은 유지 )");

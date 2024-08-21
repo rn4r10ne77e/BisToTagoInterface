@@ -1,5 +1,6 @@
 package com.geon.bis.link;
 
+import com.geon.bis.link.config.BusRunEventCode;
 import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
@@ -25,6 +26,9 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +54,11 @@ public class Publication201BusLocationInfo {
         // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
         try {
-            Timestamp lastTime = new Timestamp(util.nowTime().getTime() - (10 * 60 * 1000)); // 10분전 타임
+//            Timestamp lastTime = new Timestamp(util.nowTime().getTime() - (10 * 60 * 1000)); // 10분전 타임
             String origin = ctx.channel().attr(INFO).get().getOrigin().get(0);
             log.info("start");
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
-                    .dtStart(util.TimeToString(lastTime))
-                    .dtEnd(util.TimeToString(lastTime))
+                    .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(1))
                     .origin(origin)
                     .build());
             log.debug("list size: {}", busList.size());
@@ -63,6 +66,7 @@ public class Publication201BusLocationInfo {
             if (!busList.isEmpty()) {
                 List<ResultBusLocationInfo> part = new ArrayList<>();
                 for (ResultBusLocationInfo el : busList) {
+
                     // 메세지를 정의된 개수만큼 쪼개서 보내기
                     part.add(el);
                     if(part.size() >= sendCnt) {
@@ -98,12 +102,25 @@ public class Publication201BusLocationInfo {
         //노선 ID
         busLocationInfo.setTpif_SubRouteIdentityNumber(new UTF8String16(el.getSubRouteIdentityNumber()));
         //이벤트 분류코드
-        if (el.getBusEventCodeNumber() != -1) {
-            busLocationInfo.setTpfc_BusEventCodeNumber(
-                    BusLocationInfo.Tpfc_BusEventCodeNumber.valueOf(Long.valueOf(el.getBusEventCodeNumber())));
-        } else {
-            busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.exit_BusStop);
+        switch (el.getBusEventCodeNumber()){
+            case 11:
+                busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.enter_BusStop);
+                break;
+            case 12:
+                busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.exit_BusStop);
+                break;
+            case 21:
+                busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.fixed_Cycle);
+                break;
+
+            default: busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.pass_Cross);
         }
+
+//        if (el.getBusEventCodeNumber() != -1) {
+//            busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.valueOf(Long.valueOf(el.getBusEventCodeNumber())));
+//        } else {
+//            busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.exit_BusStop);
+//        }
 
         // 운행 조건 코드
         if (el.getBusRunCodeNumber() != -1) {
@@ -152,16 +169,16 @@ public class Publication201BusLocationInfo {
 
         //메시지 발생시각, 이벤트 정보 수집 노드 ID, 노선 내 순번
         BusLocationEvent busLocationEvent = new BusLocationEvent(
-                new GeneralizedTime(util.TimeToString(el.getMessageGenerationTime())),
+                new GeneralizedTime(util.TimeToString(Timestamp.valueOf(el.getMessageGenerationTime().toLocalDateTime()))),
                 new UTF8String16(el.getNodeZoneIDNumber()), el.getNodeRouteSequence());
 
         //노드 진입시각
         if (el.getNodeZoneEntryTime() != null) {
-            busLocationEvent.setTsvh_NodeZoneEntryTime(new GeneralizedTime(util.TimeToString(el.getNodeZoneEntryTime())));
+            busLocationEvent.setTsvh_NodeZoneEntryTime(new GeneralizedTime(util.TimeToString(Timestamp.valueOf(el.getNodeZoneEntryTime().toLocalDateTime()))));
         }
         //노드 진출시각
         if (el.getNodeZoneExitTime() != null) {
-            busLocationEvent.setTsvh_NodeZoneExitTime(new GeneralizedTime(util.TimeToString(el.getNodeZoneExitTime())));
+            busLocationEvent.setTsvh_NodeZoneExitTime(new GeneralizedTime(util.TimeToString(Timestamp.valueOf(el.getNodeZoneExitTime().toLocalDateTime()))));
         }
         //노드 통행시간
         if (el.getNodeZoneTripTime() != -1) {
@@ -195,7 +212,7 @@ public class Publication201BusLocationInfo {
         //위치정보 수집시각
         if (el.getPTVehicleCollectedTime() != null) {
             busLocationPolling.setTsfc_PTVehicleCollectedTime(
-                    new GeneralizedTime(util.TimeToString(el.getPTVehicleCollectedTime())));
+                    new GeneralizedTime(util.TimeToString(Timestamp.valueOf(el.getPTVehicleCollectedTime().toLocalDateTime()))));
         }
 
         //정보수집주기

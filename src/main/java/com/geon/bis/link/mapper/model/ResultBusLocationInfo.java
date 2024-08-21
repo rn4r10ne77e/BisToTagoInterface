@@ -1,7 +1,7 @@
 package com.geon.bis.link.mapper.model;
 
 import lombok.*;
-import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -31,32 +31,34 @@ public class ResultBusLocationInfo {
     private int BusPassengerNumber = -1;
     /** 버스 잔여 좌석 정보 */
     private int BusRemainSeatsNumber = -1;
-// 이벤트 정보
+
+    // 이벤트 정보
     /** 메시지 발생시각 */
-    private Timestamp MessageGenerationTime = null;
+    private ZonedDateTime MessageGenerationTime = null;
     /** 이벤트 정보 수집 노드 ID */
     private String NodeZoneIDNumber;
     /** 노선 내 순번 */
     private int NodeRouteSequence = -1;
     /** 노드 진입시각 */
-    private Timestamp NodeZoneEntryTime = null;
+    private ZonedDateTime NodeZoneEntryTime = null;
     /** 노드 진출시각 */
-    private Timestamp NodeZoneExitTime = null;
+    private ZonedDateTime NodeZoneExitTime = null;
     /** 노드 통행시간 */
     private int NodeZoneTripTime = -1;
-// 정주기 정보
+
+    // 정주기 정보
     /** GPS_LATI */
     private float PTVehicleCoordinateLati = 0.0f;
     /** GPS_LONG */
     private float PTVehicleCoordinateLong = 0.0f;
     /** 위치정보 수집시각 */
-    private Timestamp PTVehicleCollectedTime = null;
+    private ZonedDateTime PTVehicleCollectedTime = null;
     /** 정보수집주기 */
     private int PTVehicleCollectedCycleTime = -1;
 
 
     /** 메세지 기록시간(DB 서버시간) */
-    private Timestamp WritedTime = null;
+    private ZonedDateTime WritedTime = null;
 
     private boolean EventSendYN = false;
     private boolean PreSendYN = false;
