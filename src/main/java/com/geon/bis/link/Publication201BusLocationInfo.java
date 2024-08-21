@@ -1,6 +1,5 @@
 package com.geon.bis.link;
 
-import com.geon.bis.link.config.BusRunEventCode;
 import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
@@ -24,11 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 

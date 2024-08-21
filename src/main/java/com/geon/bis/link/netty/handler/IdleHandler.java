@@ -1,6 +1,5 @@
 package com.geon.bis.link.netty.handler;
 
-import com.geon.bis.link.mapper.BusCompMapper;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,8 +15,6 @@ import org.springframework.stereotype.Component;
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
 public class IdleHandler extends ChannelDuplexHandler {
-
-    private final BusCompMapper busCompMapper;
 
     @Value("${setting.idle.read-time}")
     private int idleReadTime;
@@ -44,7 +41,6 @@ public class IdleHandler extends ChannelDuplexHandler {
         if(evt instanceof IdleStateEvent e){
             switch (e.state()) {
                 case READER_IDLE -> {
-                    log.info("db connection result {}", busCompMapper.find().getCompanyNm());
                     log.info("'{}'로부터 '{}'초 동안 입력이 없음", ctx.channel().remoteAddress(), idleReadTime);
                     Integer count = ctx.channel().attr(HEARTBEAT_COUNT).get();
                     if( count == null ) count = 0;
