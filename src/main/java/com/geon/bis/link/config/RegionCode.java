@@ -2,14 +2,16 @@ package com.geon.bis.link.config;
 
 import lombok.Getter;
 
+import java.util.Objects;
+
 @Getter
 public enum RegionCode {
 
-    TAEAN("태안", 299),
-    BORYEONG("보령", 287),
-    GEUMSAN("금산", 292),
-    CHEONGYANG("청양", 296),
-    SEOCHEON("서천", 295);
+    TAEAN("taean", 299),
+    BORYEONG("boryeong", 287),
+    GEUMSAN("geumsan", 292),
+    CHEONGYANG("cheongyang", 296),
+    SEOCHEON("seocheon", 295);
 
     private final String region;
     private final int code;
@@ -26,5 +28,13 @@ public enum RegionCode {
             }
         }
         throw new IllegalArgumentException("Invalid code: " + code);
+    }
+    public static RegionCode findByRegion(String name) {
+        for (RegionCode region : values()) {
+            if (region.getRegion().equals(name)) {
+                return region;
+            }
+        }
+        throw new IllegalArgumentException("Invalid name: " + name);
     }
 }

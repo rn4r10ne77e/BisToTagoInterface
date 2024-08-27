@@ -11,5 +11,6 @@
     </settings>
     <typeHandlers>
         <typeHandler handler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler" javaType="java.time.ZonedDateTime"/>
+        <typeHandler handler="com.geon.bis.link.mapper.handler.StringArrayTypeHandler" />
     </typeHandlers>
 </configuration>

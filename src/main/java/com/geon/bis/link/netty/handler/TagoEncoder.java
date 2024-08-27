@@ -23,7 +23,7 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-		log.info("send : {}", msg);
+//		log.info("send : {}", msg);
 		if (!(msg instanceof C2CAuthenticatedMessage)) {
 			log.error("C2C instance error");
 			return;

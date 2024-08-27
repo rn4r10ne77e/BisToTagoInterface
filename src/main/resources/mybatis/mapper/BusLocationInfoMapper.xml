@@ -28,6 +28,6 @@
             pt_vehicle_collected_time as PTVehicleCollectedTime,
             pt_vehicle_collected_cycle_time as PTVehicleCollectedCycleTime
         from
-            public.get_bus_location_info(#{stdTime})
+            public.get_bus_location_info(#{stdTime}, #{origin,jdbcType=ARRAY}, #{mode})
     </select>
 </mapper>

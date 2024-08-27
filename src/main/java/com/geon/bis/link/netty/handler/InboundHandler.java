@@ -53,10 +53,10 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg)  {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
-        log.info("received : {}", c2c);
+//        log.info("received : {}", c2c);
         switch (c2c.getPdu().getChosenFlag()) {
 
             case PDUs.login_chosen:
@@ -83,7 +83,9 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
                 break;
 
             case PDUs.accept_chosen:
-                log.info("------------------------------------------------------ accept ------------------------------------------------------ ");
+
+                log.info(" accept ------------- : {}", c2c.getPdu().getAccept().getDatexAccept_Type());
+                break;
             case PDUs.reject_chosen:
                 log.debug(c2c.toString());
 //                tagoService.acceptRejectPublication(c2c);

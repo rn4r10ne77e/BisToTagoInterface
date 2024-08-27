@@ -2,6 +2,7 @@ package com.geon.bis.link;
 
 import com.geon.bis.link.config.Account;
 import com.geon.bis.link.config.AccountProperties;
+import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.tago.config.Common;
@@ -173,7 +174,12 @@ public class TagoService {
             if (el.getIp().equals(clientIp) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
                 isMatchIdAndPassword = true;
 
-                channelInfo.setOrigin(el.getOrigins());
+                channelInfo.setOrigin(
+                        el.getOrigins().stream().map(e->{
+                            RegionCode regionCode = RegionCode.findByRegion(e);
+                            return String.valueOf(regionCode.getCode());
+                        }).toList()
+                );
                 channelInfo.setDestination(el.getUsername());
                 destination = el.getUsername();
                 break;
@@ -358,13 +364,12 @@ public class TagoService {
      * 서브스크립션을 처리한다.
      * @param subscription
      */
-    public void processSubscription(Subscription subscription, ChannelHandlerContext ctx) {
+    public void processSubscription(Subscription subscription, ChannelHandlerContext ctx) throws RuntimeException{
         log.info("[Subscription] process");
         log.info("subscription : {}", subscription);
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
 
-//        long subSerialNbr = subscription.getDatexSubscribe_Serial_nbr();
         SubscriptionMode subscriptionMode = subscription
                 .getDatexSubscribe_Type()
                 .getSubscription()
@@ -380,24 +385,35 @@ public class TagoService {
         switch (oId) {
             case Common.BUS_LOC_INFO_REQ -> {
                 if (subscriptionMode.hasSingle()) {
-                    channelInfo.setPubSingle201(ctx.executor().schedule(() -> {
-                        log.info("여기에 코드를 입력하세요.");
-                    }, 5, TimeUnit.SECONDS));
+                    try {
+                        log.info("싱글 구독");
+                        pub201.procSinglePublication(ctx);
+                    } catch (Exception e) {
+                        getError(e);
+                    }
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
-                    ScheduledFuture<?> ft = ctx.executor().scheduleWithFixedDelay(() -> {
-                        log.info("기간제 스케줄로 등록 {}초", interval);
+                    channelInfo.setPubPeriod201(ctx.executor().scheduleWithFixedDelay(() -> {
+                        log.info("주기적 구독 스케줄러 {}초", interval);
                         try {
                             pub201.procPeriodicPublication(ctx);
                         } catch (Exception e) {
-                            e.printStackTrace();
-                            log.error("exceptionCaught: {}",ExceptionUtils.getMessage(e));
-                            log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(e));
-                            log.error("exceptionCaught: 해당 스케줄러만 종료 ( 연결은 유지 )");
+                            getError(e);
                             ctx.channel().attr(INFO).get().getPubPeriod201().cancel(true);
                         }
-                    }, 5, interval, TimeUnit.SECONDS);
-                    channelInfo.setPubPeriod201(ft);
+                    }, 5, interval, TimeUnit.SECONDS));
+                } else if (subscriptionMode.hasEvent_driven()) {
+                    channelInfo.setPubEventt201(ctx.executor().scheduleWithFixedDelay(()->{
+                        log.info("이벤트 구독 스케줄러 5초 지정");
+                        try {
+                            pub201.procEventPublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                            ctx.channel().attr(INFO).get().getPubEventt201().cancel(true);
+                        }
+
+                    }, 5, 5, TimeUnit.SECONDS));
+
                 } // 버스위치정보
 //
 //
@@ -432,6 +448,10 @@ public class TagoService {
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
         }
 
+    }
+
+    private static void getError(Exception e) {
+        log.error("exceptionCaught: {}",ExceptionUtils.getStackTrace(e));
     }
 
     /**

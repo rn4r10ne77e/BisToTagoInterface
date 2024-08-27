@@ -1,6 +1,8 @@
 package com.geon.bis.link;
 
+import com.geon.bis.link.config.BusRunEventCode;
 import com.geon.bis.link.config.ChannelAttribute;
+import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
@@ -20,6 +22,7 @@ import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -28,6 +31,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
@@ -39,6 +43,7 @@ public class Publication201BusLocationInfo {
 
     private final BusLocationInfoMapper busLocationInfoMapper;
     private final Util util;
+    private final ProjectInfoProperties projectInfoProperties;
 
     @Value("${server.sender}")
     private String sender;
@@ -47,49 +52,126 @@ public class Publication201BusLocationInfo {
     @Value("${server.sendCnt}")
     private int sendCnt;
 
+
+    /**
+     * 싱글 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
+     * @param ctx - 요청한 핸들러
+     * @throws Exception - 인코딩에 대한 예외
+     */
+    public void procSinglePublication (ChannelHandlerContext ctx) throws Exception {
+        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+        List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
+                        .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
+                        .mode("SINGLE")
+                        .origin(origin)
+                .build());
+
+        for( RegionCode regionCode : RegionCode.values() ) {
+            makePublicationData(
+                    ctx,
+                    regionCode.getRegion(),
+                    busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
+        }
+    }
+
+    /**
+     * 주기 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
+     * @param ctx - 요청한 핸들러
+     * @throws Exception - 인코딩에 대한 예외
+     */
     public void procPeriodicPublication (ChannelHandlerContext ctx) throws Exception {
         // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
+        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+        List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
+                .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(1))
+                .mode("PERIOD")
+                .origin(origin)
+                .build());
+
+        for( RegionCode regionCode : RegionCode.values() ) {
+            makePublicationData(
+                    ctx,
+                    regionCode.getRegion(),
+                    busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
+        }
+    }
+
+    /**
+     * 이벤트 구독 요청에 대한 응답 엔트리 ( 중복데이터 불허 )
+     * @param ctx - 요청한 핸들러
+     * @throws Exception - 인코딩에 대한 예외
+     */
+    public void procEventPublication (ChannelHandlerContext ctx) throws Exception {
         try {
-//            Timestamp lastTime = new Timestamp(util.nowTime().getTime() - (10 * 60 * 1000)); // 10분전 타임
-            String origin = ctx.channel().attr(INFO).get().getOrigin().get(0);
-            log.info("start");
+            List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+            log.info("procEventPublication start");
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                     .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(1))
+                    .mode("EVENT")
                     .origin(origin)
                     .build());
-            log.debug("list size: {}", busList.size());
 
-            if (!busList.isEmpty()) {
-                List<ResultBusLocationInfo> part = new ArrayList<>();
-                for (ResultBusLocationInfo el : busList) {
-
-                    // 메세지를 정의된 개수만큼 쪼개서 보내기
-                    part.add(el);
-                    if(part.size() >= sendCnt) {
-                        // 구분 할 수 있는 플래그값 필요
-    //                    ctx.writeAndFlush(publication(makePublishDataBusEvent(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx));
-                        C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
-                        this.testEncoding(data);
-                        ctx.writeAndFlush(data);
-
-                        part.clear();
-                    }
-                    if(!part.isEmpty()) {
-                        // 구분 할 수 있는 플래그값 필요
-    //                ctx.writeAndFlush(publication(makePublishDataBusEvent(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx));
-                        C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(part), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
-                        this.testEncoding(data);
-                        ctx.writeAndFlush(data);
-
-                    }
-                }
+            for( RegionCode regionCode : RegionCode.values() ) {
+                makePublicationData(
+                        ctx,
+                        regionCode.getRegion(),
+                        busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
             }
         } catch ( Exception e) {
             throw new Exception(e);
         }
     }
 
+    /**
+     * DB로 부터 가져온 "버스위치정보"를 정주기, 이벤트 데이터로 분류하여 최대 5개의 행을 하나의 패킷으로 만들어서 보냄
+     * @param ctx - 요청한 핸들러
+     * @param origin - 지역
+     * @param busList - 조회 데이터 목록
+     * @throws EncodeFailedException - 인코딩 실패시
+     * @throws EncodeNotSupportedException - 인코딩 실패시
+     */
+    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBusLocationInfo> busList) throws EncodeFailedException, EncodeNotSupportedException {
+        if (!busList.isEmpty()) {
+            List<ResultBusLocationInfo> partPerPol = new ArrayList<>();
+            List<ResultBusLocationInfo> partBusEve = new ArrayList<>();
+            for (ResultBusLocationInfo el : busList) {
+
+                if(el.getBusEventCodeNumber() == BusRunEventCode.findByDescription("fixed_Cycle").getCode()) {
+                    partPerPol.add(el);
+                } else {
+                    partBusEve.add(el);
+                }
+
+                if( partBusEve.size() >= sendCnt ){
+                    C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                    this.testEncoding(data);
+                    ctx.writeAndFlush(data);
+                    partBusEve.clear();
+                }
+
+                if(partPerPol.size() >= sendCnt) {
+                    C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                    this.testEncoding(data);
+                    ctx.writeAndFlush(data);
+                    partPerPol.clear();
+                }
+
+                if(!partBusEve.isEmpty()) {
+                    C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                    this.testEncoding(data);
+                    ctx.writeAndFlush(data);
+                }
+
+                if(!partPerPol.isEmpty()) {
+                    C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                    this.testEncoding(data);
+                    ctx.writeAndFlush(data);
+
+                }
+            }
+        }
+    }
 
     private BusLocationInfo CommonDataGen(ResultBusLocationInfo el) {
 
