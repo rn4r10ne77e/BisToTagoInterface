@@ -52,11 +52,10 @@ public class Publication201BusLocationInfo {
     @Value("${server.sendCnt}")
     private int sendCnt;
 
-
     /**
      * 싱글 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
-     * @param ctx - 요청한 핸들러
-     * @throws Exception - 인코딩에 대한 예외
+     * @param ctx 요청한 핸들러
+     * @throws Exception 인코딩에 대한 예외
      */
     public void procSinglePublication (ChannelHandlerContext ctx) throws Exception {
         List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
@@ -67,7 +66,7 @@ public class Publication201BusLocationInfo {
                 .build());
 
         for( RegionCode regionCode : RegionCode.values() ) {
-            makePublicationData(
+            this.makePublicationData(
                     ctx,
                     regionCode.getRegion(),
                     busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
@@ -90,7 +89,7 @@ public class Publication201BusLocationInfo {
                 .build());
 
         for( RegionCode regionCode : RegionCode.values() ) {
-            makePublicationData(
+            this.makePublicationData(
                     ctx,
                     regionCode.getRegion(),
                     busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
@@ -113,7 +112,7 @@ public class Publication201BusLocationInfo {
                     .build());
 
             for( RegionCode regionCode : RegionCode.values() ) {
-                makePublicationData(
+                this.makePublicationData(
                         ctx,
                         regionCode.getRegion(),
                         busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
@@ -124,7 +123,7 @@ public class Publication201BusLocationInfo {
     }
 
     /**
-     * DB로 부터 가져온 "버스위치정보"를 정주기, 이벤트 데이터로 분류하여 최대 5개의 행을 하나의 패킷으로 만들어서 보냄
+     * DB로 부터 가져온 "버스위치정보"를 각 지역별로 분류 된 상태의 목록을 받아서 "정주기", "이벤트" 데이터로 분류하여 최대 5개의 행을 하나의 패킷으로 만들어서 보냄
      * @param ctx - 요청한 핸들러
      * @param origin - 지역
      * @param busList - 조회 데이터 목록
@@ -143,32 +142,31 @@ public class Publication201BusLocationInfo {
                     partBusEve.add(el);
                 }
 
-                if( partBusEve.size() >= sendCnt ){
-                    C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                if( partBusEve.size() >= sendCnt ) {
+                    C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), origin, ctx);
                     this.testEncoding(data);
                     ctx.writeAndFlush(data);
                     partBusEve.clear();
                 }
 
-                if(partPerPol.size() >= sendCnt) {
-                    C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
+                if( partPerPol.size() >= sendCnt ) {
+                    C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), origin, ctx);
                     this.testEncoding(data);
                     ctx.writeAndFlush(data);
                     partPerPol.clear();
                 }
+            }
 
-                if(!partBusEve.isEmpty()) {
-                    C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
-                    this.testEncoding(data);
-                    ctx.writeAndFlush(data);
-                }
+            if( !partBusEve.isEmpty() ) {
+                C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), origin, ctx);
+                this.testEncoding(data);
+                ctx.writeAndFlush(data);
+            }
 
-                if(!partPerPol.isEmpty()) {
-                    C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), util.getSubSerialNbr(), util.getPubSerialNbr(), origin, ctx);
-                    this.testEncoding(data);
-                    ctx.writeAndFlush(data);
-
-                }
+            if( !partPerPol.isEmpty() ) {
+                C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), origin, ctx);
+                this.testEncoding(data);
+                ctx.writeAndFlush(data);
             }
         }
     }
@@ -269,7 +267,6 @@ public class Publication201BusLocationInfo {
     /**
      * 버스위치정보 정주기 메세지를 생성한다.
      * @param el ResultBusLocationInfo
-     * @return EndApplicationMessage
      * @return BusLocationPolling
      */
     private BusLocationPolling pollingDataGen(ResultBusLocationInfo el) {
@@ -427,7 +424,7 @@ public class Publication201BusLocationInfo {
         }
     }
 
-    public C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, long subSerialNbr, long pubSerialNbr, String origin, ChannelHandlerContext ctx ) {
+    public C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
         EndApplicationMessage DatexPublishData = EndAppMsg;
 
 //        if (serverPubTestOn) {
@@ -452,8 +449,8 @@ public class Publication201BusLocationInfo {
         c2c.setOptions(getOptions(origin , ctx));
 
         PublicationData publicationData = new PublicationData();
-        publicationData.setDatexPublish_SubscribeSerial_nbr(subSerialNbr);
-        publicationData.setDatexPublish_Serial_nbr(pubSerialNbr);
+        publicationData.setDatexPublish_SubscribeSerial_nbr(util.getPubSerialNbr());
+        publicationData.setDatexPublish_Serial_nbr(util.getPubSerialNbr());
         publicationData.setDatexPublish_LatePublicationFlag(false);
         publicationData.setDatexPublish_Type(PublicationType.createPublicationTypeWithDatexPublish_Data(DatexPublishData));
 		/*

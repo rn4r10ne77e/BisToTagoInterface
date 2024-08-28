@@ -19,17 +19,14 @@ public class  ChannelAttribute {
     public void release(ChannelHandlerContext ctx){
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
-        if( channelInfo.getPubSingle201() != null ){
-            channelInfo.getPubSingle201().cancel(true);
-            channelInfo.setPubPeriod201(null);
+
+        if( channelInfo.getPub201() != null ){
+            channelInfo.getPub201().cancel(true);
+            channelInfo.setPub201(null);
         }
-        if( channelInfo.getPubPeriod201() != null ){
-            channelInfo.getPubPeriod201().cancel(true);
-            channelInfo.setPubPeriod201(null);
-        }
-        if( channelInfo.getPubEventt201() != null ){
-            channelInfo.getPubEventt201().cancel(true);
-            channelInfo.setPubEventt201(null);
+        if( channelInfo.getPub202() != null ){
+            channelInfo.getPub202().cancel(true);
+            channelInfo.setPub202(null);
         }
     }
 
@@ -59,9 +56,9 @@ public class  ChannelAttribute {
         private int heartbeatDurationMax;
         private boolean subGuarantee;
 
-        private ScheduledFuture<?> pubSingle201;
-        private ScheduledFuture<?> pubPeriod201;
-        private ScheduledFuture<?> pubEventt201;
+        private ScheduledFuture<?> pub201;
+        private ScheduledFuture<?> pub202;
+
         private int responseTimeOut;
         private List<String> origin;
         private String destination;

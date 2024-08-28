@@ -10,6 +10,11 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResultArrivalPredictionTimeInfo {
+
+
+	//origin
+	private String origin;
+
 	/** 메시지 발생시각 */
 	private Timestamp MessageGenerationTime = null;
 	/** 이벤트 분류코드 */
@@ -28,11 +33,11 @@ public class ResultArrivalPredictionTimeInfo {
 	private String LastBITIdentifyNumber = null;
 	/** 노선 내 순번 */
 	private int NodeRouteSequence = -1;
-	/** (최근통과정류장)진입시각 */
+	/** (최근통과정류장) 진입시각 */
 	private Timestamp LastBITZoneEntryTime = null;
-	/** (최근통과정류장)진출시각 */
+	/** (최근통과정류장) 진출시각 */
 	private Timestamp LastBITZoneExitTime = null;
-	/** (최근통과정류장)통과시간 */
+	/** (최근통과정류장) 통과시간 */
 	private int LastBITZoneTripTime = -1;
 	/** 평균 통행속도 */
 	private int RollingAverageSpeedRate = -1;

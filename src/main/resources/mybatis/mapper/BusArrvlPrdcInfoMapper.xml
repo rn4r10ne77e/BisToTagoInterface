@@ -4,6 +4,8 @@
 
 <mapper namespace="com.geon.bis.link.mapper.BusArrvlPrdcInfoMapper">
     <select id="find" parameterType="ParamArrivalPredictionTimeInfo" resultType="ResultArrivalPredictionTimeInfo">
-        select 1
+        select
+
+        from
     </select>
 </mapper>

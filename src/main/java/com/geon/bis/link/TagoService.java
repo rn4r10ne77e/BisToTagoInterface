@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -39,6 +40,8 @@ public class TagoService {
     private final AccountProperties accountProperties;
     private final ChannelGroup channelGroup;
     private final Publication201BusLocationInfo pub201;
+    private final Publication202BusArrvlPrdcInfo pub202;
+    private final LazyInitializationExcludeFilter scheduledBeanLazyInitializationExcludeFilter;
 
     private int dataPacketNumber = 0;
 
@@ -384,53 +387,74 @@ public class TagoService {
 
         switch (oId) {
             case Common.BUS_LOC_INFO_REQ -> {
+                if( channelInfo.getPub201() != null ){
+                    channelInfo.getPub201().cancel(true);
+                    channelInfo.setPub202(null);
+                }
                 if (subscriptionMode.hasSingle()) {
                     try {
-                        log.info("싱글 구독");
+                        log.info("[버스위치정보] 싱글 구독");
                         pub201.procSinglePublication(ctx);
                     } catch (Exception e) {
                         getError(e);
                     }
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
-                    channelInfo.setPubPeriod201(ctx.executor().scheduleWithFixedDelay(() -> {
-                        log.info("주기적 구독 스케줄러 {}초", interval);
+                    channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(() -> {
+                        log.info("[버스위치정보] 주기 구독 ( 스케줄러 {}초 )", interval);
                         try {
                             pub201.procPeriodicPublication(ctx);
                         } catch (Exception e) {
                             getError(e);
-                            ctx.channel().attr(INFO).get().getPubPeriod201().cancel(true);
+                            ctx.channel().attr(INFO).get().getPub201().cancel(true);
                         }
                     }, 5, interval, TimeUnit.SECONDS));
                 } else if (subscriptionMode.hasEvent_driven()) {
-                    channelInfo.setPubEventt201(ctx.executor().scheduleWithFixedDelay(()->{
-                        log.info("이벤트 구독 스케줄러 5초 지정");
+                    channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(()->{
+                        log.info("[버스위치정보] 이벤트 구독 ( 스케줄러 5초 )");
                         try {
                             pub201.procEventPublication(ctx);
                         } catch (Exception e) {
                             getError(e);
-                            ctx.channel().attr(INFO).get().getPubEventt201().cancel(true);
+                            ctx.channel().attr(INFO).get().getPub202().cancel(true);
                         }
-
                     }, 5, 5, TimeUnit.SECONDS));
-
                 } // 버스위치정보
-//
-//
-//            subBusList = new ArrayList<TagoServerBuslocation>(); //버스위치정보 구독리스트 초기화
-//            // 제공하는 origins 목록에 맞추어 데이터 제공
-//            for(String origin : origins) {
-//                TagoServerBuslocation subBus = new TagoServerBuslocation(subscriptionMode, subSerialNbr, origin, destination, this);
-//                subBusList.add(subBus);
-//            }
             }
             case Common.ARR_PRE_TIME_INFO_REQ -> {
-//                subArrList = new ArrayList<TagoServerArrPrediction>(); //버스도착예정정보 구독리스트 초기화
-//
-//                for (String origin : origins) {
-//                    TagoServerArrPrediction subArr = new TagoServerArrPrediction(subscriptionMode, subSerialNbr, origin, destination, this);
-//                    subArrList.add(subArr);
-//                }  //버스도착예정정보
+                if( channelInfo.getPub201() != null ){
+                    channelInfo.getPub202().cancel(true);
+                    channelInfo.setPub202(null);
+                }
+                if (subscriptionMode.hasSingle()) {
+                    try {
+                        log.info("[버스도착예정] 싱글 구독");
+                        pub202.procSinglePublication(ctx);
+                    } catch (Exception e) {
+                        getError(e);
+                    }
+                } else if (subscriptionMode.hasPeriodic()) {
+                    int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
+                    channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(() -> {
+                        log.info("[버스도착예정] 주기 구독 ( 스케줄러 {}초 )", interval);
+                        try {
+                            pub202.procPeriodicPublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                            ctx.channel().attr(INFO).get().getPub202().cancel(true);
+                        }
+                    }, 5, interval, TimeUnit.SECONDS));
+                } else if (subscriptionMode.hasEvent_driven()) {
+                    channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(()->{
+                        log.info("[버스도착예정] 이벤트 구독 ( 스케줄러 5초 )");
+                        try {
+                            pub202.procEventPublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                            ctx.channel().attr(INFO).get().getPub202().cancel(true);
+                        }
+                    }, 5, 5, TimeUnit.SECONDS));
+                } // 버스도착예정
             }
             case Common.BASE_INFO_VERSION_REQ -> {
 //                subBivList = new ArrayList<TagoServerBaseinfoVersion>(); //기반정보버전정보 구독리스트 초기화
