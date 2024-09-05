@@ -1,13 +1,10 @@
 package com.geon.bis.link;
 
-import com.geon.bis.link.config.BusRunEventCode;
 import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BusArrvlPrdcInfoMapper;
-import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamArrivalPredictionTimeInfo;
 import com.geon.bis.link.mapper.model.ResultArrivalPredictionTimeInfo;
-import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -22,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -39,12 +35,13 @@ public class Publication202BusArrvlPrdcInfo {
 
     private final Util util;
     private final BusArrvlPrdcInfoMapper busArrvlPrdcInfoMapper;
-    private final BusLocationInfoMapper busLocationInfoMapper;
 
     @Value("${server.sender}")
     private String sender;
     @Value("${server.sendCnt}")
     private int sendCnt;
+    @Value("${server.timeCnt}")
+    private int timeCnt;
 
     private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException {
 
@@ -70,20 +67,30 @@ public class Publication202BusArrvlPrdcInfo {
         }
     }
 
-    public void procSinglePublication ( ChannelHandlerContext ctx ) {
+    public void procSinglePublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
         List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
-                        .stdTime(ZonedDateTime.now(ZoneId.of("A")))
+                        .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
+                        .mode("SINGLE")
+                        .origin(origin)
                 .build());
-
-
+        for( RegionCode regionCode : RegionCode.values() ) {
+            this.makePublicationData(
+                    ctx,
+                    regionCode.getRegion(),
+                    busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
+        }
     }
 
 
     public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
         // 짧은 주기 신규 데이터만 스캔하여 publication (중복데이터 미전송)
         List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder().build());
+        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
+                    .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
+                    .mode("EVENT")
+                    .origin(origin)
+                .build());
 
         for(RegionCode regionCode : RegionCode.values() ) {
             makePublicationData(
@@ -96,7 +103,12 @@ public class Publication202BusArrvlPrdcInfo {
 
     public void procPeriodicPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
-        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder().build());
+        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
+                .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
+                .mode("PERIOD")
+                .origin(origin)
+                .build());
 
         for( RegionCode regionCode : RegionCode.values() ) {
             makePublicationData(
@@ -106,9 +118,6 @@ public class Publication202BusArrvlPrdcInfo {
             );
         }
     }
-
-
-
 
     private C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
 
@@ -305,8 +314,8 @@ public class Publication202BusArrvlPrdcInfo {
      * 스케줄러에서 ctx.writeAndFlush 이전에 인코딩을 테스트 하기 위함.
      *
      * @param dummy - 인코딩할 데이터
-     * @throws EncodeFailedException - 인코딩 할때 발생하는 예외를 던짐.
-     * @throws EncodeNotSupportedException - 지원하지 않는 인코딩 포맷일 경우.
+     * @throws EncodeFailedException -
+     * @throws EncodeNotSupportedException -
      */
     void testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
 

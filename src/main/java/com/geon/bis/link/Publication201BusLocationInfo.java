@@ -41,16 +41,15 @@ import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPubli
 @RequiredArgsConstructor
 public class Publication201BusLocationInfo {
 
-    private final BusLocationInfoMapper busLocationInfoMapper;
     private final Util util;
-    private final ProjectInfoProperties projectInfoProperties;
+    private final BusLocationInfoMapper busLocationInfoMapper;
 
     @Value("${server.sender}")
     private String sender;
-    @Value("${server.server-pub-test-on}")
-    private boolean serverPubTestOn;
     @Value("${server.sendCnt}")
     private int sendCnt;
+    @Value("${server.timeCnt}")
+    private int timeCnt;
 
     /**
      * 싱글 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
@@ -83,7 +82,7 @@ public class Publication201BusLocationInfo {
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
         List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
-                .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(1))
+                .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                 .mode("PERIOD")
                 .origin(origin)
                 .build());
@@ -106,7 +105,7 @@ public class Publication201BusLocationInfo {
             List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
             log.info("procEventPublication start");
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
-                    .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(1))
+                    .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                     .mode("EVENT")
                     .origin(origin)
                     .build());

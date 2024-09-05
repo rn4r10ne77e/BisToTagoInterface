@@ -6,6 +6,29 @@
     <select id="find" parameterType="ParamArrivalPredictionTimeInfo" resultType="ResultArrivalPredictionTimeInfo">
         select
 
-        from
+            comput_dt as MessageGenerationTime,
+            event_cd as BusEventCodeNumber,
+            arr_stop_id as BITIdentityNumber,
+            route_id as SubRouteIdentityNumber,
+            veh_id as PTVehicleIDNumber,
+            access_point_arrival_time as AccesspoINTArrivalTime,
+            access_point_arrival_count as AccesspoINTArrivalCount,
+            node_route_sequence as LastBITIdentifyNumber,
+
+            last_node_no as NodeRouteSequence,
+            last_zone_entry_time as LastBITZoneEntryTime,
+            last_zone_exit_time as LastBITZoneExitTime,
+            last_zone_trip_time as LastBITZoneTripTime,
+            speed_rate as RollingAverageSpeedRate,
+            is_last as LastPTVehicle,
+
+            end_node_zone_id as EndNodeZoneIDNumber,
+            end_node_zone_sequence as EndNodeRouteSequence,
+            total_seats_number as BusTotalSeatsNumber,
+            passenger_number as BusPassengerNumber,
+            remain_seats_number as BusRemainSeatsNumber
+
+        from get_arrival_prediction_time_info(#{stdTime}, #{origin,jdbcType=ARRAY}, #{mode})
+
     </select>
 </mapper>

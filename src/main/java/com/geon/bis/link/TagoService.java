@@ -41,7 +41,6 @@ public class TagoService {
     private final ChannelGroup channelGroup;
     private final Publication201BusLocationInfo pub201;
     private final Publication202BusArrvlPrdcInfo pub202;
-    private final LazyInitializationExcludeFilter scheduledBeanLazyInitializationExcludeFilter;
 
     private int dataPacketNumber = 0;
 

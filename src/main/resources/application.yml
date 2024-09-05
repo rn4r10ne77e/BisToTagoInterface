@@ -40,6 +40,8 @@ server:
   server-pub-test-on: false
   # 한번에 보내는 메세지 개수
   sendCnt: 5
+  # 한번에 가지고 올 시간 데이터의 기준 기간 현재 시간기준 n분 이전 데이터
+  timeCnt: 1
 
   # inbound 제한시간 ( 불필요시 삭제 )
   read-time: 10
