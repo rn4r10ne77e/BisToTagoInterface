@@ -227,13 +227,7 @@ public class Publication202BusArrvlPrdcInfo {
                     //메시지 발생시각
                     ArrPTInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(el.getMessageGenerationTime())));
                     //이벤트 분류코드
-                    if (el.getBusEventCodeNumber() != -1) {
-                        ArrPTInfo.setTpfc_BusEventCodeNumber(
-                                ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.valueOf(Long.valueOf(el.getBusEventCodeNumber())));
-                    } else {
-                        ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.fixed_Cycle);
-                    }
-
+                    ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.enter_BusStop);
                     //정류장 ID
                     ArrPTInfo.setTpif_BITIdentifyNumber(new UTF8String16(el.getBITIdentityNumber()));
                     //노선 ID

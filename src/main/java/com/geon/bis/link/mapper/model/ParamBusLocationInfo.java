@@ -5,7 +5,6 @@ import lombok.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-
 @Getter
 @Setter
 @Builder

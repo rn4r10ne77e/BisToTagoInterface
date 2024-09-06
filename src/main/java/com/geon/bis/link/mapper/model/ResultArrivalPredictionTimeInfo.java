@@ -11,8 +11,6 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class ResultArrivalPredictionTimeInfo {
 
-	//origin
-	private String origin;
 	/** 메시지 발생시각 */
 	private Timestamp MessageGenerationTime = null;
 	/** 이벤트 분류코드 */

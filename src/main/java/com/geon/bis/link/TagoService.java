@@ -41,6 +41,7 @@ public class TagoService {
     private final ChannelGroup channelGroup;
     private final Publication201BusLocationInfo pub201;
     private final Publication202BusArrvlPrdcInfo pub202;
+    private final Publication207BaseInfoVersion pub207;
 
     private int dataPacketNumber = 0;
 
@@ -456,6 +457,26 @@ public class TagoService {
                 } // 버스도착예정
             }
             case Common.BASE_INFO_VERSION_REQ -> {
+                if( channelInfo.getPub207() != null ){
+                    channelInfo.getPub207().cancel(true);
+                    channelInfo.setPub207(null);
+                }
+                if( subscriptionMode.hasSingle() ) {
+                    try {
+                        log.info("[기반정보버전] 싱글 구독");
+                        pub207.procSinglePublication(ctx);
+                    } catch (Exception e) {
+                        getError(e);
+                    }
+                } else if ( subscriptionMode.hasPeriodic() ) {
+
+                } else if ( subscriptionMode.hasEvent_driven() ){
+
+                } // 버스 기반 버전 정보
+
+
+
+
 //                subBivList = new ArrayList<TagoServerBaseinfoVersion>(); //기반정보버전정보 구독리스트 초기화
 //
 //                for (String origin : origins) {
@@ -464,6 +485,10 @@ public class TagoService {
 //                }  //기반정보버전정보
             }
             case Common.BASE_INFO_REQ -> {
+                if( channelInfo.getPub201() != null ){
+                    channelInfo.getPub201().cancel(true);
+                    channelInfo.setPub202(null);
+                }
 //                for (String origin : origins) {
 //                    TagoServerBaseinfo subBase = new TagoServerBaseinfo(subscriptionMode, subSerialNbr, origin, destination, this);
 //                }  //기반정보

@@ -84,7 +84,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
             case PDUs.accept_chosen:
 
-                log.info(" accept ------------- : {}", c2c.getPdu().getAccept().getDatexAccept_Type());
+//                log.info(" accept ------------- : {}", c2c.getPdu().getAccept().getDatexAccept_Type());
                 break;
             case PDUs.reject_chosen:
                 log.debug(c2c.toString());
