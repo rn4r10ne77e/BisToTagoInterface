@@ -3,7 +3,10 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BaseInfoVersionMapper">
-    <select id="find" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
+    <select id="findAllRecent" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
+        select 1;
+    </select>
+    <select id="findChanged" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
         select 1;
     </select>
 </mapper>

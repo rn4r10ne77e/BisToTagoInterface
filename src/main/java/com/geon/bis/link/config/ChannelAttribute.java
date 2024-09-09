@@ -32,6 +32,11 @@ public class  ChannelAttribute {
             channelInfo.getPub207().cancel(true);
             channelInfo.setPub207(null);
         }
+
+        if( channelInfo.getPub208() != null ){
+            channelInfo.getPub208().cancel(true);
+            channelInfo.setPub208(null);
+        }
     }
 
     public void init(ChannelHandlerContext ctx){
@@ -63,6 +68,7 @@ public class  ChannelAttribute {
         private ScheduledFuture<?> pub201;
         private ScheduledFuture<?> pub202;
         private ScheduledFuture<?> pub207;
+        private ScheduledFuture<?> pub208;
 
         private int responseTimeOut;
         private List<String> origin;

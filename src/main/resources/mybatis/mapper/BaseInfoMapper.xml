@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.geon.bis.link.mapper.BaseInfoMapper">
+    <select id="find" parameterType="ParamBaseInfo" resultType="ResultBaseInfo">
+        select 1;
+    </select>
+    <select id="getStation" parameterType="ParamBaseInfo" resultType="StationModel">
+        select 1;
+    </select>
+    <select id="getRoute" parameterType="ParamBaseInfo" resultType="RouteModel">
+        select 1;
+    </select>
+    <select id="getRouteStation" parameterType="ParamBaseInfo" resultType="RouteStationModel">
+        select 1;
+    </select>
+    <select id="getVehicle" parameterType="ParamBaseInfo" resultType="VehicleModel">
+        select 1;
+    </select>
+    <select id="getNode" parameterType="ParamBaseInfo" resultType="NodeModel">
+        select 1;
+    </select>
+    <select id="getLink" parameterType="ParamBaseInfo" resultType="LinkModel">
+        select 1;
+    </select>
+    <select id="getLinkCoords" parameterType="ParamBaseInfo" resultType="LinkCoordsModel">
+        select 1;
+    </select>
+    <select id="getRoutePlan" parameterType="ParamBaseInfo" resultType="RoutePlanModel">
+        select 1;
+    </select>
+    <select id="getRouteLink" parameterType="ParamBaseInfo" resultType="RouteLinkModel">
+        select 1;
+    </select>
+    <select id="getRouteAllocate" parameterType="ParamBaseInfo" resultType="RouteAllocateModel">
+        select 1;
+    </select>
+    <select id="getCompany" parameterType="ParamBaseInfo" resultType="CompanyModel">
+        select 1;
+    </select>
+    <select id="getAdmin" parameterType="ParamBaseInfo" resultType="AdminModel">
+        select 1;
+    </select>
+</mapper>

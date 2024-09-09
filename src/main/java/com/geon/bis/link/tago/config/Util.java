@@ -214,7 +214,7 @@ public class Util {
 		try {
 			parsedDate = dateFormat.parse(dateString);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
         Timestamp timestamp = new Timestamp(parsedDate.getTime());
 

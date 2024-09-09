@@ -2,6 +2,7 @@ package com.geon.bis.link;
 
 import com.geon.bis.link.config.Account;
 import com.geon.bis.link.config.AccountProperties;
+import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
@@ -42,6 +43,8 @@ public class TagoService {
     private final Publication201BusLocationInfo pub201;
     private final Publication202BusArrvlPrdcInfo pub202;
     private final Publication207BaseInfoVersion pub207;
+    private final Publication208BaseInfo pub208;
+    private final ChannelAttribute channelAttribute;
 
     private int dataPacketNumber = 0;
 
@@ -264,7 +267,7 @@ public class TagoService {
 
         // responseSubscription cancel process
         if (c2CAuthMsg.getPdu().getSubscription().getDatexSubscribe_Type().hasDatexSubscribe_CancelReason_cd()) {
-            return  responseSubscriptionCancel(c2CAuthMsg);
+            return  responseSubscriptionCancel(c2CAuthMsg, ctx);
         }
 
         // subscription_chosen
@@ -363,13 +366,12 @@ public class TagoService {
 
         return c2c;
     }
+
     /**
      * 서브스크립션을 처리한다.
-     * @param subscription
+     * @param subscription 구독 모드 : SINGLE, PERIOD, EVENT
      */
     public void processSubscription(Subscription subscription, ChannelHandlerContext ctx) throws RuntimeException{
-        log.info("[Subscription] process");
-        log.info("subscription : {}", subscription);
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
 
@@ -389,7 +391,7 @@ public class TagoService {
             case Common.BUS_LOC_INFO_REQ -> {
                 if( channelInfo.getPub201() != null ){
                     channelInfo.getPub201().cancel(true);
-                    channelInfo.setPub202(null);
+                    channelInfo.setPub201(null);
                 }
                 if (subscriptionMode.hasSingle()) {
                     try {
@@ -422,7 +424,7 @@ public class TagoService {
                 } // 버스위치정보
             }
             case Common.ARR_PRE_TIME_INFO_REQ -> {
-                if( channelInfo.getPub201() != null ){
+                if( channelInfo.getPub202() != null ){
                     channelInfo.getPub202().cancel(true);
                     channelInfo.setPub202(null);
                 }
@@ -469,29 +471,45 @@ public class TagoService {
                         getError(e);
                     }
                 } else if ( subscriptionMode.hasPeriodic() ) {
-
+                    log.info("[기반정보버전] 기간 구독 : 처리 로직 없음 확인 필요");
                 } else if ( subscriptionMode.hasEvent_driven() ){
-
+                    try {
+                        log.info("[기반정보버전] 이벤트 구독");
+                        pub207.procEventPublication(ctx);
+                    } catch (Exception e) {
+                        getError(e);
+                    }
                 } // 버스 기반 버전 정보
-
-
-
-
-//                subBivList = new ArrayList<TagoServerBaseinfoVersion>(); //기반정보버전정보 구독리스트 초기화
-//
-//                for (String origin : origins) {
-//                    TagoServerBaseinfoVersion subBiv = new TagoServerBaseinfoVersion(subscriptionMode, subSerialNbr, origin, destination, this);
-//                    subBivList.add(subBiv);
-//                }  //기반정보버전정보
             }
             case Common.BASE_INFO_REQ -> {
-                if( channelInfo.getPub201() != null ){
-                    channelInfo.getPub201().cancel(true);
-                    channelInfo.setPub202(null);
+                if( channelInfo.getPub208() != null ){
+                    channelInfo.getPub208().cancel(true);
+                    channelInfo.setPub208(null);
                 }
-//                for (String origin : origins) {
-//                    TagoServerBaseinfo subBase = new TagoServerBaseinfo(subscriptionMode, subSerialNbr, origin, destination, this);
-//                }  //기반정보
+                if( subscriptionMode.hasSingle() ){
+                    try {
+                        log.info("[기반정보] 싱글 구독");
+                        pub208.procSinglePublication(ctx);
+                    } catch (Exception e) {
+                        getError(e);
+                    }
+                }  else if ( subscriptionMode.hasPeriodic() ) {
+                    log.info("[기반정보] 기간 구독 : 처리 로직 없음 확인 필요");
+                } else if ( subscriptionMode.hasEvent_driven() ){
+                    try {
+                        channelInfo.setPub208(ctx.executor().scheduleWithFixedDelay(()->{
+                            log.info("[기반정보] 이벤트 구독 ( 스케줄러 5초 )");
+                            try {
+                                pub208.procEventPublication(ctx);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub208().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                    } catch (Exception e) {
+                        getError(e);
+                    }
+                }
             }
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
         }
@@ -507,13 +525,10 @@ public class TagoService {
      * @param c2CAuthMsg
      * @return
      */
-    private C2CAuthenticatedMessage responseSubscriptionCancel(C2CAuthenticatedMessage c2CAuthMsg) {
+    private C2CAuthenticatedMessage responseSubscriptionCancel(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx ) {
         log.info("[Subscription] Cancel");
-
-        // 구독 프로세스 종료
-//        for(TagoServerBuslocation subBus:subBusList) {
-//            subBus.close(); // 버스 스케쥴 종료
-//        }
+        // 모든 구독 프로세스 종료
+        channelAttribute.release(ctx);
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
@@ -628,10 +643,11 @@ public class TagoService {
             }
         }
     }
+
     /**
      * HeaderOptions을 만든다.
-     *
-     * @return
+     * @param origin 지역 코드
+     * @return 옵션을 만들어서 반환
      */
     public HeaderOptions getOptions(String origin) {
         HeaderOptions options = new HeaderOptions();
@@ -646,9 +662,5 @@ public class TagoService {
 
         return options;
     }
-
-
-
-
 
 }

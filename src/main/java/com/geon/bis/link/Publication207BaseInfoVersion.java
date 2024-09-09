@@ -44,10 +44,11 @@ public class Publication207BaseInfoVersion {
 	@Value("${server.timeCnt}")
 	private int timeCnt;
 
-	private void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
+	public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
 		// 버전정보 확인후 전달 이벤트 방식
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findChanged(ParamBaseInfoVersion.builder()
+						.origin(origin)
 						.mode("EVENT")
 				.build());
 
@@ -92,8 +93,8 @@ public class Publication207BaseInfoVersion {
 	
 	public void procPeriodicPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
-						.mode("PERIOD")
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findAllRecent(ParamBaseInfoVersion.builder()
+						.mode("EVENT")
 						.origin(origin)
 				.build());
 
@@ -110,7 +111,7 @@ public class Publication207BaseInfoVersion {
 	
 	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findAllRecent(ParamBaseInfoVersion.builder()
 						.mode("SINGLE")
 						.origin(origin)
 				.build());
@@ -212,50 +213,50 @@ public class Publication207BaseInfoVersion {
 		Message_MESSAGE_BODY_3 message_MESSAGE_BODY_3 = new Message_MESSAGE_BODY_3();
 
 		if (!BaseinfoVersionList.isEmpty()) {
-			for (ResultBaseInfoVersion Vo : BaseinfoVersionList) {
-				BusBaseInformationVersion BaseinfoVersion = new BusBaseInformationVersion();
-				BaseinfoVersion.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(Vo.getMessageGenerationTime())));
-				if(Vo.getNodeVersion() != null) {
-					BaseinfoVersion.setBase_Node_version(new UTF8String16(Vo.getNodeVersion()));	
+			for (ResultBaseInfoVersion el : BaseinfoVersionList) {
+				BusBaseInformationVersion baseInfoVersion = new BusBaseInformationVersion();
+				baseInfoVersion.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(el.getMessageGenerationTime())));
+				if(el.getNodeVersion() != null) {
+					baseInfoVersion.setBase_Node_version(new UTF8String16(el.getNodeVersion()));
 				}
-				if(Vo.getNodeVersion() != null) {
-					BaseinfoVersion.setBase_Link_version(new UTF8String16(Vo.getLinkVersion()));
+				if(el.getNodeVersion() != null) {
+					baseInfoVersion.setBase_Link_version(new UTF8String16(el.getLinkVersion()));
 				}
-				if(Vo.getLinkVersion() != null) {
-					BaseinfoVersion.setBase_LinkCoords_version(new UTF8String16(Vo.getLinkCoordsVersion()));
+				if(el.getLinkVersion() != null) {
+					baseInfoVersion.setBase_LinkCoords_version(new UTF8String16(el.getLinkCoordsVersion()));
 				}
-				if(Vo.getStationVersion() != null) {
-					BaseinfoVersion.setBase_Station_version(new UTF8String16(Vo.getStationVersion()));
+				if(el.getStationVersion() != null) {
+					baseInfoVersion.setBase_Station_version(new UTF8String16(el.getStationVersion()));
 				}
-				if(Vo.getRouteVersion() != null) {
-					BaseinfoVersion.setBase_Route_version(new UTF8String16(Vo.getRouteVersion()));
+				if(el.getRouteVersion() != null) {
+					baseInfoVersion.setBase_Route_version(new UTF8String16(el.getRouteVersion()));
 				}
-				if(Vo.getRoutePlanVersion() != null) {
-					BaseinfoVersion.setBase_RoutePlan_version(new UTF8String16(Vo.getRoutePlanVersion()));
+				if(el.getRoutePlanVersion() != null) {
+					baseInfoVersion.setBase_RoutePlan_version(new UTF8String16(el.getRoutePlanVersion()));
 				}
-				if(Vo.getRouteStationVersion() != null) {
-					BaseinfoVersion.setBase_RouteStation_version(new UTF8String16(Vo.getRouteStationVersion()));
+				if(el.getRouteStationVersion() != null) {
+					baseInfoVersion.setBase_RouteStation_version(new UTF8String16(el.getRouteStationVersion()));
 				}
-				if(Vo.getVehicleVersion() != null) {
-					BaseinfoVersion.setBase_Vehicle_version(new UTF8String16(Vo.getVehicleVersion()));
+				if(el.getVehicleVersion() != null) {
+					baseInfoVersion.setBase_Vehicle_version(new UTF8String16(el.getVehicleVersion()));
 				}
-				if(Vo.getRouteLinkVersion() != null) {
-					BaseinfoVersion.setBase_RouteLink_version(new UTF8String16(Vo.getRouteLinkVersion()));
+				if(el.getRouteLinkVersion() != null) {
+					baseInfoVersion.setBase_RouteLink_version(new UTF8String16(el.getRouteLinkVersion()));
 				}
-				if(Vo.getRouteAllocateVersion() != null) {
-					BaseinfoVersion.setBase_RouteAllocate_version(new UTF8String16(Vo.getRouteAllocateVersion()));
+				if(el.getRouteAllocateVersion() != null) {
+					baseInfoVersion.setBase_RouteAllocate_version(new UTF8String16(el.getRouteAllocateVersion()));
 				}
-				if(Vo.getCompanyVersion() != null) {
-					BaseinfoVersion.setBase_Company_version(new UTF8String16(Vo.getCompanyVersion()));
+				if(el.getCompanyVersion() != null) {
+					baseInfoVersion.setBase_Company_version(new UTF8String16(el.getCompanyVersion()));
 				}
-				if(Vo.getAdminVersion() != null) {
-					BaseinfoVersion.setBase_Admin_version(new UTF8String16(Vo.getAdminVersion()));
+				if(el.getAdminVersion() != null) {
+					baseInfoVersion.setBase_Admin_version(new UTF8String16(el.getAdminVersion()));
 				}
-				if(Vo.getRemark() != null) {
-					BaseinfoVersion.setBase_Remark(new UTF8String16(Vo.getRemark()));
+				if(el.getRemark() != null) {
+					baseInfoVersion.setBase_Remark(new UTF8String16(el.getRemark()));
 				}			
 				
-				message_MESSAGE_BODY_3.add(BaseinfoVersion);
+				message_MESSAGE_BODY_3.add(baseInfoVersion);
 			}
 		}
 		
