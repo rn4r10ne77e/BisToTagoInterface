@@ -10,6 +10,8 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResultBaseInfoVersion {
+    /** 지역 코드 */
+    private String origin;
     /** 메세지 발생시각 */
     private Timestamp MessageGenerationTime = null;
     /** 노드정보 */

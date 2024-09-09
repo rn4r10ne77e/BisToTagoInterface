@@ -123,11 +123,11 @@ public class Publication201BusLocationInfo {
 
     /**
      * DB로 부터 가져온 "버스위치정보"를 각 지역별로 분류 된 상태의 목록을 받아서 "정주기", "이벤트" 데이터로 분류하여 최대 5개의 행을 하나의 패킷으로 만들어서 보냄
-     * @param ctx - 요청한 핸들러
-     * @param origin - 지역
-     * @param busList - 조회 데이터 목록
-     * @throws EncodeFailedException - 인코딩 실패시
-     * @throws EncodeNotSupportedException - 인코딩 실패시
+     * @param ctx 요청한 핸들러
+     * @param origin 지역
+     * @param busList 조회 데이터 목록
+     * @throws EncodeFailedException 인코딩 실패시
+     * @throws EncodeNotSupportedException 인코딩 실패시
      */
     private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBusLocationInfo> busList) throws EncodeFailedException, EncodeNotSupportedException {
         if (!busList.isEmpty()) {
@@ -460,7 +460,7 @@ public class Publication201BusLocationInfo {
         datexPublish_Data.add(publicationData);
 
         Publication publication = new Publication();
-        publication.setDatexPublish_Guaranteed_bool(true);
+//        publication.setDatexPublish_Guaranteed_bool(true);
         publication.setDatexPublish_Guaranteed_bool(ctx.channel().attr(INFO).get().isSubGuarantee());
 //        publication.setDatexPublish_Guaranteed_bool(serverHandler.isSubGuarantee());
         publication.setDatexPublish_Format(createPublish_FormatWithDatexPublish_Data(datexPublish_Data));
