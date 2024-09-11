@@ -11,7 +11,7 @@ public class CompanyModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 운수회사 ID */
-	private String CompanyId = null;
+	private String companyId = null;
 	/** 전화번호 */
 	private String phoneNo = null;
 	/** FAX번호 */

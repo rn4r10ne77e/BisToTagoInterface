@@ -11,25 +11,25 @@ public class VehicleModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 차량 ID */
-	private String Vehid = null;
+	private String vehid = null;
 	/** 차량번호 */
-	private String PlateNo = null;
+	private String plateNo = null;
 	/** 차종(0,1,2,3) */
-	private int VehTp = -1;
+	private int vehTp = -1;
 	/** 특수버스 구분(0,1,2,3) */
-	private int BusTp = -1;
+	private int busTp = -1;
 	/** 승차정원 */
-	private int VehCapa = -1;
+	private int vehCapa = -1;
 	/** 관할관청 ID */
-	private String AdminId = null;
+	private String adminId = null;
 	/** 운수회사 ID */
-	private String CompanyId = null;
+	private String companyId = null;
 	/** 등록일자 */
-	private String RegDate = null;
+	private String regDate = null;
 	/** 비고 */
-	private String Remark = null;
+	private String remark = null;
 	/** 버전 */
-	private String Ver = null;
+	private String ver = null;
 	/** 전체 사이즈 */
-	private int Total = -1;
+	private int total = -1;
 }

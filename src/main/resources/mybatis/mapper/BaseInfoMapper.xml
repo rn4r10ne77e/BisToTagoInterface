@@ -10,7 +10,26 @@
         select 1;
     </select>
     <select id="getRoute" parameterType="ParamBaseInfo" resultType="RouteModel">
-        select 1;
+        select
+            route_id as routeId,
+            route_nm as routeNm,
+            route_ty as routeTy,
+            st_sta_id as stStaId,
+            ed_sta_id as edStaId,
+            md_sta_id as mdStaId,
+            perm_vol as permVol,
+            begin_date as beginDate,
+            close_date as closeDate,
+            '' as routeEx,
+            company_id as companyId,
+            admin_id as adminId,
+            distance as distance,
+            req_time as reqTime,
+            charge as charge,
+            regist_dt as regDate,
+            '' as remark,
+            ver as ver
+        from public.get_route(#{origin}, #{mode})
     </select>
     <select id="getRouteStation" parameterType="ParamBaseInfo" resultType="RouteStationModel">
         select 1;
