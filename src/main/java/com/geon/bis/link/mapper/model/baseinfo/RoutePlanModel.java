@@ -11,29 +11,29 @@ public class RoutePlanModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 노선 ID */
-	private String RouteId = null;
+	private String routeId = null;
 	/** 운행 요일(0,1,2,3,4) */
-	private int OperationWeek = -1;
+	private int operationWeek = -1;
 	/** 일일 운행 횟수 */
-	private int OperationCnt = -1;
+	private int operationCnt = -1;
 	/** 기점 첫차 출발시각 */
-	private String StartFirstTm = null;
+	private String startFirstTm = null;
 	/** 기점 막차 출발시각 */
-	private String StartLastTm = null;
+	private String startLastTm = null;
 	/** 종점 첫차 출발시각 */
-	private String EndFirstTm = null;
+	private String endFirstTm = null;
 	/** 종점 막차 출발시각 */
-	private String EndLastTm = null;
+	private String endLastTm = null;
 	/** 최소 배차간격 */
-	private int MinHead = -1;
+	private int minHead = -1;
 	/** 최대 배차간격 */
-	private int MaxHead = -1;
+	private int maxHead = -1;
 	/** 등록일자 */
-	private String RegDate = null;
+	private String regDate = null;
 	/** 비고 */
-	private String Remark = null;
+	private String remark = null;
 	/** 버전 */
-	private String Ver = null;
+	private String ver = null;
 	/** 전체 사이즈 */
-	private int Total = -1;
+	private int total = -1;
 }

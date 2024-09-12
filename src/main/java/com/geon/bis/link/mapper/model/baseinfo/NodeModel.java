@@ -11,23 +11,23 @@ public class NodeModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 노드 ID */
-	private String NodeId = null;
+	private String nodeId = null;
 	/** 노드 유형 */
-	private String Type = null;
+	private String type = null;
 	/** 노드 한글명칭 */
-	private String Name = null;
+	private String name = null;
 	/** 위치 좌표 위도 */
-	private float CoordinateLati = -1;
+	private float coordinateLati = -1;
 	/** 위치 좌표 경도 */
-	private float CoordinateLong = -1;
+	private float coordinateLong = -1;
 	/** 회전 제한 유무 */
-	private String TurnLimit = null;
+	private String turnLimit = null;
 	/** 등록일자 */
-	private String RegDate = null;
+	private String regDate = null;
 	/** 비고 */
-	private String Remark = null;
+	private String remark = null;
 	/** 버전 */
-	private String Ver = null;
+	private String ver = null;
 	/** 전체 사이즈 */
-	private int Total = -1;
+	private int total = -1;
 }

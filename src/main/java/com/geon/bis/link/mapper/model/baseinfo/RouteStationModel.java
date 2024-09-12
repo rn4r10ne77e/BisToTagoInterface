@@ -15,11 +15,11 @@ public class RouteStationModel {
 	/** 진행순서 */
 	private int sequence;
 	/** 정류장 ID */
-	private String StationId = null;
+	private String stationId = null;
 	/** 상하행 구분(0,1,2) */
 	private int upDown = -1;
 	/** 기점 기준 누적거리 */
-	private int SumDist = -1;
+	private int sumDist = -1;
 	/** 종점 기준 잔여거리 */
 	private int remainDist = -1;
 	/** 이전 정류장 거리 */

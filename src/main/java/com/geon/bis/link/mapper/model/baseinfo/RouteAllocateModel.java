@@ -11,23 +11,23 @@ public class RouteAllocateModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 노선 ID */
-	private String RouteId = null;
+	private String routeId = null;
 	/** 운행 요일(0,1,2,3,4) */
-	private int OperationWeek = -1;
+	private int operationWeek = -1;
 	/** 배차 순번 */
-	private int AllocSeq = -1;
+	private int allocSeq = -1;
 	/** 배차 시간 */
-	private String AllocTime = null;
+	private String allocTime = null;
 	/** 기점 정류장 ID */
-	private String StartStation = null;
+	private String startStation = null;
 	/** 종점 정류장 ID */
-	private String EndStation = null;
+	private String endStation = null;
 	/** 등록일자 */
-	private String RegDate = null;
+	private String regDate = null;
 	/** 비고 */
-	private String Remark = null;
+	private String remark = null;
 	/** 버전 */
-	private String Ver = null;
+	private String ver = null;
 	/** 전체 사이즈 */
-	private int Total = -1;
+	private int total = -1;
 }

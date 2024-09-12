@@ -11,21 +11,21 @@ public class RouteLinkModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 노선 ID */
-	private String RouteId = null;
+	private String routeId = null;
 	/** 순번 */
-	private int Sequence = -1;
+	private int sequence = -1;
 	/** 링크 ID */
-	private String LinkId = null;
+	private String linkId = null;
 	/** 정류장 포함 여부(0,1) */
-	private int StationYn = -1;
+	private int stationYn = -1;
 	/** 상하행 구분(0,1,2) */
-	private int UpDown = -1;
+	private int upDown = -1;
 	/** 등록일자 */
-	private String RegDate = null;
+	private String regDate = null;
 	/** 비고 */
-	private String Remark = null;
+	private String remark = null;
 	/** 버전 */
-	private String Ver = null;
+	private String ver = null;
 	/** 전체 사이즈 */
-	private int Total = -1;
+	private int total = -1;
 }
