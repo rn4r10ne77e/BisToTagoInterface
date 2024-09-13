@@ -13,7 +13,7 @@ public class AdminModel {
 	/** 관할관청 ID */
 	private String adminId = null;
 	/** 행정자치부 ID */
-	private String MoiId = null;
+	private String moiId = null;
 	/** 광역시도명 */
 	private String adminNm1 = null;
 	/** 시군구명 */
