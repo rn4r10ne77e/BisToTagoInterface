@@ -61,7 +61,9 @@ public class Publication201BusLocationInfo {
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                         .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
                         .mode("SINGLE")
-                        .origin(origin)
+                .origin(origin.stream()
+                        .map(Integer::parseInt) // 문자열을 정수로 변환
+                        .collect(Collectors.toList()))
                 .build());
 
         for( RegionCode regionCode : RegionCode.values() ) {
@@ -84,7 +86,9 @@ public class Publication201BusLocationInfo {
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                 .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                 .mode("PERIOD")
-                .origin(origin)
+                .origin(origin.stream()
+                        .map(Integer::parseInt) // 문자열을 정수로 변환
+                        .collect(Collectors.toList()))
                 .build());
 
         for( RegionCode regionCode : RegionCode.values() ) {
@@ -107,7 +111,9 @@ public class Publication201BusLocationInfo {
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                     .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                     .mode("EVENT")
-                    .origin(origin)
+                    .origin(origin.stream()
+                            .map(Integer::parseInt) // 문자열을 정수로 변환
+                            .collect(Collectors.toList()))
                     .build());
 
             for( RegionCode regionCode : RegionCode.values() ) {

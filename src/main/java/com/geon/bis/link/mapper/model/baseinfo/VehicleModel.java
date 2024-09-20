@@ -11,7 +11,7 @@ public class VehicleModel {
 	/** 지역 코드 */
 	private String origin = null;
 	/** 차량 ID */
-	private String vehid = null;
+	private String vehId = null;
 	/** 차량번호 */
 	private String plateNo = null;
 	/** 차종(0,1,2,3) */

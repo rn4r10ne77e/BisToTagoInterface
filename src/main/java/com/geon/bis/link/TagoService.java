@@ -473,12 +473,15 @@ public class TagoService {
                 } else if ( subscriptionMode.hasPeriodic() ) {
                     log.info("[기반정보버전] 기간 구독 : 처리 로직 없음 확인 필요");
                 } else if ( subscriptionMode.hasEvent_driven() ){
-                    try {
-                        log.info("[기반정보버전] 이벤트 구독");
-                        pub207.procEventPublication(ctx);
-                    } catch (Exception e) {
-                        getError(e);
-                    }
+                    channelInfo.setPub207(ctx.executor().scheduleWithFixedDelay(()->{
+                        log.info("[기반정보버전] 이벤트 구독 5 초");
+                        try {
+                            pub207.procEventPublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                            ctx.channel().attr(INFO).get().getPub207().cancel(true);
+                        }
+                    }, 5, 5, TimeUnit.SECONDS));
                 } // 버스 기반 버전 정보
             }
             case Common.BASE_INFO_REQ -> {
@@ -656,7 +659,7 @@ public class TagoService {
             options.setDatex_Destination_text(new UTF8String16(destination));
         }
         if (origin != null) {
-            options.setDatex_Origin_text(new UTF8String16(origin));
+            options.setDatex_Origin_text(new UTF8String16(RegionCode.findByCode(Integer.parseInt(origin)).getRegion()));
         }
         options.setDatex_DataPacket_time(util.getCurrentAsnTime());
 

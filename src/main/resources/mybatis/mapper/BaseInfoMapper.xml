@@ -7,7 +7,22 @@
         select 1;
     </select>
     <select id="getStation" parameterType="ParamBaseInfo" resultType="StationModel">
-        select 1;
+        select
+            origin as origin,
+            station_id as stationId,
+            station_knm as stationKnm,
+            station_tp as stationTp,
+            center_yn as centerYn,
+            admin_id as adminId,
+            station_enm as stationEnm,
+            coordinate_lati as coordinateLati,
+            coordinate_long as coordinateLong,
+            install_link_id as installLinkId,
+            reg_date as regDate,
+            remark as remark,
+            ver as ver,
+            total as total
+        from get_station(#{origin}, #{mode}, #{ver})
     </select>
     <select id="getRoute" parameterType="ParamBaseInfo" resultType="RouteModel">
         select
@@ -32,10 +47,39 @@
         from public.get_route(#{origin}, #{mode})
     </select>
     <select id="getRouteStation" parameterType="ParamBaseInfo" resultType="RouteStationModel">
-        select 1;
+        select
+            origin as origin,
+            route_id as routeId,
+            sequence as sequence,
+            station_id as stationId,
+            up_down as upDown,
+            sum_dist as sumDist,
+            remain_dist as remainDist,
+            stat_dist as statDist,
+            next_dist as nextDist,
+            stat_tp as statTp,
+            reg_date as regDate,
+            remark as remark,
+            ver as ver,
+            total as sotal
+        from public.get_route_station(#{origin}, #{mode}, #{ver})
+
     </select>
     <select id="getVehicle" parameterType="ParamBaseInfo" resultType="VehicleModel">
-        select 1;
+        select
+            origin as origin,
+            veh_id as vehId,
+            plate_no as plateNo,
+            veh_tp as vehTp,
+            bus_tp as busTp,
+            veh_capa as vehCapa,
+            admin_id as adminId,
+            company_id as companyId,
+            reg_date as regDate,
+            remark as remark,
+            ver as ver,
+            total as total
+        from public.get_vehicle(#{origin}, #{mode}, #{ver})
     </select>
     <select id="getNode" parameterType="ParamBaseInfo" resultType="NodeModel">
         select 1;
@@ -56,9 +100,30 @@
         select 1;
     </select>
     <select id="getCompany" parameterType="ParamBaseInfo" resultType="CompanyModel">
-        select 1;
+        select
+            company_id as companyId,
+            company_nm as companyNm,
+            phone_no as phoneNo,
+            fax_no as faxNo,
+            address as address,
+            ceo_nm as ceoNm,
+            bus_cnt as busCnt,
+            reg_cnt as regCnt,
+            spare_cnt as spareCnt,
+            admin_id as adminId,
+            regist_dt as regDate,
+            ver as ver
+        from get_company(#{origin}, #{mode}, #{ver})
     </select>
     <select id="getAdmin" parameterType="ParamBaseInfo" resultType="AdminModel">
-        select 1;
+        select
+            admin_id as adminId,
+            moi_id as moiId,
+            admin_nm1 as adminNm1,
+            admin_nm2 as adminNm2,
+            reg_date as regDate,
+            remark as remark,
+            ver as ver
+        from get_admin(#{origin}, #{mode}, #{ver})
     </select>
 </mapper>

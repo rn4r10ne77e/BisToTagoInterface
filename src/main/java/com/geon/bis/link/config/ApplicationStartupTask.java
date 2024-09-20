@@ -1,5 +1,6 @@
 package com.geon.bis.link.config;
 
+import com.geon.bis.link.Publication207BaseInfoVersion;
 import com.geon.bis.link.netty.config.NettyServerSocket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

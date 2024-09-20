@@ -13,31 +13,31 @@ public class ResultBaseInfoVersion {
     /** 지역 코드 */
     private String origin;
     /** 메세지 발생시각 */
-    private Timestamp MessageGenerationTime = null;
+    private Timestamp messageGenerationTime;
     /** 노드정보 */
-    private String NodeVersion = null;
+    private String nodeVersion;
     /** 링크정보 */
-    private String LinkVersion = null;
+    private String linkVersion;
     /** 링크형상정보 */
-    private String LinkCoordsVersion = null;
+    private String linkCoordsVersion;
     /** 정류장정보 */
-    private String StationVersion = null;
+    private String stationVersion;
     /** 노선기본정보 */
-    private String RouteVersion = null;
+    private String routeVersion;
     /** 노선운행정보 */
-    private String RoutePlanVersion = null;
+    private String routePlanVersion;
     /** 노선부가정보 */
-    private String RouteStationVersion = null;
+    private String routeStationVersion;
     /** 차량정보 */
-    private String VehicleVersion = null;
+    private String vehicleVersion;
     /** 노선표출정보 */
-    private String RouteLinkVersion = null;
+    private String routeLinkVersion;
     /** 노선운행예정정보 */
-    private String RouteAllocateVersion = null;
+    private String routeAllocateVersion;
     /** 운수회사정보 */
-    private String CompanyVersion = null;
+    private String companyVersion;
     /** 관할관청정보 */
-    private String AdminVersion = null;
+    private String adminVersion;
     /** 비고 */
-    private String Remark = null;
+    private String remark;
 }

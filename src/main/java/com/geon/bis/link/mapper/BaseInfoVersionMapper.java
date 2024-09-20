@@ -8,8 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface BaseInfoVersionMapper {
-    /** 각각의 버스기반정보의 최신(현재)버전을반환 */
-    List<ResultBaseInfoVersion> findAllRecent(ParamBaseInfoVersion param);
-    /** 각의 버스기반정보의 변경된 버전만 반환 */
-    List<ResultBaseInfoVersion> findChanged(ParamBaseInfoVersion param);
+    /** 각각의 버스기반정보 버전 조회 */
+    List<ResultBaseInfoVersion> find(ParamBaseInfoVersion param);
 }

@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 
@@ -44,15 +45,33 @@ public class Publication207BaseInfoVersion {
 	@Value("${server.timeCnt}")
 	private int timeCnt;
 
+	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
+		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+				.mode("SINGLE")
+				.origin(origin.stream()
+						.map(Integer::parseInt) // 문자열을 정수로 변환
+						.collect(Collectors.toList()))
+				.build());
+
+		for( RegionCode regionCode : RegionCode.values() ){
+			makePublicationData(
+					ctx,
+					regionCode.getRegion(),
+					versionList.stream().filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode()))).toList());
+		}
+
+	}
+
 	public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
 		// 버전정보 확인후 전달 이벤트 방식
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findChanged(ParamBaseInfoVersion.builder()
-						.origin(origin)
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+				.origin(origin.stream()
+						.map(Integer::parseInt) // 문자열을 정수로 변환
+						.collect(Collectors.toList()))
 						.mode("EVENT")
 				.build());
-
-		if( versionList.size() != 1 ) return;
 
 		for( RegionCode regionCode : RegionCode.values() ){
 			makePublicationData(
@@ -70,6 +89,7 @@ public class Publication207BaseInfoVersion {
 	 * @throws EncodeNotSupportedException 인코딩 실패시
 	 */
 	private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBaseInfoVersion> versionList) throws EncodeFailedException, EncodeNotSupportedException {
+
 		if (!versionList.isEmpty()) {
 			List<ResultBaseInfoVersion> sendList = new ArrayList<>();
 			for (ResultBaseInfoVersion el : versionList) {
@@ -90,12 +110,14 @@ public class Publication207BaseInfoVersion {
 			}
 		}
 	}
-	
+
 	public void procPeriodicPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findAllRecent(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
 						.mode("EVENT")
-						.origin(origin)
+				.origin(origin.stream()
+						.map(Integer::parseInt) // 문자열을 정수로 변환
+						.collect(Collectors.toList()))
 				.build());
 
 		if( versionList.size() != 1 ) return;
@@ -108,25 +130,7 @@ public class Publication207BaseInfoVersion {
 		}
 
 	}
-	
-	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
-		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findAllRecent(ParamBaseInfoVersion.builder()
-						.mode("SINGLE")
-						.origin(origin)
-				.build());
 
-		if( versionList.size() != 1 ) return;
-
-		for( RegionCode regionCode : RegionCode.values() ){
-			makePublicationData(
-					ctx,
-					regionCode.getRegion(),
-					versionList.stream().filter(e-> e.getOrigin().equals(String.valueOf(regionCode.getCode()))).toList());
-		}
-
-	}
-	
 	/**
 	 * 퍼블리케이션을 요청한다.
 	 * @param EndAppMsg - event-driven일 경우 데이터가 있으며, null인 경우는 Periodic이다.

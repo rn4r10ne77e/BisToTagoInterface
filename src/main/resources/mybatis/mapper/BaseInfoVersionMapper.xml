@@ -3,10 +3,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BaseInfoVersionMapper">
-    <select id="findAllRecent" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
-        select 1;
-    </select>
-    <select id="findChanged" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
-        select 1;
+    <select id="find" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
+        select
+            region_code            as origin,
+            node_version           as nodeVersion,
+            link_version           as linkVersion,
+            link_coords_version    as linkCoordsVersion,
+            station_version        as stationVersion,
+            route_version          as routeVersion,
+            route_plan_version     as routePlanVersion,
+            route_station_version  as routeStationVersion,
+            vehicle_version        as vehicleVersion,
+            route_link_version     as routeLinkVersion,
+            route_allocate_version as routeAllocateVersion,
+            company_version        as companyVersion,
+            admin_version          as adminVersion,
+            remark                 as remark,
+            now()                  as messageGenerationTime
+        from public.get_base_info_version(#{origin}, #{mode})
     </select>
 </mapper>

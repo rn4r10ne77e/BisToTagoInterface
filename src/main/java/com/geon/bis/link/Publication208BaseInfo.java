@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 
@@ -65,19 +66,19 @@ public class Publication208BaseInfo {
 	public void procSinglePublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		// 현재버전정보 확인
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		// TODO 버전은 지역별로 최신 버전 1개만 가져올 것
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findAllRecent(ParamBaseInfoVersion.builder()
-				.origin(origin)
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+				.origin(origin.stream()
+						.map(Integer::parseInt)
+						.collect(Collectors.toList()))
+				.mode("SINGLE")
 				.build());
 
-		if( versionList.size() != 1 ) return;
 		for ( RegionCode regionCode : RegionCode.values() ) {
-
-			Optional<ResultBaseInfoVersion> resultOne = versionList.stream()
-					.filter( e-> e.getOrigin().equals(String.valueOf(regionCode.getCode())) )
+			Optional<ResultBaseInfoVersion> result = versionList.stream()
+					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
 					.findFirst();
-			if( resultOne.isPresent() ){
-				pubProcess( resultOne.get(), regionCode.getRegion(), ctx );
+			if( result.isPresent() ){
+				pubProcess( result.get(), regionCode.getRegion(), ctx );
 			}
 		}
 	}
@@ -85,19 +86,21 @@ public class Publication208BaseInfo {
 	// 바뀐 버전의 기반정보만 전송
 	public void procEventPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.findChanged(ParamBaseInfoVersion.builder()
-				.origin(origin)
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+				.origin(origin.stream()
+						.map(Integer::parseInt)
+						.collect(Collectors.toList()))
+				.mode("EVENT")
 				.build());
-		for ( RegionCode regionCode : RegionCode.values() ) {
 
-			Optional<ResultBaseInfoVersion> resultOne = versionList.stream()
-					.filter( e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())) )
+		for ( RegionCode regionCode : RegionCode.values() ) {
+			Optional<ResultBaseInfoVersion> result = versionList.stream()
+					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
 					.findFirst();
-			if( resultOne.isPresent() ){
-				pubProcess( resultOne.get(), regionCode.getRegion(), ctx );
+			if( result.isPresent() ){
+				pubProcess( result.get(), regionCode.getRegion(), ctx );
 			}
 		}
-
 	}
 
 	private void pubProcess( ResultBaseInfoVersion ver, String origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
@@ -111,7 +114,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// Route 전송
-		if(ver.getRouteVersion() != null) {
+		if(ver.getRouteVersion() != null && !ver.getRouteVersion().isEmpty()) {
 			List<List<RouteModel>> RouteList = partitionList(baseInfoMapper.getRoute(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<RouteModel> el : RouteList) {
 				C2CAuthenticatedMessage result = publication(pubRoute(el), origin, ctx);
@@ -120,7 +123,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// RouteStation 전송
-		if(ver.getRouteStationVersion() != null) {
+		if(ver.getRouteStationVersion() != null && !ver.getRouteStationVersion().isEmpty()) {
 			List<List<RouteStationModel>> RoutestationList = partitionList(baseInfoMapper.getRouteStation(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<RouteStationModel> el : RoutestationList) {
 				C2CAuthenticatedMessage result = publication(pubRouteStation(el), origin, ctx);
@@ -129,7 +132,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// vehicle 전송
-		if(ver.getVehicleVersion() != null) {
+		if(ver.getVehicleVersion() != null && !ver.getVehicleVersion().isEmpty()) {
 			List<List<VehicleModel>> VehicleList = partitionList(baseInfoMapper.getVehicle(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<VehicleModel> el : VehicleList) {
 				C2CAuthenticatedMessage result = publication(pubVehicle(el), origin, ctx);
@@ -138,7 +141,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// Node 전송
-		if(ver.getNodeVersion() != null) {
+		if(ver.getNodeVersion() != null && !ver.getNodeVersion().isEmpty()) {
 			List<List<NodeModel>> NodeList = partitionList(baseInfoMapper.getNode(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<NodeModel> el : NodeList) {
 				C2CAuthenticatedMessage result = publication(pubNode(el), origin, ctx);
@@ -148,7 +151,7 @@ public class Publication208BaseInfo {
 
 		}
 		// Link 전송
-		if(ver.getLinkVersion() != null) {
+		if(ver.getLinkVersion() != null && !ver.getLinkVersion().isEmpty()) {
 			List<List<LinkModel>> LinkList = partitionList(baseInfoMapper.getLink(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<LinkModel> el : LinkList) {
 				C2CAuthenticatedMessage result = publication(pubLink(el), origin, ctx);
@@ -157,7 +160,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// LinkCoords 전송
-		if(ver.getLinkCoordsVersion() != null) {
+		if(ver.getLinkCoordsVersion() != null && !ver.getLinkCoordsVersion().isEmpty()) {
 			List<List<LinkCoordsModel>> LinkcoordsList = partitionList(baseInfoMapper.getLinkCoords(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<LinkCoordsModel> el : LinkcoordsList) {
 				C2CAuthenticatedMessage result = publication(pubLinkcoords(el), origin, ctx);
@@ -166,7 +169,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// RoutePlan 전송
-		if(ver.getRoutePlanVersion() != null) {
+		if(ver.getRoutePlanVersion() != null && !ver.getRoutePlanVersion().isEmpty()) {
 			List<List<RoutePlanModel>> RouteplanList = partitionList(baseInfoMapper.getRoutePlan(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<RoutePlanModel> el : RouteplanList) {
 				C2CAuthenticatedMessage result = publication(pubRoutePlan(el), origin, ctx);
@@ -175,7 +178,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// RouteLink 전송
-		if(ver.getRouteLinkVersion() != null) {
+		if(ver.getRouteLinkVersion() != null && !ver.getRouteLinkVersion().isEmpty()) {
 			List<List<RouteLinkModel>> RoutelinkList = partitionList(baseInfoMapper.getRouteLink(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<RouteLinkModel> el : RoutelinkList) {
 				C2CAuthenticatedMessage result = publication(pubRouteLink(el), origin, ctx);
@@ -184,7 +187,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// RouteAllocate 전송
-		if(ver.getRouteAllocateVersion() != null) {
+		if(ver.getRouteAllocateVersion() != null && !ver.getRouteAllocateVersion().isEmpty()) {
 			List<List<RouteAllocateModel>> RouteallocateList = partitionList(baseInfoMapper.getRouteAllocate(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<RouteAllocateModel> el : RouteallocateList) {
 				C2CAuthenticatedMessage result = publication(pubRouteAllocate(el), origin, ctx);
@@ -193,7 +196,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// Company 전송
-		if(ver.getCompanyVersion() != null) {
+		if(ver.getCompanyVersion() != null && !ver.getCompanyVersion().isEmpty()) {
 			List<List<CompanyModel>> CompanyList = partitionList(baseInfoMapper.getCompany(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<CompanyModel> el : CompanyList) {
 				C2CAuthenticatedMessage result = publication(pubCompany(el), origin, ctx);
@@ -202,7 +205,7 @@ public class Publication208BaseInfo {
 			}
 		}
 		// Admin 전송
-		if(ver.getAdminVersion() != null) {
+		if(ver.getAdminVersion() != null && !ver.getAdminVersion().isEmpty()) {
 			List<List<AdminModel>> AdminList = partitionList(baseInfoMapper.getAdmin(ParamBaseInfo.builder().build()), sendCnt);
 			for (List<AdminModel> el : AdminList) {
 				C2CAuthenticatedMessage result = publication(pubAdmin(el), origin, ctx);
@@ -809,7 +812,7 @@ public class Publication208BaseInfo {
 				
 				Vehicle vehicle = new Vehicle();
 
-				vehicle.setTrnt_Veh_id(new UTF8String16(el.getVehid()));
+				vehicle.setTrnt_Veh_id(new UTF8String16(el.getVehId()));
 				vehicle.setVehicle_Plat_no(new UTF8String16(el.getPlateNo()));
 				switch(el.getVehTp()) {
 					case 0 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.compactbus); break;

@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 
@@ -72,7 +73,9 @@ public class Publication202BusArrvlPrdcInfo {
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
                         .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
                         .mode("SINGLE")
-                        .origin(origin)
+                .origin(origin.stream()
+                        .map(Integer::parseInt) // 문자열을 정수로 변환
+                        .collect(Collectors.toList()))
                 .build());
         for( RegionCode regionCode : RegionCode.values() ) {
             this.makePublicationData(
@@ -89,7 +92,9 @@ public class Publication202BusArrvlPrdcInfo {
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
                     .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                     .mode("EVENT")
-                    .origin(origin)
+                .origin(origin.stream()
+                        .map(Integer::parseInt) // 문자열을 정수로 변환
+                        .collect(Collectors.toList()))
                 .build());
 
         for(RegionCode regionCode : RegionCode.values() ) {
@@ -107,7 +112,9 @@ public class Publication202BusArrvlPrdcInfo {
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
                 .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                 .mode("PERIOD")
-                .origin(origin)
+                .origin(origin.stream()
+                        .map(Integer::parseInt) // 문자열을 정수로 변환
+                        .collect(Collectors.toList()))
                 .build());
 
         for( RegionCode regionCode : RegionCode.values() ) {
