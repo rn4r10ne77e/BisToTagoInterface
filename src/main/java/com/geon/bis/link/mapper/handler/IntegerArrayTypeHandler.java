@@ -30,7 +30,6 @@ public class IntegerArrayTypeHandler extends BaseTypeHandler<List<Integer>> {
         if (array != null) {
             return Arrays.asList((Integer[]) array.getArray());
         }
-
         return List.of();
     }
 

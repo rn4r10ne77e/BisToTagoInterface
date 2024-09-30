@@ -525,8 +525,6 @@ public class TagoService {
 
     /**
      * 서브스크립션 취소에 대한 처리와 응답을 한다.
-     * @param c2CAuthMsg
-     * @return
      */
     private C2CAuthenticatedMessage responseSubscriptionCancel(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx ) {
         log.info("[Subscription] Cancel");
@@ -551,8 +549,6 @@ public class TagoService {
 
     /**
      * Logout에 대한 응답을 한다.
-     * @param c2CAuthMsg
-     * @return
      */
     private C2CAuthenticatedMessage responseLogout(C2CAuthenticatedMessage c2CAuthMsg) {
         log.info("[Logout] response");
@@ -570,7 +566,6 @@ public class TagoService {
 
     /**
      * 입력된 Terminate 타입에 따라 Terminate를 요청한다.
-     * @return
      */
     private C2CAuthenticatedMessage requestTerminate(Terminate terminate) {
         log.info("[Terminate] request");
@@ -589,7 +584,6 @@ public class TagoService {
 
     /**
      * FrED에 응답을 한다.
-     * @return
      */
     public C2CAuthenticatedMessage responseFrED() {
 

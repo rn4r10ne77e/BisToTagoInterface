@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ParamBaseInfo {
     /** 조회할 시군*/
-    private List<String> origin;
+    private Integer origin;
     /** 조회 기준 시간. 기준 시간부터 가장 최근 데이터까지 조회 */
     private ZonedDateTime stdTime;
     /** 조회 할 버전 */

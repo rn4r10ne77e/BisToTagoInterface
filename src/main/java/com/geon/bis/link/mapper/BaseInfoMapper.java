@@ -9,7 +9,6 @@ import java.util.List;
 
 @Mapper
 public interface BaseInfoMapper {
-    ResultBaseInfo find(ParamBaseInfo paramBaseInfo);
     List<StationModel> getStation(ParamBaseInfo paramBaseInfo);
     List<RouteModel> getRoute(ParamBaseInfo paramBaseInfo);
     List<RouteStationModel> getRouteStation(ParamBaseInfo paramBaseInfo);

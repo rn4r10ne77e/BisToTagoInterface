@@ -3,9 +3,6 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BaseInfoMapper">
-    <select id="find" parameterType="ParamBaseInfo" resultType="ResultBaseInfo">
-        select 1;
-    </select>
     <select id="getStation" parameterType="ParamBaseInfo" resultType="StationModel">
         select
             origin as origin,
@@ -22,7 +19,7 @@
             remark as remark,
             ver as ver,
             total as total
-        from get_station(#{origin}, #{mode}, #{ver})
+        from public.get_station(#{origin}, #{mode}, #{ver})
     </select>
     <select id="getRoute" parameterType="ParamBaseInfo" resultType="RouteModel">
         select
@@ -44,7 +41,7 @@
             regist_dt as regDate,
             '' as remark,
             ver as ver
-        from public.get_route(#{origin}, #{mode})
+        from public.get_route(#{origin}, #{mode}, #{ver})
     </select>
     <select id="getRouteStation" parameterType="ParamBaseInfo" resultType="RouteStationModel">
         select
@@ -61,7 +58,7 @@
             reg_date as regDate,
             remark as remark,
             ver as ver,
-            total as sotal
+            total as total
         from public.get_route_station(#{origin}, #{mode}, #{ver})
 
     </select>

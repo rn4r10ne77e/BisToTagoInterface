@@ -104,9 +104,15 @@ public class Publication208BaseInfo {
 	}
 
 	private void pubProcess( ResultBaseInfoVersion ver, String origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
+		List<String> origins = ctx.channel().attr(INFO).get().getOrigin();
+
 		// Station 전송
 		if(ver.getStationVersion() != null) {
-			List<List<StationModel>> stationList = partitionList(baseInfoMapper.getStation(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<StationModel>> stationList = partitionList(baseInfoMapper.getStation(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getStationVersion())
+					.build()), sendCnt);
 			for (List<StationModel> el : stationList) {
 				C2CAuthenticatedMessage  result = publication(pubStation(el), origin, ctx);
 				this.testEncoding(result);
@@ -115,7 +121,11 @@ public class Publication208BaseInfo {
 		}
 		// Route 전송
 		if(ver.getRouteVersion() != null && !ver.getRouteVersion().isEmpty()) {
-			List<List<RouteModel>> RouteList = partitionList(baseInfoMapper.getRoute(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<RouteModel>> RouteList = partitionList(baseInfoMapper.getRoute(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getRouteVersion())
+					.build()), sendCnt);
 			for (List<RouteModel> el : RouteList) {
 				C2CAuthenticatedMessage result = publication(pubRoute(el), origin, ctx);
 				this.testEncoding(result);
@@ -124,7 +134,11 @@ public class Publication208BaseInfo {
 		}
 		// RouteStation 전송
 		if(ver.getRouteStationVersion() != null && !ver.getRouteStationVersion().isEmpty()) {
-			List<List<RouteStationModel>> RoutestationList = partitionList(baseInfoMapper.getRouteStation(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<RouteStationModel>> RoutestationList = partitionList(baseInfoMapper.getRouteStation(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getRouteStationVersion())
+					.build()), sendCnt);
 			for (List<RouteStationModel> el : RoutestationList) {
 				C2CAuthenticatedMessage result = publication(pubRouteStation(el), origin, ctx);
 				this.testEncoding(result);
@@ -133,7 +147,11 @@ public class Publication208BaseInfo {
 		}
 		// vehicle 전송
 		if(ver.getVehicleVersion() != null && !ver.getVehicleVersion().isEmpty()) {
-			List<List<VehicleModel>> VehicleList = partitionList(baseInfoMapper.getVehicle(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<VehicleModel>> VehicleList = partitionList(baseInfoMapper.getVehicle(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getVehicleVersion())
+					.build()), sendCnt);
 			for (List<VehicleModel> el : VehicleList) {
 				C2CAuthenticatedMessage result = publication(pubVehicle(el), origin, ctx);
 				this.testEncoding(result);
@@ -142,7 +160,11 @@ public class Publication208BaseInfo {
 		}
 		// Node 전송
 		if(ver.getNodeVersion() != null && !ver.getNodeVersion().isEmpty()) {
-			List<List<NodeModel>> NodeList = partitionList(baseInfoMapper.getNode(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<NodeModel>> NodeList = partitionList(baseInfoMapper.getNode(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getNodeVersion())
+					.build()), sendCnt);
 			for (List<NodeModel> el : NodeList) {
 				C2CAuthenticatedMessage result = publication(pubNode(el), origin, ctx);
 				this.testEncoding(result);
@@ -152,7 +174,11 @@ public class Publication208BaseInfo {
 		}
 		// Link 전송
 		if(ver.getLinkVersion() != null && !ver.getLinkVersion().isEmpty()) {
-			List<List<LinkModel>> LinkList = partitionList(baseInfoMapper.getLink(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<LinkModel>> LinkList = partitionList(baseInfoMapper.getLink(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getLinkVersion())
+					.build()), sendCnt);
 			for (List<LinkModel> el : LinkList) {
 				C2CAuthenticatedMessage result = publication(pubLink(el), origin, ctx);
 				this.testEncoding(result);
@@ -161,7 +187,11 @@ public class Publication208BaseInfo {
 		}
 		// LinkCoords 전송
 		if(ver.getLinkCoordsVersion() != null && !ver.getLinkCoordsVersion().isEmpty()) {
-			List<List<LinkCoordsModel>> LinkcoordsList = partitionList(baseInfoMapper.getLinkCoords(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<LinkCoordsModel>> LinkcoordsList = partitionList(baseInfoMapper.getLinkCoords(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getLinkCoordsVersion())
+					.build()), sendCnt);
 			for (List<LinkCoordsModel> el : LinkcoordsList) {
 				C2CAuthenticatedMessage result = publication(pubLinkcoords(el), origin, ctx);
 				this.testEncoding(result);
@@ -170,7 +200,11 @@ public class Publication208BaseInfo {
 		}
 		// RoutePlan 전송
 		if(ver.getRoutePlanVersion() != null && !ver.getRoutePlanVersion().isEmpty()) {
-			List<List<RoutePlanModel>> RouteplanList = partitionList(baseInfoMapper.getRoutePlan(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<RoutePlanModel>> RouteplanList = partitionList(baseInfoMapper.getRoutePlan(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getRoutePlanVersion())
+					.build()), sendCnt);
 			for (List<RoutePlanModel> el : RouteplanList) {
 				C2CAuthenticatedMessage result = publication(pubRoutePlan(el), origin, ctx);
 				this.testEncoding(result);
@@ -179,7 +213,11 @@ public class Publication208BaseInfo {
 		}
 		// RouteLink 전송
 		if(ver.getRouteLinkVersion() != null && !ver.getRouteLinkVersion().isEmpty()) {
-			List<List<RouteLinkModel>> RoutelinkList = partitionList(baseInfoMapper.getRouteLink(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<RouteLinkModel>> RoutelinkList = partitionList(baseInfoMapper.getRouteLink(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getRouteLinkVersion())
+					.build()), sendCnt);
 			for (List<RouteLinkModel> el : RoutelinkList) {
 				C2CAuthenticatedMessage result = publication(pubRouteLink(el), origin, ctx);
 				this.testEncoding(result);
@@ -188,7 +226,11 @@ public class Publication208BaseInfo {
 		}
 		// RouteAllocate 전송
 		if(ver.getRouteAllocateVersion() != null && !ver.getRouteAllocateVersion().isEmpty()) {
-			List<List<RouteAllocateModel>> RouteallocateList = partitionList(baseInfoMapper.getRouteAllocate(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<RouteAllocateModel>> RouteallocateList = partitionList(baseInfoMapper.getRouteAllocate(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getRouteAllocateVersion())
+					.build()), sendCnt);
 			for (List<RouteAllocateModel> el : RouteallocateList) {
 				C2CAuthenticatedMessage result = publication(pubRouteAllocate(el), origin, ctx);
 				this.testEncoding(result);
@@ -197,7 +239,11 @@ public class Publication208BaseInfo {
 		}
 		// Company 전송
 		if(ver.getCompanyVersion() != null && !ver.getCompanyVersion().isEmpty()) {
-			List<List<CompanyModel>> CompanyList = partitionList(baseInfoMapper.getCompany(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<CompanyModel>> CompanyList = partitionList(baseInfoMapper.getCompany(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getCompanyVersion())
+					.build()), sendCnt);
 			for (List<CompanyModel> el : CompanyList) {
 				C2CAuthenticatedMessage result = publication(pubCompany(el), origin, ctx);
 				this.testEncoding(result);
@@ -206,7 +252,11 @@ public class Publication208BaseInfo {
 		}
 		// Admin 전송
 		if(ver.getAdminVersion() != null && !ver.getAdminVersion().isEmpty()) {
-			List<List<AdminModel>> AdminList = partitionList(baseInfoMapper.getAdmin(ParamBaseInfo.builder().build()), sendCnt);
+			List<List<AdminModel>> AdminList = partitionList(baseInfoMapper.getAdmin(ParamBaseInfo.builder()
+					.origin(Integer.parseInt(origin))
+					.mode("SINGLE")
+					.ver(ver.getAdminVersion())
+					.build()), sendCnt);
 			for (List<AdminModel> el : AdminList) {
 				C2CAuthenticatedMessage result = publication(pubAdmin(el), origin, ctx);
 				this.testEncoding(result);
@@ -304,38 +354,40 @@ public class Publication208BaseInfo {
 			String version = "19000101000000"; // 버전정보
 			
 			for (NodeModel el : BaseinfoList) {
-				 
-				Node node = new Node();
-				
-				node.setTrnt_Nodeid(new UTF8String16(el.getNodeId()));
-				node.setNode_type(new UTF8String16(el.getType()));
-				if(el.getName() != null) {
-					node.setNode_Name(new UTF8String16(el.getName()));
-				}
-				
-				//GPS_LATI
-				String latiFrac = String.valueOf(el.getCoordinateLati()).split("\\.")[1];
-				//GPS_LONG
-				String longFrac = String.valueOf(el.getCoordinateLong()).split("\\.")[1];
-	
-				Latitude latitude = new Latitude((int) el.getCoordinateLati(), Long.valueOf(latiFrac),
-						latiFrac.length(), Compass1.north);
-				Longitude longitude = new Longitude((int) el.getCoordinateLong(), Long.valueOf(longFrac),
-						longFrac.length(), Compass2.east);
-	
-				NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
-				node.setNode_Coordinate(nMEACoord);
-				
-				node.setNode_Turn_P(new UTF8String16(el.getTurnLimit()));
-				node.setNode_Reg_date(new UTF8String16(el.getRegDate()));
-				if(el.getRemark() != null) {
-					node.setNode_Remark(new UTF8String16(el.getRemark()));
-				}			 
-				
-				version = el.getVer();
-				
-				baseInfoNode.add(node);
-			}
+
+                if (el != null ) {
+                    Node node = new Node();
+
+                    node.setTrnt_Nodeid(new UTF8String16(el.getNodeId()));
+                    node.setNode_type(new UTF8String16(el.getType()));
+                    if(el.getName() != null) {
+                        node.setNode_Name(new UTF8String16(el.getName()));
+                    }
+
+                    //GPS_LATI
+                    String latiFrac = String.valueOf(el.getCoordinateLati()).split("\\.")[1];
+                    //GPS_LONG
+                    String longFrac = String.valueOf(el.getCoordinateLong()).split("\\.")[1];
+
+                    Latitude latitude = new Latitude((int) el.getCoordinateLati(), Long.valueOf(latiFrac),
+                            latiFrac.length(), Compass1.north);
+                    Longitude longitude = new Longitude((int) el.getCoordinateLong(), Long.valueOf(longFrac),
+                            longFrac.length(), Compass2.east);
+
+                    NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
+                    node.setNode_Coordinate(nMEACoord);
+
+                    node.setNode_Turn_P(new UTF8String16(el.getTurnLimit()));
+                    node.setNode_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        node.setNode_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoNode.add(node);
+                }
+            }
 			
 		baseInfo.setTsfc_BaseInfoNode(baseInfoNode);
 		baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -374,35 +426,36 @@ public class Publication208BaseInfo {
 			String version = "19000101000000"; // 버전정보
 			
 			for (LinkModel el : BaseinfoList) {
-				 
-				Link link = new Link();
-				
-				link.setTrnt_Linkid(new UTF8String16(el.getLinkId()));
-				link.setLink_Fnode(new UTF8String16(el.getFNode()));
-				link.setLink_Tnode(new UTF8String16(el.getTNode()));
-				link.setLink_Lanes(el.getLanes());
-				link.setLink_Roadrank(new UTF8String16(el.getRoadRank()));
-				link.setLink_Roadno(new UTF8String16(el.getRoadType()));
-				if(link.getLink_Roadname() != null) {
-					link.setLink_Roadname(new UTF8String16(el.getRoadName()));
+				if( el != null ){
+					Link link = new Link();
+
+					link.setTrnt_Linkid(new UTF8String16(el.getLinkId()));
+					link.setLink_Fnode(new UTF8String16(el.getFNode()));
+					link.setLink_Tnode(new UTF8String16(el.getTNode()));
+					link.setLink_Lanes(el.getLanes());
+					link.setLink_Roadrank(new UTF8String16(el.getRoadRank()));
+					link.setLink_Roadno(new UTF8String16(el.getRoadType()));
+					if(link.getLink_Roadname() != null) {
+						link.setLink_Roadname(new UTF8String16(el.getRoadName()));
+					}
+					link.setLink_Roaduse(new UTF8String16(el.getRoadUse()));
+					link.setLink_Multilink(new UTF8String16(el.getMultiLink()));
+					link.setLink_Connect(new UTF8String16(el.getConnect()));
+					link.setLink_MaxSpd(el.getMaxSpd());
+					if(el.getRestVeh() != null) {
+						link.setLink_Restveh(new UTF8String16(el.getRestVeh()));
+					}
+					link.setLink_Restw(el.getResTw());
+					link.setLink_Resth(el.getResTh());
+					link.setLink_Reg_date(new UTF8String16(el.getRegDate()));
+					if(el.getRemark() != null) {
+						link.setLink_Remark(new UTF8String16(el.getRemark()));
+					}
+
+					version = el.getVer();
+
+					baseInfoLink.add(link);
 				}
-				link.setLink_Roaduse(new UTF8String16(el.getRoadUse()));
-				link.setLink_Multilink(new UTF8String16(el.getMultiLink()));
-				link.setLink_Connect(new UTF8String16(el.getConnect()));
-				link.setLink_MaxSpd(el.getMaxSpd());
-				if(el.getRestVeh() != null) {
-					link.setLink_Restveh(new UTF8String16(el.getRestVeh()));
-				}
-                link.setLink_Restw(el.getResTw());
-                link.setLink_Resth(el.getResTh());
-                link.setLink_Reg_date(new UTF8String16(el.getRegDate()));
-				if(el.getRemark() != null) {
-					link.setLink_Remark(new UTF8String16(el.getRemark()));
-				}			
-				
-				version = el.getVer();
-				
-				baseInfoLink.add(link);
 			}
 			
 		baseInfo.setTsfc_BaseInfoLink(baseInfoLink);
@@ -441,30 +494,32 @@ public class Publication208BaseInfo {
 			String version = "19000101000000"; // 버전정보
 			
 			for (LinkCoordsModel el : coordsModelList) {
-				 
-				Linkcoords linkcoords = new Linkcoords();
-				
-				linkcoords.setTrnt_Linkid(new UTF8String16(el.getLinkId()));
-				linkcoords.setLinkcoords_Sequence(el.getSequence());
-				String latiFrac = String.valueOf(el.getCoordinateLati()).split("\\.")[1];
-				String longFrac = String.valueOf(el.getCoordinateLong()).split("\\.")[1];
-				Latitude latitude = new Latitude((int) el.getCoordinateLati(), Long.valueOf(latiFrac),
-						latiFrac.length(), Compass1.north);
-				Longitude longitude = new Longitude((int) el.getCoordinateLong(), Long.valueOf(longFrac),
-						longFrac.length(), Compass2.east);
-	
-				NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
-				linkcoords.setLinkcoords_Coordinate(nMEACoord);
-				
-				linkcoords.setLinkcoords_Reg_date(new UTF8String16(el.getRegDate()));
-				if(el.getRemark() != null) {
-					linkcoords.setLinkcoords_Remark(new UTF8String16(el.getRemark()));
-				}			
-				
-				version = el.getVer();
 
-				baseInfoLinkCoords.add(linkcoords);
-			}
+                if (el != null) {
+                    Linkcoords linkcoords = new Linkcoords();
+
+                    linkcoords.setTrnt_Linkid(new UTF8String16(el.getLinkId()));
+                    linkcoords.setLinkcoords_Sequence(el.getSequence());
+                    String latiFrac = String.valueOf(el.getCoordinateLati()).split("\\.")[1];
+                    String longFrac = String.valueOf(el.getCoordinateLong()).split("\\.")[1];
+                    Latitude latitude = new Latitude((int) el.getCoordinateLati(), Long.valueOf(latiFrac),
+                            latiFrac.length(), Compass1.north);
+                    Longitude longitude = new Longitude((int) el.getCoordinateLong(), Long.valueOf(longFrac),
+                            longFrac.length(), Compass2.east);
+
+                    NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
+                    linkcoords.setLinkcoords_Coordinate(nMEACoord);
+
+                    linkcoords.setLinkcoords_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        linkcoords.setLinkcoords_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoLinkCoords.add(linkcoords);
+                }
+            }
 			
 			baseInfo.setTsfc_BaseInfoLinkCoords(baseInfoLinkCoords);
 			baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -500,61 +555,62 @@ public class Publication208BaseInfo {
 			Tsfc_BaseInfoStation baseInfoStation = new Tsfc_BaseInfoStation();
 			
 			String version = "19000101000000"; // 버전정보
-			
+
 			for (StationModel el : stationModelList) {
-				
-				Station station = new Station();
-				
-				station.setTrnt_Station_id(new UTF8String16(el.getStationId()));
-				station.setStation_Station_knm(new UTF8String16(el.getStationKnm()));
-				
-				switch(el.getStationTp()) {
-					case 0: station.setStation_Station_tp(Station.Station_Station_tp._public); break;
-					case 1: station.setStation_Station_tp(Station.Station_Station_tp.public_city_farmbus); break;
-					case 2: station.setStation_Station_tp(Station.Station_Station_tp.seat_city_farmbus); break;
-					case 3: station.setStation_Station_tp(Station.Station_Station_tp.express_seat_city_farmbus); break;
-					case 4: station.setStation_Station_tp(Station.Station_Station_tp.public_intercity); break;
-					case 5: station.setStation_Station_tp(Station.Station_Station_tp.seat_intercity); break;
-					case 6: station.setStation_Station_tp(Station.Station_Station_tp.express_intercity); break;
-					case 7: station.setStation_Station_tp(Station.Station_Station_tp.townbus); break;
-					default : break;
-				}
-				
-				switch(el.getCenterYn()) {
-					case 0: station.setStation_Center_yn(Station.Station_Center_yn.side); break;
-					case 1: station.setStation_Center_yn(Station.Station_Center_yn.mid); break;
-					default : break;
-				}
-			
-				station.setStation_Admin_id(new UTF8String16(el.getAdminId()));
-				if(el.getStationEnm() != null) {
-					station.setStation_Station_enm(new UTF8String16(el.getStationEnm()));
-				}
-				
-				//GPS_LATI
-				String latiFrac = String.valueOf(el.getCoordinateLati()).split("\\.")[1];
-				//GPS_LONG
-				String longFrac = String.valueOf(el.getCoordinateLong()).split("\\.")[1];
+                if (el != null) {
+                    Station station = new Station();
 
-				Latitude latitude = new Latitude((int) el.getCoordinateLati(), Long.valueOf(latiFrac),
-						latiFrac.length(), Compass1.north);
-				Longitude longitude = new Longitude((int) el.getCoordinateLong(), Long.valueOf(longFrac),
-						longFrac.length(), Compass2.east);
+                    station.setTrnt_Station_id(new UTF8String16(el.getStationId()));
+                    station.setStation_Station_knm(new UTF8String16(el.getStationKnm()));
 
-				NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
-				station.setStation_Coordinate(nMEACoord);
-				
-				station.setStation_Install_link_id(new UTF8String16(el.getInstallLinkId()));
-				station.setStation_Reg_date(new UTF8String16(el.getRegDate()));
-				
-				if(el.getRemark() != null) {
-					station.setStation_Remark(new UTF8String16(el.getRemark()));
-				}
-				
-				version = el.getVer();
-				
-				baseInfoStation.add(station);
-			}
+                    switch(el.getStationTp()) {
+                        case 0: station.setStation_Station_tp(Station.Station_Station_tp._public); break;
+                        case 1: station.setStation_Station_tp(Station.Station_Station_tp.public_city_farmbus); break;
+                        case 2: station.setStation_Station_tp(Station.Station_Station_tp.seat_city_farmbus); break;
+                        case 3: station.setStation_Station_tp(Station.Station_Station_tp.express_seat_city_farmbus); break;
+                        case 4: station.setStation_Station_tp(Station.Station_Station_tp.public_intercity); break;
+                        case 5: station.setStation_Station_tp(Station.Station_Station_tp.seat_intercity); break;
+                        case 6: station.setStation_Station_tp(Station.Station_Station_tp.express_intercity); break;
+                        case 7: station.setStation_Station_tp(Station.Station_Station_tp.townbus); break;
+                        default : station.setStation_Station_tp(Station.Station_Station_tp._public); break;
+                    }
+
+                    switch(el.getCenterYn()) {
+                        case 0: station.setStation_Center_yn(Station.Station_Center_yn.side); break;
+                        case 1: station.setStation_Center_yn(Station.Station_Center_yn.mid); break;
+                        default : station.setStation_Center_yn(Station.Station_Center_yn.side); break;
+                    }
+
+                    station.setStation_Admin_id(new UTF8String16(el.getAdminId()));
+                    if(el.getStationEnm() != null) {
+                        station.setStation_Station_enm(new UTF8String16(el.getStationEnm()));
+                    }
+
+                    //GPS_LATI
+                    String latiFrac = String.valueOf(el.getCoordinateLati()).split("\\.")[1];
+                    //GPS_LONG
+                    String longFrac = String.valueOf(el.getCoordinateLong()).split("\\.")[1];
+
+                    Latitude latitude = new Latitude((int) el.getCoordinateLati(), Long.valueOf(latiFrac),
+                            latiFrac.length(), Compass1.north);
+                    Longitude longitude = new Longitude((int) el.getCoordinateLong(), Long.valueOf(longFrac),
+                            longFrac.length(), Compass2.east);
+
+                    NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
+                    station.setStation_Coordinate(nMEACoord);
+
+                    station.setStation_Install_link_id(new UTF8String16(el.getInstallLinkId()));
+                    station.setStation_Reg_date(new UTF8String16(el.getRegDate()));
+
+                    if(el.getRemark() != null) {
+                        station.setStation_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoStation.add(station);
+                }
+            }
 			
 			baseInfo.setTsfc_BaseInfoStation(baseInfoStation);
 			baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -809,39 +865,41 @@ public class Publication208BaseInfo {
 			String version = "19000101000000"; // 버전정보
 			
 			for (VehicleModel el : vehicleModelList) {
-				
-				Vehicle vehicle = new Vehicle();
 
-				vehicle.setTrnt_Veh_id(new UTF8String16(el.getVehId()));
-				vehicle.setVehicle_Plat_no(new UTF8String16(el.getPlateNo()));
-				switch(el.getVehTp()) {
-					case 0 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.compactbus); break;
-					case 1 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.smallbus); break;
-					case 2 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.middlebus); break;
-					case 3 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.bigbus); break;
-					default: break;
-				}
-				switch(el.getBusTp()) {
-					case 0 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.commonbus); break;
-					case 1 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.lowplatbus); break;
-					case 2 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.doubledecker); break;
-					case 3 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.dendybus); break;
-					default: break;
-				}
-				vehicle.setVehicle_Veh_capa(el.getVehCapa());
-				vehicle.setVehicle_Admin_id(new UTF8String16(el.getAdminId()));
-				if(el.getCompanyId() != null) {
-					vehicle.setVehicle_Company_id(new UTF8String16(el.getCompanyId()));
-				}
-				vehicle.setVehicle_Reg_date(new UTF8String16(el.getRegDate()));
-				if(el.getRemark() != null) {
-					vehicle.setVehicle_Remark(new UTF8String16(el.getRemark()));
-				}
-				
-				version = el.getVer();
-				
-				baseInfoVehicle.add(vehicle);
-			}
+                if (el != null) {
+                    Vehicle vehicle = new Vehicle();
+
+                    vehicle.setTrnt_Veh_id(new UTF8String16(el.getVehId()));
+                    vehicle.setVehicle_Plat_no(new UTF8String16(el.getPlateNo()));
+                    switch(el.getVehTp()) {
+                        case 0 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.compactbus); break;
+                        case 1 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.smallbus); break;
+                        case 2 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.middlebus); break;
+                        case 3 : vehicle.setVehicle_Veh_tp(Vehicle.Vehicle_Veh_tp.bigbus); break;
+                        default: break;
+                    }
+                    switch(el.getBusTp()) {
+                        case 0 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.commonbus); break;
+                        case 1 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.lowplatbus); break;
+                        case 2 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.doubledecker); break;
+                        case 3 : vehicle.setVehicle_Bus_tp(Vehicle.Vehicle_Bus_tp.dendybus); break;
+                        default: break;
+                    }
+                    vehicle.setVehicle_Veh_capa(el.getVehCapa());
+                    vehicle.setVehicle_Admin_id(new UTF8String16(el.getAdminId()));
+                    if(el.getCompanyId() != null) {
+                        vehicle.setVehicle_Company_id(new UTF8String16(el.getCompanyId()));
+                    }
+                    vehicle.setVehicle_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        vehicle.setVehicle_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoVehicle.add(vehicle);
+                }
+            }
 			
 			baseInfo.setTsfc_BaseInfoVehicle(baseInfoVehicle);
 			baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -879,33 +937,35 @@ public class Publication208BaseInfo {
 			
 			String version = "19000101000000"; // 버전정보
 			
-			for (RouteLinkModel Vo : routeLinkModelList) {
-				
-				Routelink routeLink = new Routelink();
+			for (RouteLinkModel el : routeLinkModelList) {
 
-				routeLink.setTrnt_Route_id(new UTF8String16(Vo.getRouteId()));
-				routeLink.setRoutelink_Sequence(Vo.getSequence());
-				routeLink.setRoutelink_Link_id(new UTF8String16(Vo.getLinkId()));
-				switch(Vo.getStationYn()) {
-					case 0 : routeLink.setRoutelink_Station_yn(Routelink.Routelink_Station_yn.no); break;
-					case 1 : routeLink.setRoutelink_Station_yn(Routelink.Routelink_Station_yn.yes);; break;
-					default: break;
-				}
-				switch(Vo.getStationYn()) {
-					case 0 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.up); break;
-					case 1 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.down); break;
-					case 2 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.no_division); break;
-					default: break;
-				}
-				routeLink.setRoutelink_Reg_date(new UTF8String16(Vo.getRegDate()));
-				if(Vo.getRemark() != null) {
-					routeLink.setRoutelink_Remark(new UTF8String16(Vo.getRemark()));	
-				}
-				
-				version = Vo.getVer();
-				
-				baseInfoRouteLink.add(routeLink);
-			}
+                if ( el != null ) {
+                    Routelink routeLink = new Routelink();
+
+                    routeLink.setTrnt_Route_id(new UTF8String16(el.getRouteId()));
+                    routeLink.setRoutelink_Sequence(el.getSequence());
+                    routeLink.setRoutelink_Link_id(new UTF8String16(el.getLinkId()));
+                    switch(el.getStationYn()) {
+                        case 0 : routeLink.setRoutelink_Station_yn(Routelink.Routelink_Station_yn.no); break;
+                        case 1 : routeLink.setRoutelink_Station_yn(Routelink.Routelink_Station_yn.yes);; break;
+                        default: break;
+                    }
+                    switch(el.getStationYn()) {
+                        case 0 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.up); break;
+                        case 1 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.down); break;
+                        case 2 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.no_division); break;
+                        default: break;
+                    }
+                    routeLink.setRoutelink_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        routeLink.setRoutelink_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoRouteLink.add(routeLink);
+                }
+            }
 			
 			baseInfo.setTsfc_BaseInfoRoutelink(baseInfoRouteLink);
 			baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -944,35 +1004,37 @@ public class Publication208BaseInfo {
 			String version = "19000101000000"; // 버전정보
 			
 			for (RouteAllocateModel el : routeAllocateModelList) {
-				
-				Routeallocate routeAllocate = new Routeallocate();
-				
-				routeAllocate.setTrnt_Route_id(new UTF8String16(el.getRouteId()));
-				switch(el.getOperationWeek()) {
-					case 0 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.occasionality); break;
-					case 1 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.weekday); break;
-					case 2 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.saturday); break;
-					case 3 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.holiday); break;
-					case 4 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.daily); break;
-					default: break;
-				}
-				routeAllocate.setRouteallocate_Alloc_seq(el.getAllocSeq());
-				routeAllocate.setRouteallocate_Alloc_time(new UTF8String16(el.getAllocTime()));
-				if(el.getStartStation() != null) {
-					routeAllocate.setRouteallocate_St_station_id(new UTF8String16(el.getStartStation()));
-				}
-				if(el.getEndStation() != null) {
-					routeAllocate.setRouteallocate_Ed_station_id(new UTF8String16(el.getEndStation()));
-				}
-				routeAllocate.setRouteallocate_Reg_date(new UTF8String16(el.getRegDate()));
-				if(el.getRemark() != null) {
-					routeAllocate.setRouteallocate_Remark(new UTF8String16(el.getRemark()));
-				}
-				
-				version = el.getVer();
-				
-				baseInfoRouteAllocate.add(routeAllocate);
-			}
+
+                if ( el != null ) {
+                    Routeallocate routeAllocate = new Routeallocate();
+
+                    routeAllocate.setTrnt_Route_id(new UTF8String16(el.getRouteId()));
+                    switch(el.getOperationWeek()) {
+                        case 0 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.occasionality); break;
+                        case 1 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.weekday); break;
+                        case 2 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.saturday); break;
+                        case 3 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.holiday); break;
+                        case 4 : routeAllocate.setRouteallocate_Oper_week(Routeallocate.Routeallocate_Oper_week.daily); break;
+                        default: break;
+                    }
+                    routeAllocate.setRouteallocate_Alloc_seq(el.getAllocSeq());
+                    routeAllocate.setRouteallocate_Alloc_time(new UTF8String16(el.getAllocTime()));
+                    if(el.getStartStation() != null) {
+                        routeAllocate.setRouteallocate_St_station_id(new UTF8String16(el.getStartStation()));
+                    }
+                    if(el.getEndStation() != null) {
+                        routeAllocate.setRouteallocate_Ed_station_id(new UTF8String16(el.getEndStation()));
+                    }
+                    routeAllocate.setRouteallocate_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        routeAllocate.setRouteallocate_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoRouteAllocate.add(routeAllocate);
+                }
+            }
 			
 			baseInfo.setTsfc_BaseInfoRouteallocate(baseInfoRouteAllocate);
 			baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -1011,30 +1073,32 @@ public class Publication208BaseInfo {
 			String version = "19000101000000"; // 버전정보
 			
 			for (CompanyModel el : companyModelList) {
-				
-				Company company = new Company();
-				
-				company.setTrnt_Company_id(new UTF8String16(el.getCompanyId()));
-				company.setCompany_Company_nm(new UTF8String16(el.getCompanyNm()));
-				company.setCompany_Phone_no(new UTF8String16(el.getPhoneNo()));
-				if(el.getFaxNo() != null) {
-					company.setCompany_Fax_no(new UTF8String16(el.getFaxNo()));
-				}
-				company.setCompany_Address(new UTF8String16(el.getAddress()));
-				company.setCompany_Ceo_nm(new UTF8String16(el.getCeoNm()));
-				company.setCompany_Bus_cnt(el.getBusCnt());
-				company.setCompany_Reg_cnt(el.getRegCnt());
-				company.setCompany_Spare_cnt(el.getSpareCnt());
-				company.setCompany_Admin_id(new UTF8String16(el.getAdminId()));
-				company.setCompany_Reg_date(new UTF8String16(el.getRegDate()));
-				if(el.getRemark() != null) {
-					company.setCompany_Remark(new UTF8String16(el.getRemark()));
-				}
-				
-				version = el.getVer();
-				
-				baseInfoCompany.add(company);
-			}
+
+                if ( el != null ) {
+                    Company company = new Company();
+
+                    company.setTrnt_Company_id(new UTF8String16(el.getCompanyId()));
+                    company.setCompany_Company_nm(new UTF8String16(el.getCompanyNm()));
+                    company.setCompany_Phone_no(new UTF8String16(el.getPhoneNo()));
+                    if(el.getFaxNo() != null) {
+                        company.setCompany_Fax_no(new UTF8String16(el.getFaxNo()));
+                    }
+                    company.setCompany_Address(new UTF8String16(el.getAddress()));
+                    company.setCompany_Ceo_nm(new UTF8String16(el.getCeoNm()));
+                    company.setCompany_Bus_cnt(el.getBusCnt());
+                    company.setCompany_Reg_cnt(el.getRegCnt());
+                    company.setCompany_Spare_cnt(el.getSpareCnt());
+                    company.setCompany_Admin_id(new UTF8String16(el.getAdminId()));
+                    company.setCompany_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        company.setCompany_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoCompany.add(company);
+                }
+            }
 			
 			baseinfo.setTsfc_BaseInfoCompany(baseInfoCompany);
 			baseinfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -1073,23 +1137,24 @@ public class Publication208BaseInfo {
 			
 			String version = "19000101000000"; // 버전정보
 			
-			for (AdminModel Vo : adminModelList) {
-				
-				Admin admin = new Admin();
-				
-				admin.setTrnt_Admin_id(new UTF8String16(Vo.getAdminId()));
-				admin.setAdmin_Moi_id(new UTF8String16(Vo.getMoiId()));
-				admin.setAdmin_Admin_nm1(new UTF8String16(Vo.getAdminNm1()));
-				admin.setAdmin_Admin_nm2(new UTF8String16(Vo.getAdminNm2()));
-				admin.setAdmin_Reg_date(new UTF8String16(Vo.getRegDate()));
-				if(Vo.getRemark() != null) {
-					admin.setAdmin_Remark(new UTF8String16(Vo.getRemark()));	
-				}
-				
-				version = Vo.getVer();
-				
-				baseInfoAdmin.add(admin);
-			}
+			for (AdminModel el : adminModelList) {
+                if ( el != null ) {
+                    Admin admin = new Admin();
+
+                    admin.setTrnt_Admin_id(new UTF8String16(el.getAdminId()));
+                    admin.setAdmin_Moi_id(new UTF8String16(el.getMoiId()));
+                    admin.setAdmin_Admin_nm1(new UTF8String16(el.getAdminNm1()));
+                    admin.setAdmin_Admin_nm2(new UTF8String16(el.getAdminNm2()));
+                    admin.setAdmin_Reg_date(new UTF8String16(el.getRegDate()));
+                    if(el.getRemark() != null) {
+                        admin.setAdmin_Remark(new UTF8String16(el.getRemark()));
+                    }
+
+                    version = el.getVer();
+
+                    baseInfoAdmin.add(admin);
+                }
+            }
 			
 			baseInfo.setTsfc_BaseInfoAdmin(baseInfoAdmin);
 			baseInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(version)); //버전정보
@@ -1140,6 +1205,7 @@ public class Publication208BaseInfo {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		baos.reset();
+		log.info("test data : {}",dummy);
 		util.getCoder().encode(dummy, baos);
 		byte[] encoding = baos.toByteArray();
 

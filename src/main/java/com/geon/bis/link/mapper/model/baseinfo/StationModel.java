@@ -2,6 +2,9 @@ package com.geon.bis.link.mapper.model.baseinfo;
 
 import lombok.*;
 
+/**
+ * @
+ */
 @Getter
 @Setter
 @Builder
