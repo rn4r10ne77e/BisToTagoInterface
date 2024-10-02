@@ -1,22 +1,17 @@
 package com.geon.bis.link.config;
 
 import com.geon.bis.link.tago.config.Util;
-import com.oss.asn1.ASN1Project;
 import com.oss.asn1.Coder;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelId;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.ChannelGroupFuture;
-import io.netty.channel.group.ChannelMatcher;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
-import java.util.Collection;
-import java.util.Iterator;
+import javax.sql.DataSource;
 
 @Configuration
 @EnableConfigurationProperties(AccountProperties.class)
@@ -33,5 +28,10 @@ public class Config {
     @Bean
     public ChannelGroup getChannelGroup(){
         return new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    }
+
+    @Bean
+    public DataSourceTransactionManager transactionManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
     }
 }

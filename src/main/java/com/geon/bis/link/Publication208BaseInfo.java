@@ -78,7 +78,7 @@ public class Publication208BaseInfo {
 					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
 					.findFirst();
 			if( result.isPresent() ){
-				pubProcess( result.get(), regionCode.getRegion(), ctx );
+				pubProcess( result.get(), regionCode, ctx );
 			}
 		}
 	}
@@ -98,23 +98,21 @@ public class Publication208BaseInfo {
 					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
 					.findFirst();
 			if( result.isPresent() ){
-				pubProcess( result.get(), regionCode.getRegion(), ctx );
+				pubProcess( result.get(), regionCode, ctx );
 			}
 		}
 	}
 
-	private void pubProcess( ResultBaseInfoVersion ver, String origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
-		List<String> origins = ctx.channel().attr(INFO).get().getOrigin();
-
+	private void pubProcess( ResultBaseInfoVersion ver, RegionCode origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		// Station 전송
 		if(ver.getStationVersion() != null) {
 			List<List<StationModel>> stationList = partitionList(baseInfoMapper.getStation(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getStationVersion())
 					.build()), sendCnt);
 			for (List<StationModel> el : stationList) {
-				C2CAuthenticatedMessage  result = publication(pubStation(el), origin, ctx);
+				C2CAuthenticatedMessage  result = publication(pubStation(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -122,12 +120,12 @@ public class Publication208BaseInfo {
 		// Route 전송
 		if(ver.getRouteVersion() != null && !ver.getRouteVersion().isEmpty()) {
 			List<List<RouteModel>> RouteList = partitionList(baseInfoMapper.getRoute(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getRouteVersion())
 					.build()), sendCnt);
 			for (List<RouteModel> el : RouteList) {
-				C2CAuthenticatedMessage result = publication(pubRoute(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubRoute(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -135,12 +133,12 @@ public class Publication208BaseInfo {
 		// RouteStation 전송
 		if(ver.getRouteStationVersion() != null && !ver.getRouteStationVersion().isEmpty()) {
 			List<List<RouteStationModel>> RoutestationList = partitionList(baseInfoMapper.getRouteStation(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getRouteStationVersion())
 					.build()), sendCnt);
 			for (List<RouteStationModel> el : RoutestationList) {
-				C2CAuthenticatedMessage result = publication(pubRouteStation(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubRouteStation(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -148,12 +146,12 @@ public class Publication208BaseInfo {
 		// vehicle 전송
 		if(ver.getVehicleVersion() != null && !ver.getVehicleVersion().isEmpty()) {
 			List<List<VehicleModel>> VehicleList = partitionList(baseInfoMapper.getVehicle(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getVehicleVersion())
 					.build()), sendCnt);
 			for (List<VehicleModel> el : VehicleList) {
-				C2CAuthenticatedMessage result = publication(pubVehicle(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubVehicle(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -161,12 +159,12 @@ public class Publication208BaseInfo {
 		// Node 전송
 		if(ver.getNodeVersion() != null && !ver.getNodeVersion().isEmpty()) {
 			List<List<NodeModel>> NodeList = partitionList(baseInfoMapper.getNode(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getNodeVersion())
 					.build()), sendCnt);
 			for (List<NodeModel> el : NodeList) {
-				C2CAuthenticatedMessage result = publication(pubNode(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubNode(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -175,12 +173,12 @@ public class Publication208BaseInfo {
 		// Link 전송
 		if(ver.getLinkVersion() != null && !ver.getLinkVersion().isEmpty()) {
 			List<List<LinkModel>> LinkList = partitionList(baseInfoMapper.getLink(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getLinkVersion())
 					.build()), sendCnt);
 			for (List<LinkModel> el : LinkList) {
-				C2CAuthenticatedMessage result = publication(pubLink(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubLink(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -188,12 +186,12 @@ public class Publication208BaseInfo {
 		// LinkCoords 전송
 		if(ver.getLinkCoordsVersion() != null && !ver.getLinkCoordsVersion().isEmpty()) {
 			List<List<LinkCoordsModel>> LinkcoordsList = partitionList(baseInfoMapper.getLinkCoords(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getLinkCoordsVersion())
 					.build()), sendCnt);
 			for (List<LinkCoordsModel> el : LinkcoordsList) {
-				C2CAuthenticatedMessage result = publication(pubLinkcoords(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubLinkcoords(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -201,12 +199,12 @@ public class Publication208BaseInfo {
 		// RoutePlan 전송
 		if(ver.getRoutePlanVersion() != null && !ver.getRoutePlanVersion().isEmpty()) {
 			List<List<RoutePlanModel>> RouteplanList = partitionList(baseInfoMapper.getRoutePlan(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getRoutePlanVersion())
 					.build()), sendCnt);
 			for (List<RoutePlanModel> el : RouteplanList) {
-				C2CAuthenticatedMessage result = publication(pubRoutePlan(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubRoutePlan(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -214,12 +212,12 @@ public class Publication208BaseInfo {
 		// RouteLink 전송
 		if(ver.getRouteLinkVersion() != null && !ver.getRouteLinkVersion().isEmpty()) {
 			List<List<RouteLinkModel>> RoutelinkList = partitionList(baseInfoMapper.getRouteLink(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getRouteLinkVersion())
 					.build()), sendCnt);
 			for (List<RouteLinkModel> el : RoutelinkList) {
-				C2CAuthenticatedMessage result = publication(pubRouteLink(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubRouteLink(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -227,12 +225,12 @@ public class Publication208BaseInfo {
 		// RouteAllocate 전송
 		if(ver.getRouteAllocateVersion() != null && !ver.getRouteAllocateVersion().isEmpty()) {
 			List<List<RouteAllocateModel>> RouteallocateList = partitionList(baseInfoMapper.getRouteAllocate(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getRouteAllocateVersion())
 					.build()), sendCnt);
 			for (List<RouteAllocateModel> el : RouteallocateList) {
-				C2CAuthenticatedMessage result = publication(pubRouteAllocate(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubRouteAllocate(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -240,12 +238,12 @@ public class Publication208BaseInfo {
 		// Company 전송
 		if(ver.getCompanyVersion() != null && !ver.getCompanyVersion().isEmpty()) {
 			List<List<CompanyModel>> CompanyList = partitionList(baseInfoMapper.getCompany(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getCompanyVersion())
 					.build()), sendCnt);
 			for (List<CompanyModel> el : CompanyList) {
-				C2CAuthenticatedMessage result = publication(pubCompany(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubCompany(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}
@@ -253,12 +251,12 @@ public class Publication208BaseInfo {
 		// Admin 전송
 		if(ver.getAdminVersion() != null && !ver.getAdminVersion().isEmpty()) {
 			List<List<AdminModel>> AdminList = partitionList(baseInfoMapper.getAdmin(ParamBaseInfo.builder()
-					.origin(Integer.parseInt(origin))
+					.origin(origin.getCode())
 					.mode("SINGLE")
 					.ver(ver.getAdminVersion())
 					.build()), sendCnt);
 			for (List<AdminModel> el : AdminList) {
-				C2CAuthenticatedMessage result = publication(pubAdmin(el), origin, ctx);
+				C2CAuthenticatedMessage result = publication(pubAdmin(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
 				ctx.writeAndFlush(result);
 			}

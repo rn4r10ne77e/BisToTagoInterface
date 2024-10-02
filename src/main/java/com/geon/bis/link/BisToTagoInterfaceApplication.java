@@ -16,5 +16,4 @@ public class BisToTagoInterfaceApplication {
                 .properties("spring.config.location=classpath:application.yml,classpath:accounts.yml")
                 .run(args);
     }
-
 }
