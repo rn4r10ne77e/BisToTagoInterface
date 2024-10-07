@@ -27,7 +27,7 @@
             passenger_number as BusPassengerNumber,
             remain_seats_number as BusRemainSeatsNumber
 
-        from get_arrival_prediction_time_info(#{stdTime}, #{origin,jdbcType=ARRAY}, #{mode})
+        from public.get_arrival_prediction_time_info(#{stdTime}, #{origin,jdbcType=ARRAY}, #{mode})
 
     </select>
 </mapper>
