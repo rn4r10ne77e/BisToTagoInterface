@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    username: postgres
+    password: geo&0317
+    url: jdbc:postgresql://geonworks.iptime.org:33333/cnbus # 개발 서버
+
+server:
+  host: 127.0.0.1
+  port: 8091

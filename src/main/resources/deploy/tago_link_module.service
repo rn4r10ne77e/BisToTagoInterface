@@ -1,0 +1,15 @@
+[Unit]
+Description=Bis Relay Server
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/tago
+# WEB 서버에서 사용할 경우 JAVA 경로
+ExecStart=/usr/lib/jvm/jdk-17.0.12-oracle-x64/bin/java -Dspring.profiles.active=prod -jar TagoLinkModule.jar
+Restart=always
+Environment="JAVA_OPTS=-Xms512m -Xmx1024m"
+
+[Install]
+WantedBy=multi-user.target

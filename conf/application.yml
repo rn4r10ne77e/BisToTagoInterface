@@ -2,15 +2,12 @@ spring:
   application:
     name: BisToTagoInterface
   profiles:
-    active: local
+    active: dev
   datasource:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: geo&0317
-#    url: jdbc:postgresql://geonworks.iptime.org:33333/cnbus # 개발 서버
-    url: jdbc:postgresql://192.168.45.11:20001/cnbus # 릴레이 서버
-#    url: jdbc:postgresql://192.168.25.21:5432/cnbus # 운영 서버
-#    url: jdbc:postgresql://localhost:5434/cnbus # 로컬 서버
+    url: jdbc:postgresql://geonworks.iptime.org:33333/cnbus # 개발 서버
 
     hikari:
       maximum-pool-size: 10

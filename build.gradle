@@ -19,6 +19,29 @@ configurations {
     }
 }
 
+
+tasks.register('copyDeployFiles',Copy){
+    from 'src/main/resources/deploy'
+    include 'registration.sh','tago_link_module.service','tago_link_module.bat','un_registration.sh'
+    into(layout.buildDirectory.dir('libs'))
+}
+
+tasks.register('copyPropertiesFiles',Copy){
+    from 'conf'
+    include 'application.yml', 'application-dev.yml','application-vpn.yml','application-prod.yml','accounts.yml'
+    into(layout.buildDirectory.dir('libs/conf'))
+}
+
+bootJar{
+    dependsOn copyPropertiesFiles
+    dependsOn copyDeployFiles
+
+    archiveVersion = "1.0.0"
+    archiveBaseName = "TagoLinkModule"
+    archiveFileName = "TagoLinkModule.jar"
+}
+
+
 repositories {
     mavenCentral()
 }
