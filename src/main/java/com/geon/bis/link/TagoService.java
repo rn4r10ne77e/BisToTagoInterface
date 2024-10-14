@@ -177,7 +177,8 @@ public class TagoService {
         String clientIp = ((InetSocketAddress)(ctx.channel().remoteAddress())).getAddress().getHostAddress();
 
         for(Account el : accountProperties.getAccount() ){
-            if (el.getIp().equals(clientIp) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
+            if (el.getIps().stream().anyMatch(e -> e.equals(clientIp)) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
+                log.info("인증 성공");
                 isMatchIdAndPassword = true;
 
                 channelInfo.setOrigin(

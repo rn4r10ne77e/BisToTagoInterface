@@ -5,9 +5,6 @@ spring:
     active: dev
   datasource:
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: geo&0317
-    url: jdbc:postgresql://geonworks.iptime.org:33333/cnbus # 개발 서버
 
     hikari:
       maximum-pool-size: 10
@@ -19,8 +16,6 @@ mybatis:
   type-aliases-package: com.geon.bis.link.mapper.model
 
 server:
-  host: 127.0.0.1
-  port: 8091
   netty:
     boss-count: 1
     worker-count: 10
@@ -28,9 +23,9 @@ server:
     backlog: 30
 
   # 서버모듈ID
-  sender: gasan
+  sender: cnbis1
   # 원천데이터제공처(지자체ID), 여러지자체 데이터 제공시 ',' 로 구분
-  origin: gasan
+  origin: cnbis1
   # ASN.1 메세지 사이즈(1024 넘기면 네트워크 전송간 오류 발생)
   datagram-size: 1024
   # 로그인 절차, 비밀번호 검증 절차 시행여부

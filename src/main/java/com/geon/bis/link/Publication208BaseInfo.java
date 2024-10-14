@@ -66,7 +66,7 @@ public class Publication208BaseInfo {
 	public void procSinglePublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		// 현재버전정보 확인
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.origin(origin.stream()
 						.map(Integer::parseInt)
 						.collect(Collectors.toList()))
@@ -86,7 +86,7 @@ public class Publication208BaseInfo {
 	// 바뀐 버전의 기반정보만 전송
 	public void procEventPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.origin(origin.stream()
 						.map(Integer::parseInt)
 						.collect(Collectors.toList()))

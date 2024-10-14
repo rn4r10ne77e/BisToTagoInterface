@@ -10,6 +10,6 @@ import java.util.List;
 public class Account {
     private String username;
     private String password;
-    private String ip;
+    private List<String> ips;
     private List<String> origins;
 }

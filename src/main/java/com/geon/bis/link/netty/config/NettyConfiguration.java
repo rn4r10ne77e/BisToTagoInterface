@@ -25,7 +25,7 @@ public class NettyConfiguration {
 
     @Value("${server.host}")
     private String host;
-    @Value("${server.port}")
+    @Value("${server.tcp-port}")
     private int port;
     @Value("${server.netty.boss-count}")
     private int bossCount;

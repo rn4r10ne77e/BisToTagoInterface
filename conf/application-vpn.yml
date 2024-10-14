@@ -5,5 +5,7 @@ spring:
     url: jdbc:postgresql://192.168.45.11:20001/cnbus # 릴레이 서버
 
 server:
+  address: 127.0.0.1
+  port: 8090
   host: 127.0.0.1
-  port: 8091
+  tcp-port: 8091

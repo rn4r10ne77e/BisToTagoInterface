@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BaseInfoVersionMapper">
-    <select id="find" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
+    <select id="getVersions" parameterType="ParamBaseInfoVersion" resultType="ResultBaseInfoVersion">
         select
             region_code            as origin,
             node_version           as nodeVersion,

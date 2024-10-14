@@ -47,7 +47,7 @@ public class Publication207BaseInfoVersion {
 
 	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.mode("SINGLE")
 				.origin(origin.stream()
 						.map(Integer::parseInt) // 문자열을 정수로 변환
@@ -66,7 +66,7 @@ public class Publication207BaseInfoVersion {
 	public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
 		// 버전정보 확인후 전달 이벤트 방식
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.origin(origin.stream()
 						.map(Integer::parseInt) // 문자열을 정수로 변환
 						.collect(Collectors.toList()))
@@ -113,7 +113,7 @@ public class Publication207BaseInfoVersion {
 
 	public void procPeriodicPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.find(ParamBaseInfoVersion.builder()
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 						.mode("EVENT")
 				.origin(origin.stream()
 						.map(Integer::parseInt) // 문자열을 정수로 변환

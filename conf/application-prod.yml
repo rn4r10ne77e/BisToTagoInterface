@@ -6,4 +6,7 @@ spring:
 
 server:
   host: 192.168.60.21
-  port: 8091
+  tcp-port: 8091
+  address: 192.168.60.21
+  port: 8090
+
