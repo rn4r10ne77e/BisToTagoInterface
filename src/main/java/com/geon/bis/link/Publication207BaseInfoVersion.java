@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -216,50 +218,53 @@ public class Publication207BaseInfoVersion {
 		
 		Message_MESSAGE_BODY_3 message_MESSAGE_BODY_3 = new Message_MESSAGE_BODY_3();
 
+		LocalDateTime dateTime = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+		String formattedDateTime = dateTime.format(formatter);
+
 		if (!BaseinfoVersionList.isEmpty()) {
 			for (ResultBaseInfoVersion el : BaseinfoVersionList) {
+
 				BusBaseInformationVersion baseInfoVersion = new BusBaseInformationVersion();
 				baseInfoVersion.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(el.getMessageGenerationTime())));
 				if(el.getNodeVersion() != null) {
-					baseInfoVersion.setBase_Node_version(new UTF8String16(el.getNodeVersion()));
+					baseInfoVersion.setBase_Node_version(new UTF8String16(util.StringToVerTime( formattedDateTime, el.getNodeVersion() )));
 				}
 				if(el.getNodeVersion() != null) {
-					baseInfoVersion.setBase_Link_version(new UTF8String16(el.getLinkVersion()));
+					baseInfoVersion.setBase_Link_version(new UTF8String16(util.StringToVerTime( formattedDateTime, el.getLinkVersion() )));
 				}
 				if(el.getLinkVersion() != null) {
-					baseInfoVersion.setBase_LinkCoords_version(new UTF8String16(el.getLinkCoordsVersion()));
+					baseInfoVersion.setBase_LinkCoords_version(new UTF8String16(util.StringToVerTime( formattedDateTime, el.getLinkCoordsVersion())));
 				}
 				if(el.getStationVersion() != null) {
-					baseInfoVersion.setBase_Station_version(new UTF8String16(el.getStationVersion()));
+					baseInfoVersion.setBase_Station_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getStationVersion())));
 				}
 				if(el.getRouteVersion() != null) {
-					baseInfoVersion.setBase_Route_version(new UTF8String16(el.getRouteVersion()));
+					baseInfoVersion.setBase_Route_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getRouteVersion())));
 				}
 				if(el.getRoutePlanVersion() != null) {
-					baseInfoVersion.setBase_RoutePlan_version(new UTF8String16(el.getRoutePlanVersion()));
+					baseInfoVersion.setBase_RoutePlan_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getRoutePlanVersion())));
 				}
 				if(el.getRouteStationVersion() != null) {
-					baseInfoVersion.setBase_RouteStation_version(new UTF8String16(el.getRouteStationVersion()));
+					baseInfoVersion.setBase_RouteStation_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getRouteStationVersion())));
 				}
 				if(el.getVehicleVersion() != null) {
-					baseInfoVersion.setBase_Vehicle_version(new UTF8String16(el.getVehicleVersion()));
+					baseInfoVersion.setBase_Vehicle_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getVehicleVersion())));
 				}
 				if(el.getRouteLinkVersion() != null) {
-					baseInfoVersion.setBase_RouteLink_version(new UTF8String16(el.getRouteLinkVersion()));
+					baseInfoVersion.setBase_RouteLink_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getRouteLinkVersion())));
 				}
 				if(el.getRouteAllocateVersion() != null) {
-					baseInfoVersion.setBase_RouteAllocate_version(new UTF8String16(el.getRouteAllocateVersion()));
+					baseInfoVersion.setBase_RouteAllocate_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getRouteAllocateVersion())));
 				}
 				if(el.getCompanyVersion() != null) {
-					baseInfoVersion.setBase_Company_version(new UTF8String16(el.getCompanyVersion()));
+					baseInfoVersion.setBase_Company_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getCompanyVersion())));
 				}
 				if(el.getAdminVersion() != null) {
-					baseInfoVersion.setBase_Admin_version(new UTF8String16(el.getAdminVersion()));
+					baseInfoVersion.setBase_Admin_version(new UTF8String16( util.StringToVerTime( formattedDateTime, el.getAdminVersion())));
 				}
-				if(el.getRemark() != null) {
-					baseInfoVersion.setBase_Remark(new UTF8String16(el.getRemark()));
-				}			
-				
+				baseInfoVersion.setBase_Remark(new UTF8String16(formattedDateTime));
+
 				message_MESSAGE_BODY_3.add(baseInfoVersion);
 			}
 		}

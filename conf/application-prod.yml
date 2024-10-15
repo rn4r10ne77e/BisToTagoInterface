@@ -5,8 +5,8 @@ spring:
     url: jdbc:postgresql://192.168.25.21:5432/cnbus # 운영 서버
 
 server:
-  host: 192.168.60.21
+  host: 192.168.60.22
   tcp-port: 8091
-  address: 192.168.60.21
+  address: 192.168.60.22
   port: 8090
 

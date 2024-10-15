@@ -252,6 +252,35 @@ public class Util {
 
 
 
+	/**
+	 * defaultTime, version정보(8자리숫자) 입력하여 실제 버전정보(yyyyMMddHHmmss) 출력
+	 * defaultTime : YYYYMMDDHHiiss 형태의 문자열
+	 * beforeTime : 8자리 숫자
+	 * @return String : yyyyMMddHHmmss 형태의 문자열
+	 */
+	public String VerTimeToString(String defaultTime, String beforeTime) {
+
+		Timestamp dT = StringToTime(defaultTime);
+		Timestamp bT = new Timestamp(Long.parseLong(beforeTime) * 1000);
+		String verTimeString = TimeToString(new Timestamp(dT.getTime() + bT.getTime()));
+
+		return verTimeString;
+	}
+
+	/**
+	 * defaultTime, 실제 버전정보(yyyyMMddHHmmss) 입력하여 version정보(8자리숫자, 문자열) 출력
+	 * @return beforeTime : 8자리 숫자
+	 */
+	public String StringToVerTime(String defaultTime, String verTimeString) {
+
+		Timestamp dT = StringToTime(defaultTime);
+		Timestamp aT = StringToTime(verTimeString);
+		Long beforeTimeLong = (aT.getTime() - dT.getTime()) / 1000;
+
+        return String.format("%08d", beforeTimeLong);
+	}
+
+
 	private int dataPacketNumber = 0;
 	public int getDataPacketNumber() {
 		return dataPacketNumber++;
