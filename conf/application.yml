@@ -42,14 +42,6 @@ server:
   # outbound 제한시간 ( 불필요시 삭제 )
   write-time: 10
 
-logging:
-  file:
-    name: logs/prop.log
-  level:
-    root: info
-    com.zaxxer.hikari.HikariConfig: DEBUG
-#    com.zaxxer.hikari: TRACE
-
 setting:
   idle:
     read-time: 10

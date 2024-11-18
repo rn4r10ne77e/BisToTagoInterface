@@ -2,6 +2,6 @@ accounts:
   account: 
     - username: tago   
       password: tago
-      ip: [127.0.0.1, 172.16.5.175, 172.16.5.75]
+      ip: [127.0.0.1, 172.16.5.175, 172.16.5.75, 172.16.5.185]
       origins: [boryeong, cheongyang, taean, seocheon, geumsan]
       # origins: [boryeong, cheongyang, taean, seocheon, geumsan]
