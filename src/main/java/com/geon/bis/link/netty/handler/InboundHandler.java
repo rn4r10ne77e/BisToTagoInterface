@@ -104,9 +104,10 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("exceptionCaught: {}, message :{}", ExceptionUtils.getRootCauseMessage(cause), ExceptionUtils.getMessage(cause));
-        channelGroup.remove(ctx.channel());
+        log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(cause));
         channelAttribute.release(ctx);
+        channelGroup.remove(ctx.channel());
+
         ctx.close();
     }
 }

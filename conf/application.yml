@@ -7,7 +7,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 20
       connection-timeout: 10000
       idle-timeout: 10000
 mybatis:
@@ -18,7 +18,7 @@ mybatis:
 server:
   netty:
     boss-count: 1
-    worker-count: 10
+    worker-count: 30
     keep-alive: false
     backlog: 30
 

@@ -502,9 +502,12 @@ public class TagoService {
                 } else if ( subscriptionMode.hasEvent_driven() ){
                     try {
                         channelInfo.setPub208(ctx.executor().scheduleWithFixedDelay(()->{
-                            log.info("[기반정보] 이벤트 구독 ( 스케줄러 5초 )");
+                            log.info("[기반정보] 이벤트 구독 ( 스케줄러 5초 ) ( 추후 필요시 구현 현 시스템에 맞지 않음 )");
                             try {
-                                pub208.procEventPublication(ctx);
+                                // 미래 버전에 대한 데이터 전송이라고 함
+                                // 예) 변경 예정인 기반정보에 대한 정보를 미리 받아가는 개념이라고 함
+                                // 아마도 BMS 시스템 하고 연계 되어 있는 듯함.
+                                // pub208.procEventPublication(ctx);
                             } catch (Exception e) {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub208().cancel(true);

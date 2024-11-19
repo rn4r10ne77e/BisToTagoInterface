@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
-
 /**
  * 버스기반정보에대한 퍼블리케이션 모듈 이벤트, 주기방식 구독에대한 스케쥴 실행.
  * 버스기반정보는 기반정보 버전정보를 모듈 시동시 동기화 하고, 이후 버전정보를 이벤트로 수신하며, 버전정보 변경시 해당 정보 전송하는 방식으로 진행
@@ -64,7 +63,7 @@ public class Publication208BaseInfo {
 
 	// 현재의 최신 모든
 	public void procSinglePublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
-		// 현재버전정보 확인
+		// 현재 버전 정보 확인
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.origin(origin.stream()
