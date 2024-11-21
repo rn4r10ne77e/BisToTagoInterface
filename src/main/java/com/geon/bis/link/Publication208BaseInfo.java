@@ -62,7 +62,7 @@ public class Publication208BaseInfo {
 	private int timeCnt;
 
 	// 현재의 최신 모든
-	public void procSinglePublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
+	public void procSinglePublication ( ChannelHandlerContext ctx, String reqOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 		// 현재 버전 정보 확인
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
@@ -82,8 +82,8 @@ public class Publication208BaseInfo {
 		}
 	}
 	
-	// 바뀐 버전의 기반정보만 전송
-	public void procEventPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
+	// 미래 버전 ( 적용 되지 않았지만 적용 예정인 기반 정보
+	public void procEventPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.origin(origin.stream()
@@ -102,7 +102,7 @@ public class Publication208BaseInfo {
 		}
 	}
 
-	private void pubProcess( ResultBaseInfoVersion ver, RegionCode origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
+	private void pubProcess( ResultBaseInfoVersion ver, RegionCode origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 		// Station 전송
 		if(ver.getStationVersion() != null) {
 			List<List<StationModel>> stationList = partitionList(baseInfoMapper.getStation(ParamBaseInfo.builder()
@@ -205,6 +205,7 @@ public class Publication208BaseInfo {
 			for (List<RoutePlanModel> el : RouteplanList) {
 				C2CAuthenticatedMessage result = publication(pubRoutePlan(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
+
 				ctx.writeAndFlush(result);
 			}
 		}
@@ -1202,7 +1203,6 @@ public class Publication208BaseInfo {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		baos.reset();
-		log.info("test data : {}",dummy);
 		util.getCoder().encode(dummy, baos);
 		byte[] encoding = baos.toByteArray();
 

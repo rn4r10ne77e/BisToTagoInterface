@@ -1,5 +1,7 @@
 package com.geon.bis.link.config;
 
+import datex.Datex;
+import datex.iso14827_2.C2CAuthenticatedMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
@@ -7,8 +9,13 @@ import io.netty.util.concurrent.ScheduledFuture;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -40,10 +47,11 @@ public class  ChannelAttribute {
     }
 
     public void init(ChannelHandlerContext ctx){
-        ctx.channel().attr(INFO).set(ChannelAttribute.ChannelInfo.builder()
+        ctx.channel().attr(INFO).set(ChannelInfo.builder()
                         .sessionConnected(false)
                         .heartbeatDurationMax(0)
                         .responseTimeOut(0)
+                        .messages(new LinkedBlockingQueue<>())
                         .origin(new ArrayList<>())
                         .destination("")
                 .build());
@@ -64,6 +72,7 @@ public class  ChannelAttribute {
         private boolean sessionConnected;
         private int heartbeatDurationMax;
         private boolean subGuarantee;
+        private Queue<C2CAuthenticatedMessage> messages;
 
         private ScheduledFuture<?> pub201;
         private ScheduledFuture<?> pub202;

@@ -47,7 +47,7 @@ public class Publication207BaseInfoVersion {
 	@Value("${server.timeCnt}")
 	private int timeCnt;
 
-	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
+	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 				.mode("SINGLE")
@@ -65,7 +65,7 @@ public class Publication207BaseInfoVersion {
 
 	}
 
-	public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
+	public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 		// 버전정보 확인후 전달 이벤트 방식
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
@@ -90,7 +90,7 @@ public class Publication207BaseInfoVersion {
 	 * @throws EncodeFailedException 인코딩 실패시
 	 * @throws EncodeNotSupportedException 인코딩 실패시
 	 */
-	private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBaseInfoVersion> versionList) throws EncodeFailedException, EncodeNotSupportedException {
+	private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBaseInfoVersion> versionList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
 		if (!versionList.isEmpty()) {
 			List<ResultBaseInfoVersion> sendList = new ArrayList<>();
@@ -99,6 +99,7 @@ public class Publication207BaseInfoVersion {
 				if( sendList.size() >= sendCnt ) {
 					C2CAuthenticatedMessage data = publication(pubData(sendList), origin, ctx);
 					this.testEncoding(data);
+
 					ctx.writeAndFlush(data);
 					sendList.clear();
 				}
@@ -108,12 +109,13 @@ public class Publication207BaseInfoVersion {
 			if( !sendList.isEmpty() ) {
 				C2CAuthenticatedMessage data = publication(pubData(sendList), origin, ctx);
 				this.testEncoding(data);
+
 				ctx.writeAndFlush(data);
 			}
 		}
 	}
 
-	public void procPeriodicPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
+	public void procPeriodicPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
 						.mode("EVENT")

@@ -3,8 +3,6 @@ package com.geon.bis.link.netty.handler;
 import com.geon.bis.link.TagoService;
 import com.geon.bis.link.config.ChannelAttribute;
 import datex.iso14827_2.C2CAuthenticatedMessage;
-import com.oss.asn1.DecodeFailedException;
-import com.oss.asn1.DecodeNotSupportedException;
 import datex.iso14827_2.PDUs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -18,8 +16,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-
 @Slf4j
 @Component
 @ChannelHandler.Sharable
@@ -32,7 +28,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
     @Value("${server.datagram-size}")
     private int DATAGRAM_SIZE;
-    private ByteBuf byteBuf = null;
+
 
     /* @ChannelHandler.Sharable 일때는 사용하지 말것 채널 파이프라인에서 new 키워드로 인스턴스화 시킨 핸들러만 멤버변수 사용 가능 */
 //    private ScheduledFuture<?> scheduledFuture;
@@ -40,14 +36,14 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        byteBuf = PooledByteBufAllocator.DEFAULT.directBuffer(DATAGRAM_SIZE, DATAGRAM_SIZE*2);
+
         channelAttribute.init(ctx);
         channelGroup.add(ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        byteBuf.release();
+
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
     }
@@ -56,7 +52,8 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
-//        log.info("received : {}", c2c);
+
+
         switch (c2c.getPdu().getChosenFlag()) {
 
             case PDUs.login_chosen:
@@ -73,7 +70,9 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
             case PDUs.subscription_chosen:
                 C2CAuthenticatedMessage rtnC2c = tagoService.responseSubscription(c2c, ctx);
                 if (rtnC2c.getPdu().hasAccept()) {
-                    tagoService.processSubscription(c2c.getPdu().getSubscription(), ctx);
+
+
+                    tagoService.processSubscription(c2c, ctx);
                 }
                 ctx.writeAndFlush(rtnC2c);
                 break;
@@ -107,7 +106,18 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
         log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(cause));
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
-
         ctx.close();
     }
+
+
+
+
+
+
+
+
+
+
+
+
 }

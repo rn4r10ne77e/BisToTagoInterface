@@ -4,8 +4,6 @@ import com.geon.bis.link.config.Account;
 import com.geon.bis.link.config.AccountProperties;
 import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.config.RegionCode;
-import com.geon.bis.link.mapper.BusLocationInfoMapper;
-import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -14,14 +12,12 @@ import datex.iso14827_2.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.util.concurrent.ScheduledFuture;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -45,6 +41,7 @@ public class TagoService {
     private final Publication207BaseInfoVersion pub207;
     private final Publication208BaseInfo pub208;
     private final ChannelAttribute channelAttribute;
+    private final NioEventLoopGroup workerGroup;
 
     private int dataPacketNumber = 0;
 
@@ -372,21 +369,23 @@ public class TagoService {
      * 서브스크립션을 처리한다.
      * @param subscription 구독 모드 : SINGLE, PERIOD, EVENT
      */
-    public void processSubscription(Subscription subscription, ChannelHandlerContext ctx) throws RuntimeException{
+    public void processSubscription(C2CAuthenticatedMessage c2c, ChannelHandlerContext ctx) throws RuntimeException{
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
 
-        SubscriptionMode subscriptionMode = subscription
+        SubscriptionMode subscriptionMode = c2c.getPdu().getSubscription()
                 .getDatexSubscribe_Type()
                 .getSubscription()
                 .getDatexSubscribe_Mode();
 
-        String oId = subscription
-                .getDatexSubscribe_Type().
-                getSubscription()
+        String oId = c2c.getPdu().getSubscription()
+                .getDatexSubscribe_Type()
+                .getSubscription()
                 .getDatexSubscribe_Pdu()
                 .getEndApplication_Message_id()
                 .toString(new ASN1ValueFormat().excludeValueAssignment());
+
+        String headerOrigin = c2c.getOptions().getDatex_Origin_text().toString();
 
         switch (oId) {
             case Common.BUS_LOC_INFO_REQ -> {
@@ -395,12 +394,14 @@ public class TagoService {
                     channelInfo.setPub201(null);
                 }
                 if (subscriptionMode.hasSingle()) {
-                    try {
-                        log.info("[버스위치정보] 싱글 구독");
-                        pub201.procSinglePublication(ctx);
-                    } catch (Exception e) {
-                        getError(e);
-                    }
+                    ctx.executor().schedule(()->{
+                        try {
+                            log.info("[버스위치정보] 싱글 구독");
+                            pub201.procSinglePublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                        }
+                    },0, TimeUnit.SECONDS);
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
                     channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(() -> {
@@ -430,12 +431,14 @@ public class TagoService {
                     channelInfo.setPub202(null);
                 }
                 if (subscriptionMode.hasSingle()) {
-                    try {
-                        log.info("[버스도착예정] 싱글 구독");
-                        pub202.procSinglePublication(ctx);
-                    } catch (Exception e) {
-                        getError(e);
-                    }
+                    ctx.executor().schedule(()->{
+                        try {
+                            log.info("[버스도착예정] 싱글 구독");
+                            pub202.procSinglePublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                        }
+                    },0, TimeUnit.SECONDS);
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
                     channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(() -> {
@@ -465,12 +468,14 @@ public class TagoService {
                     channelInfo.setPub207(null);
                 }
                 if( subscriptionMode.hasSingle() ) {
-                    try {
-                        log.info("[기반정보버전] 싱글 구독");
-                        pub207.procSinglePublication(ctx);
-                    } catch (Exception e) {
-                        getError(e);
-                    }
+                    ctx.executor().schedule(() -> {
+                        try {
+                            log.info("[기반정보버전] 싱글 구독");
+                            pub207.procSinglePublication(ctx);
+                        } catch (Exception e) {
+                            getError(e);
+                        }
+                    },0,TimeUnit.SECONDS);
                 } else if ( subscriptionMode.hasPeriodic() ) {
                     log.info("[기반정보버전] 기간 구독 : 처리 로직 없음 확인 필요");
                 } else if ( subscriptionMode.hasEvent_driven() ){
@@ -491,23 +496,26 @@ public class TagoService {
                     channelInfo.setPub208(null);
                 }
                 if( subscriptionMode.hasSingle() ){
-                    try {
-                        log.info("[기반정보] 싱글 구독");
-                        pub208.procSinglePublication(ctx);
-                    } catch (Exception e) {
-                        getError(e);
-                    }
+                    ctx.executor().schedule(() -> {
+                        try {
+                            log.info("[기반정보] 싱글 구독");
+                            pub208.procSinglePublication(ctx, headerOrigin);
+                        } catch (Exception e) {
+                            getError(e);
+                            ctx.channel().attr(INFO).get().getPub208().cancel(true);
+                        }
+                    }, 0, TimeUnit.SECONDS);
                 }  else if ( subscriptionMode.hasPeriodic() ) {
                     log.info("[기반정보] 기간 구독 : 처리 로직 없음 확인 필요");
                 } else if ( subscriptionMode.hasEvent_driven() ){
                     try {
                         channelInfo.setPub208(ctx.executor().scheduleWithFixedDelay(()->{
                             log.info("[기반정보] 이벤트 구독 ( 스케줄러 5초 ) ( 추후 필요시 구현 현 시스템에 맞지 않음 )");
+                            // 미래 버전에 대한 데이터 전송이라고 함
+                            // 예) 변경 예정인 기반정보에 대한 정보를 미리 받아가는 개념이라고 함
+                            // 아마도 BMS 시스템 하고 연계 되어 있는 듯함.
                             try {
-                                // 미래 버전에 대한 데이터 전송이라고 함
-                                // 예) 변경 예정인 기반정보에 대한 정보를 미리 받아가는 개념이라고 함
-                                // 아마도 BMS 시스템 하고 연계 되어 있는 듯함.
-                                // pub208.procEventPublication(ctx);
+                                pub208.procEventPublication(ctx);
                             } catch (Exception e) {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub208().cancel(true);

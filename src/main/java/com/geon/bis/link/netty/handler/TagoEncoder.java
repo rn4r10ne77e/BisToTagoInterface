@@ -23,16 +23,14 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-//		log.info("send : {}", msg);
-		if (!(msg instanceof C2CAuthenticatedMessage)) {
+
+		if (!(msg instanceof C2CAuthenticatedMessage c2c)) {
 			log.error("C2C instance error");
 			return;
 		}
+//		log.info("PDU : {}",c2c.getDatex_DataPacket_number());
 
-		C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		log.debug(c2c.toString());
+      	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {
 			baos.reset();
@@ -49,8 +47,6 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 		datexDataPacket.setDatex_Data(new OctetString(encoding));
 		datexDataPacket.setDatex_Crc_nbr(new OctetString(util.getCrc16(encoding)));
 
-
-		log.debug("result : {}",datexDataPacket);
 		try {
 			baos.reset();
 			util.getCoder().encode(datexDataPacket, baos);
@@ -63,7 +59,17 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 			log.error("DatagramSize is over : " + baos.size());
 			return;
 		}
+
+//		if( ctx.channel().isWritable() ){
+//			log.info("Channel is now writable.");
+//		} else {
+//			log.error("Channel is not writable (buffer is full).");
+//		}
 		
 		out.writeBytes(baos.toByteArray());
 	}
+
+
+
+
 }

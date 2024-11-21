@@ -32,6 +32,7 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
         ch.pipeline()
                 .addLast("TagoEncoder", new TagoEncoder(util))
                 .addLast(outboundHandler)
+                .addLast("TagoQueue", new MessageQueue())
                 .addLast("TagoDecoder", new TagoDecoder(util))
                 .addLast(inboundHandler);
     }
