@@ -53,6 +53,8 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
 
+        log.info(c2c.toString());
+
 
         switch (c2c.getPdu().getChosenFlag()) {
 

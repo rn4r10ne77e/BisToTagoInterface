@@ -52,7 +52,6 @@ public class Publication208BaseInfo {
 	private final Util util;
 	private final BaseInfoMapper baseInfoMapper;
 	private final BaseInfoVersionMapper baseInfoVersionMapper;
-	private final MybatisAutoConfiguration.MapperScannerRegistrarNotFoundConfiguration mapperScannerRegistrarNotFoundConfiguration;
 
 	@Value("${server.sender}")
 	private String sender;
@@ -61,45 +60,30 @@ public class Publication208BaseInfo {
 	@Value("${server.timeCnt}")
 	private int timeCnt;
 
-	// 현재의 최신 모든
-	public void procSinglePublication ( ChannelHandlerContext ctx, String reqOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
-		// 현재 버전 정보 확인
-		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
-				.origin(origin.stream()
-						.map(Integer::parseInt)
-						.collect(Collectors.toList()))
-				.mode("SINGLE")
-				.build());
+	public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
-		for ( RegionCode regionCode : RegionCode.values() ) {
-			Optional<ResultBaseInfoVersion> result = versionList.stream()
-					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
-					.findFirst();
-			if( result.isPresent() ){
-				pubProcess( result.get(), regionCode, ctx );
-			}
-		}
+		List<Integer> requiredRegion = List.of( RegionCode.findByRegion(requiredOrigin).getCode() );
+		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
+				.origin(requiredRegion)
+				.build());
+		pubProcess( versionList.get(0), RegionCode.findByRegion(requiredOrigin), ctx );
 	}
 	
-	// 미래 버전 ( 적용 되지 않았지만 적용 예정인 기반 정보
-	public void procEventPublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
-		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
-				.origin(origin.stream()
-						.map(Integer::parseInt)
-						.collect(Collectors.toList()))
-				.mode("EVENT")
-				.build());
-
-		for ( RegionCode regionCode : RegionCode.values() ) {
-			Optional<ResultBaseInfoVersion> result = versionList.stream()
-					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
-					.findFirst();
-			if( result.isPresent() ){
-				pubProcess( result.get(), regionCode, ctx );
-			}
-		}
+	// 미래 버전 ( 적용 되지 않았지만 적용 예정인 기반 정보 ) 새로 구현해야 할 부분
+	public void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+//		List<Integer> origin = List.of( RegionCode.findByRegion(requiredOrigin).getCode() );
+//		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
+//				.origin(origin)
+//				.build());
+//
+//		for ( RegionCode regionCode : RegionCode.values() ) {
+//			Optional<ResultBaseInfoVersion> result = versionList.stream()
+//					.filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode())))
+//					.findFirst();
+//			if( result.isPresent() ){
+//				pubProcess( result.get(), regionCode, ctx );
+//			}
+//		}
 	}
 
 	private void pubProcess( ResultBaseInfoVersion ver, RegionCode origin, ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
@@ -107,7 +91,6 @@ public class Publication208BaseInfo {
 		if(ver.getStationVersion() != null) {
 			List<List<StationModel>> stationList = partitionList(baseInfoMapper.getStation(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getStationVersion())
 					.build()), sendCnt);
 			for (List<StationModel> el : stationList) {
@@ -120,7 +103,6 @@ public class Publication208BaseInfo {
 		if(ver.getRouteVersion() != null && !ver.getRouteVersion().isEmpty()) {
 			List<List<RouteModel>> RouteList = partitionList(baseInfoMapper.getRoute(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getRouteVersion())
 					.build()), sendCnt);
 			for (List<RouteModel> el : RouteList) {
@@ -133,7 +115,6 @@ public class Publication208BaseInfo {
 		if(ver.getRouteStationVersion() != null && !ver.getRouteStationVersion().isEmpty()) {
 			List<List<RouteStationModel>> RoutestationList = partitionList(baseInfoMapper.getRouteStation(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getRouteStationVersion())
 					.build()), sendCnt);
 			for (List<RouteStationModel> el : RoutestationList) {
@@ -146,7 +127,6 @@ public class Publication208BaseInfo {
 		if(ver.getVehicleVersion() != null && !ver.getVehicleVersion().isEmpty()) {
 			List<List<VehicleModel>> VehicleList = partitionList(baseInfoMapper.getVehicle(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getVehicleVersion())
 					.build()), sendCnt);
 			for (List<VehicleModel> el : VehicleList) {
@@ -159,7 +139,6 @@ public class Publication208BaseInfo {
 		if(ver.getNodeVersion() != null && !ver.getNodeVersion().isEmpty()) {
 			List<List<NodeModel>> NodeList = partitionList(baseInfoMapper.getNode(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getNodeVersion())
 					.build()), sendCnt);
 			for (List<NodeModel> el : NodeList) {
@@ -173,7 +152,6 @@ public class Publication208BaseInfo {
 		if(ver.getLinkVersion() != null && !ver.getLinkVersion().isEmpty()) {
 			List<List<LinkModel>> LinkList = partitionList(baseInfoMapper.getLink(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getLinkVersion())
 					.build()), sendCnt);
 			for (List<LinkModel> el : LinkList) {
@@ -186,7 +164,6 @@ public class Publication208BaseInfo {
 		if(ver.getLinkCoordsVersion() != null && !ver.getLinkCoordsVersion().isEmpty()) {
 			List<List<LinkCoordsModel>> LinkcoordsList = partitionList(baseInfoMapper.getLinkCoords(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getLinkCoordsVersion())
 					.build()), sendCnt);
 			for (List<LinkCoordsModel> el : LinkcoordsList) {
@@ -199,13 +176,11 @@ public class Publication208BaseInfo {
 		if(ver.getRoutePlanVersion() != null && !ver.getRoutePlanVersion().isEmpty()) {
 			List<List<RoutePlanModel>> RouteplanList = partitionList(baseInfoMapper.getRoutePlan(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getRoutePlanVersion())
 					.build()), sendCnt);
 			for (List<RoutePlanModel> el : RouteplanList) {
 				C2CAuthenticatedMessage result = publication(pubRoutePlan(el), origin.getRegion(), ctx);
 				this.testEncoding(result);
-
 				ctx.writeAndFlush(result);
 			}
 		}
@@ -213,7 +188,6 @@ public class Publication208BaseInfo {
 		if(ver.getRouteLinkVersion() != null && !ver.getRouteLinkVersion().isEmpty()) {
 			List<List<RouteLinkModel>> RoutelinkList = partitionList(baseInfoMapper.getRouteLink(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getRouteLinkVersion())
 					.build()), sendCnt);
 			for (List<RouteLinkModel> el : RoutelinkList) {
@@ -226,7 +200,6 @@ public class Publication208BaseInfo {
 		if(ver.getRouteAllocateVersion() != null && !ver.getRouteAllocateVersion().isEmpty()) {
 			List<List<RouteAllocateModel>> RouteallocateList = partitionList(baseInfoMapper.getRouteAllocate(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getRouteAllocateVersion())
 					.build()), sendCnt);
 			for (List<RouteAllocateModel> el : RouteallocateList) {
@@ -239,7 +212,6 @@ public class Publication208BaseInfo {
 		if(ver.getCompanyVersion() != null && !ver.getCompanyVersion().isEmpty()) {
 			List<List<CompanyModel>> CompanyList = partitionList(baseInfoMapper.getCompany(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getCompanyVersion())
 					.build()), sendCnt);
 			for (List<CompanyModel> el : CompanyList) {
@@ -252,7 +224,6 @@ public class Publication208BaseInfo {
 		if(ver.getAdminVersion() != null && !ver.getAdminVersion().isEmpty()) {
 			List<List<AdminModel>> AdminList = partitionList(baseInfoMapper.getAdmin(ParamBaseInfo.builder()
 					.origin(origin.getCode())
-					.mode("SINGLE")
 					.ver(ver.getAdminVersion())
 					.build()), sendCnt);
 			for (List<AdminModel> el : AdminList) {

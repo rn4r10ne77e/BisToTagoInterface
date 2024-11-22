@@ -56,22 +56,18 @@ public class Publication201BusLocationInfo {
      * @param ctx 요청한 핸들러
      * @throws Exception 인코딩에 대한 예외
      */
-    public void procSinglePublication (ChannelHandlerContext ctx) throws Exception {
-        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+    public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws Exception {
+
+        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
+//        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                         .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
                         .mode("SINGLE")
-                .origin(origin.stream()
-                        .map(Integer::parseInt) // 문자열을 정수로 변환
-                        .collect(Collectors.toList()))
+                        .origin(origin)
                 .build());
 
-        for( RegionCode regionCode : RegionCode.values() ) {
-            this.makePublicationData(
-                    ctx,
-                    regionCode.getRegion(),
-                    busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
-        }
+        this.makePublicationData( ctx, requiredOrigin, busList);
+
     }
 
     /**
@@ -79,24 +75,18 @@ public class Publication201BusLocationInfo {
      * @param ctx - 요청한 핸들러
      * @throws Exception - 인코딩에 대한 예외
      */
-    public void procPeriodicPublication (ChannelHandlerContext ctx) throws Exception {
+    public void procPeriodicPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
         // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
-        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
+//        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                 .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                 .mode("PERIOD")
-                .origin(origin.stream()
-                        .map(Integer::parseInt) // 문자열을 정수로 변환
-                        .collect(Collectors.toList()))
+                .origin(origin)
                 .build());
 
-        for( RegionCode regionCode : RegionCode.values() ) {
-            this.makePublicationData(
-                    ctx,
-                    regionCode.getRegion(),
-                    busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
-        }
+        this.makePublicationData( ctx, requiredOrigin, busList);
     }
 
     /**
@@ -104,24 +94,19 @@ public class Publication201BusLocationInfo {
      * @param ctx - 요청한 핸들러
      * @throws Exception - 인코딩에 대한 예외
      */
-    public void procEventPublication (ChannelHandlerContext ctx) throws Exception {
+    public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
         try {
-            List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+            List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
+//            List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
             log.info("procEventPublication start");
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                     .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                     .mode("EVENT")
-                    .origin(origin.stream()
-                            .map(Integer::parseInt) // 문자열을 정수로 변환
-                            .collect(Collectors.toList()))
+                    .origin(origin)
                     .build());
 
-            for( RegionCode regionCode : RegionCode.values() ) {
-                this.makePublicationData(
-                        ctx,
-                        regionCode.getRegion(),
-                        busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
-            }
+            this.makePublicationData( ctx, requiredOrigin, busList);
+
         } catch ( Exception e) {
             throw new Exception(e);
         }

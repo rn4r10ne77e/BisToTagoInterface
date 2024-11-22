@@ -47,40 +47,24 @@ public class Publication207BaseInfoVersion {
 	@Value("${server.timeCnt}")
 	private int timeCnt;
 
-	public  void procSinglePublication(ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
-		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+	public  void procSinglePublication(ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+
+		List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
-				.mode("SINGLE")
-				.origin(origin.stream()
-						.map(Integer::parseInt) // 문자열을 정수로 변환
-						.collect(Collectors.toList()))
+				.origin(origin)
 				.build());
 
-		for( RegionCode regionCode : RegionCode.values() ){
-			makePublicationData(
-					ctx,
-					regionCode.getRegion(),
-					versionList.stream().filter(e -> e.getOrigin().equals(String.valueOf(regionCode.getCode()))).toList());
-		}
-
+		makePublicationData( ctx, requiredOrigin, versionList );
 	}
 
-	public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
-		// 버전정보 확인후 전달 이벤트 방식
-		List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+	public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+
+		List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
-				.origin(origin.stream()
-						.map(Integer::parseInt) // 문자열을 정수로 변환
-						.collect(Collectors.toList()))
-						.mode("EVENT")
+				.origin(origin)
 				.build());
 
-		for( RegionCode regionCode : RegionCode.values() ){
-			makePublicationData(
-					ctx,
-					regionCode.getRegion(),
-					versionList.stream().filter(e-> e.getOrigin().equals(String.valueOf(regionCode.getCode()))).toList());
-		}
+		makePublicationData( ctx, requiredOrigin, versionList );
 	}
 
 	/**

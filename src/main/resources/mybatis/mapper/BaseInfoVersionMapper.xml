@@ -20,6 +20,6 @@
             admin_version          as adminVersion,
             remark                 as remark,
             now()                  as messageGenerationTime
-        from public.get_base_info_version(#{origin}, #{mode})
+        from public.get_base_info_version(#{origin})
     </select>
 </mapper>

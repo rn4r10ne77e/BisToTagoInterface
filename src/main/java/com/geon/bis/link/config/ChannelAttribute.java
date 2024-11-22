@@ -74,9 +74,24 @@ public class  ChannelAttribute {
         private boolean subGuarantee;
         private Queue<C2CAuthenticatedMessage> messages;
 
-        private ScheduledFuture<?> pub201;
-        private ScheduledFuture<?> pub202;
-        private ScheduledFuture<?> pub207;
+        private ScheduledFuture<?> pub201boryeong;
+        private ScheduledFuture<?> pub201cheongyang;
+        private ScheduledFuture<?> pub201taean;
+        private ScheduledFuture<?> pub201seocheon;
+        private ScheduledFuture<?> pub201geumsan;
+
+        private ScheduledFuture<?> pub202boryeong;
+        private ScheduledFuture<?> pub202cheongyang;
+        private ScheduledFuture<?> pub202taean;
+        private ScheduledFuture<?> pub202seocheon;
+        private ScheduledFuture<?> pub202geumsan;
+
+        private ScheduledFuture<?> pub207boryeong;
+        private ScheduledFuture<?> pub207cheongyang;
+        private ScheduledFuture<?> pub207taean;
+        private ScheduledFuture<?> pub207seocheon;
+        private ScheduledFuture<?> pub207geumsan;
+
         private ScheduledFuture<?> pub208;
 
         private int responseTimeOut;

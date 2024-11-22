@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.geon.bis.link.config.ChannelAttribute.*;
@@ -190,9 +191,9 @@ public class TagoService {
             }
         }
         if (isMatchIdAndPassword) {
-            log.debug("[Login] id & password are correct");
+            log.info("[Login] id & password are correct");
         } else {
-            log.debug("[Login] id or password is not matched");
+            log.info("[Login] id or password is not matched");
         }
 
         // process reject
@@ -397,7 +398,7 @@ public class TagoService {
                     ctx.executor().schedule(()->{
                         try {
                             log.info("[버스위치정보] 싱글 구독");
-                            pub201.procSinglePublication(ctx);
+                            pub201.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                         }
@@ -407,7 +408,7 @@ public class TagoService {
                     channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(() -> {
                         log.info("[버스위치정보] 주기 구독 ( 스케줄러 {}초 )", interval);
                         try {
-                            pub201.procPeriodicPublication(ctx);
+                            pub201.procPeriodicPublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                             ctx.channel().attr(INFO).get().getPub201().cancel(true);
@@ -417,7 +418,7 @@ public class TagoService {
                     channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(()->{
                         log.info("[버스위치정보] 이벤트 구독 ( 스케줄러 5초 )");
                         try {
-                            pub201.procEventPublication(ctx);
+                            pub201.procEventPublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                             ctx.channel().attr(INFO).get().getPub202().cancel(true);
@@ -434,7 +435,7 @@ public class TagoService {
                     ctx.executor().schedule(()->{
                         try {
                             log.info("[버스도착예정] 싱글 구독");
-                            pub202.procSinglePublication(ctx);
+                            pub202.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                         }
@@ -444,7 +445,7 @@ public class TagoService {
                     channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(() -> {
                         log.info("[버스도착예정] 주기 구독 ( 스케줄러 {}초 )", interval);
                         try {
-                            pub202.procPeriodicPublication(ctx);
+                            pub202.procPeriodicPublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                             ctx.channel().attr(INFO).get().getPub202().cancel(true);
@@ -454,7 +455,7 @@ public class TagoService {
                     channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(()->{
                         log.info("[버스도착예정] 이벤트 구독 ( 스케줄러 5초 )");
                         try {
-                            pub202.procEventPublication(ctx);
+                            pub202.procEventPublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                             ctx.channel().attr(INFO).get().getPub202().cancel(true);
@@ -471,7 +472,7 @@ public class TagoService {
                     ctx.executor().schedule(() -> {
                         try {
                             log.info("[기반정보버전] 싱글 구독");
-                            pub207.procSinglePublication(ctx);
+                            pub207.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                         }
@@ -479,15 +480,32 @@ public class TagoService {
                 } else if ( subscriptionMode.hasPeriodic() ) {
                     log.info("[기반정보버전] 기간 구독 : 처리 로직 없음 확인 필요");
                 } else if ( subscriptionMode.hasEvent_driven() ){
-                    channelInfo.setPub207(ctx.executor().scheduleWithFixedDelay(()->{
-                        log.info("[기반정보버전] 이벤트 구독 5 초");
-                        try {
-                            pub207.procEventPublication(ctx);
-                        } catch (Exception e) {
-                            getError(e);
-                            ctx.channel().attr(INFO).get().getPub207().cancel(true);
-                        }
-                    }, 5, 5, TimeUnit.SECONDS));
+                    var info = ctx.channel().attr(INFO).get();
+                    switch(headerOrigin){
+                        case "boryeong" -> info.setPub207boryeong(ctx.executor().scheduleWithFixedDelay(()->{
+                            log.info("[기반정보버전] 이벤트 구독 5 초");
+                            try {
+                                pub207.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub207boryeong().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "cheongyang" -> info.setPub207cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
+                              log.info("[기반정보버전] 이벤트 구독 5 초");
+                              try {
+                                  pub207.procEventPublication(ctx, headerOrigin);
+                              } catch (Exception e) {
+                                  getError(e);
+                                  ctx.channel().attr(INFO).get().getPub207cheongyang().cancel(true);
+                              }
+                          }, 5, 5, TimeUnit.SECONDS));
+                        case "taean" -> info.getPub207taean();
+                        case "seocheon" -> info.getPub207seocheon();
+                        case "geumsan" -> info.getPub207geumsan();
+                      default -> throw new IllegalStateException("Unexpected value: " + headerOrigin);
+                    }
+
                 } // 버스 기반 버전 정보
             }
             case Common.BASE_INFO_REQ -> {
@@ -506,24 +524,9 @@ public class TagoService {
                         }
                     }, 0, TimeUnit.SECONDS);
                 }  else if ( subscriptionMode.hasPeriodic() ) {
-                    log.info("[기반정보] 기간 구독 : 처리 로직 없음 확인 필요");
+                    log.info("[기반정보] 기간 구독 : 처리 로직 없음");
                 } else if ( subscriptionMode.hasEvent_driven() ){
-                    try {
-                        channelInfo.setPub208(ctx.executor().scheduleWithFixedDelay(()->{
-                            log.info("[기반정보] 이벤트 구독 ( 스케줄러 5초 ) ( 추후 필요시 구현 현 시스템에 맞지 않음 )");
-                            // 미래 버전에 대한 데이터 전송이라고 함
-                            // 예) 변경 예정인 기반정보에 대한 정보를 미리 받아가는 개념이라고 함
-                            // 아마도 BMS 시스템 하고 연계 되어 있는 듯함.
-                            try {
-                                pub208.procEventPublication(ctx);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub208().cancel(true);
-                            }
-                        }, 5, 5, TimeUnit.SECONDS));
-                    } catch (Exception e) {
-                        getError(e);
-                    }
+                    log.info("[기반정보] 이벤트 구독 : 처리 로직 없음");
                 }
             }
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);

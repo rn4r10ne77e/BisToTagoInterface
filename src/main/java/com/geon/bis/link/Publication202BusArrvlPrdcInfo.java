@@ -68,82 +68,44 @@ public class Publication202BusArrvlPrdcInfo {
         }
     }
 
-    public void procSinglePublication ( ChannelHandlerContext ctx ) throws EncodeFailedException, EncodeNotSupportedException {
-        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+    public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException {
+        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
-                        .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
-                        .mode("SINGLE")
-                .origin(origin.stream()
-                        .map(Integer::parseInt) // 문자열을 정수로 변환
-                        .collect(Collectors.toList()))
-                .build());
-        for( RegionCode regionCode : RegionCode.values() ) {
-            this.makePublicationData(
-                    ctx,
-                    regionCode.getRegion(),
-                    busList.stream().filter(e-> e.getPTVehicleIDNumber().substring(0,3).equals(String.valueOf(regionCode.getCode()))).toList());
-        }
+          .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
+          .mode("SINGLE")
+          .origin(origin)
+          .build());
+
+        this.makePublicationData( ctx, requiredOrigin, busList );
     }
 
 
-    public void procEventPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
-        // 짧은 주기 신규 데이터만 스캔하여 publication (중복데이터 미전송)
-        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+    public void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException {
+        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
-                    .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
-                    .mode("EVENT")
-                .origin(origin.stream()
-                        .map(Integer::parseInt) // 문자열을 정수로 변환
-                        .collect(Collectors.toList()))
-                .build());
+          .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
+          .mode("EVENT")
+          .origin(origin)
+          .build());
+        makePublicationData( ctx, requiredOrigin, busList );
 
-        for(RegionCode regionCode : RegionCode.values() ) {
-            makePublicationData(
-                    ctx,
-                    regionCode.getRegion(),
-                    busList.stream().filter(e -> e.getPTVehicleIDNumber().substring(0, 3).equals(String.valueOf(regionCode.getCode()))).toList()
-            );
-        }
     }
 
-    public void procPeriodicPublication (ChannelHandlerContext ctx) throws EncodeFailedException, EncodeNotSupportedException {
+    public void procPeriodicPublication (ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException {
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
-        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
+        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
                 .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                 .mode("PERIOD")
-                .origin(origin.stream()
-                        .map(Integer::parseInt) // 문자열을 정수로 변환
-                        .collect(Collectors.toList()))
+                .origin(origin)
                 .build());
 
-        for( RegionCode regionCode : RegionCode.values() ) {
-            makePublicationData(
-                    ctx,
-                    regionCode.getRegion(),
-                    busList.stream().filter(e -> e.getPTVehicleIDNumber().substring(0, 3).equals(String.valueOf(regionCode.getCode()))).toList()
-            );
-        }
+        makePublicationData( ctx, requiredOrigin, busList );
     }
 
     private C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
 
         EndApplicationMessage DatexPublish_Data = EndAppMsg;
-
-//        if (env.isPUB_TEST_ON()) {
-//            log.info("[Publication Test]");
-//            // 실시간 정보 테스트 데이터 생성
-//            DatexPublish_Data = pubTestData();
-//        } else {
-//            // 데이터가 없을 경우 패킷을 생성하지 않음.
-//            if (DatexPublish_Data == null) {
-//                log.info("[No Publication]");
-//                return false;
-//            }
-//
-//            log.info("[Publication]");
-//        }
-
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());

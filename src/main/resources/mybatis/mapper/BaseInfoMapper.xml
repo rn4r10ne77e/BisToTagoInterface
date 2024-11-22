@@ -19,7 +19,7 @@
             remark as remark,
             ver as ver,
             total as total
-        from public.get_station(#{origin}, #{mode}, #{ver})
+        from public.get_station(#{origin}, #{ver})
     </select>
     <select id="getRoute" parameterType="ParamBaseInfo" resultType="RouteModel">
         select
@@ -41,7 +41,7 @@
             regist_dt as regDate,
             '' as remark,
             ver as ver
-        from public.get_route(#{origin}, #{mode}, #{ver})
+        from public.get_route(#{origin}, #{ver})
     </select>
     <select id="getRouteStation" parameterType="ParamBaseInfo" resultType="RouteStationModel">
         select
@@ -59,7 +59,7 @@
             remark as remark,
             ver as ver,
             total as total
-        from public.get_route_station(#{origin}, #{mode}, #{ver})
+        from public.get_route_station(#{origin}, #{ver})
 
     </select>
     <select id="getVehicle" parameterType="ParamBaseInfo" resultType="VehicleModel">
@@ -76,7 +76,7 @@
             remark as remark,
             ver as ver,
             total as total
-        from public.get_vehicle(#{origin}, #{mode}, #{ver})
+        from public.get_vehicle(#{origin}, #{ver})
     </select>
     <select id="getNode" parameterType="ParamBaseInfo" resultType="NodeModel">
         select 1;
@@ -110,7 +110,7 @@
             admin_id as adminId,
             regist_dt as regDate,
             ver as ver
-        from get_company(#{origin}, #{mode}, #{ver})
+        from get_company(#{origin}, #{ver})
     </select>
     <select id="getAdmin" parameterType="ParamBaseInfo" resultType="AdminModel">
         select
@@ -121,6 +121,6 @@
             reg_date as regDate,
             remark as remark,
             ver as ver
-        from get_admin(#{origin}, #{mode}, #{ver})
+        from get_admin(#{origin}, #{ver})
     </select>
 </mapper>
