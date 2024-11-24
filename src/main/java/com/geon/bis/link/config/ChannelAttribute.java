@@ -26,24 +26,6 @@ public class  ChannelAttribute {
     public void release(ChannelHandlerContext ctx){
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
-
-        if( channelInfo.getPub201() != null ){
-            channelInfo.getPub201().cancel(true);
-            channelInfo.setPub201(null);
-        }
-        if( channelInfo.getPub202() != null ){
-            channelInfo.getPub202().cancel(true);
-            channelInfo.setPub202(null);
-        }
-        if( channelInfo.getPub207() != null ){
-            channelInfo.getPub207().cancel(true);
-            channelInfo.setPub207(null);
-        }
-
-        if( channelInfo.getPub208() != null ){
-            channelInfo.getPub208().cancel(true);
-            channelInfo.setPub208(null);
-        }
     }
 
     public void init(ChannelHandlerContext ctx){

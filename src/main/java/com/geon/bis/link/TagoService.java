@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -357,19 +359,13 @@ public class TagoService {
             c2c.setPdu(PDUs.createPDUsWithAccept(accept));
         } else {
             c2c.setDatex_AuthenticationInfo_text(new OctetString());
-
             reject.setDatexReject_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
-
             c2c.setPdu(PDUs.createPDUsWithReject(reject));
         }
 
         return c2c;
     }
 
-    /**
-     * 서브스크립션을 처리한다.
-     * @param subscription 구독 모드 : SINGLE, PERIOD, EVENT
-     */
     public void processSubscription(C2CAuthenticatedMessage c2c, ChannelHandlerContext ctx) throws RuntimeException{
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
@@ -386,18 +382,16 @@ public class TagoService {
                 .getEndApplication_Message_id()
                 .toString(new ASN1ValueFormat().excludeValueAssignment());
 
-        String headerOrigin = c2c.getOptions().getDatex_Origin_text().toString();
+        String headerOrigin = c2c.getOptions()
+                .getDatex_Origin_text()
+                .toString(new ASN1ValueFormat().excludeValueAssignment()).replaceAll("\"","");
 
         switch (oId) {
+
             case Common.BUS_LOC_INFO_REQ -> {
-                if( channelInfo.getPub201() != null ){
-                    channelInfo.getPub201().cancel(true);
-                    channelInfo.setPub201(null);
-                }
                 if (subscriptionMode.hasSingle()) {
                     ctx.executor().schedule(()->{
                         try {
-                            log.info("[버스위치정보] 싱글 구독");
                             pub201.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
@@ -405,32 +399,54 @@ public class TagoService {
                     },0, TimeUnit.SECONDS);
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
-                    channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(() -> {
-                        log.info("[버스위치정보] 주기 구독 ( 스케줄러 {}초 )", interval);
-                        try {
-                            pub201.procPeriodicPublication(ctx, headerOrigin);
-                        } catch (Exception e) {
-                            getError(e);
-                            ctx.channel().attr(INFO).get().getPub201().cancel(true);
-                        }
-                    }, 5, interval, TimeUnit.SECONDS));
                 } else if (subscriptionMode.hasEvent_driven()) {
-                    channelInfo.setPub201(ctx.executor().scheduleWithFixedDelay(()->{
-                        log.info("[버스위치정보] 이벤트 구독 ( 스케줄러 5초 )");
-                        try {
-                            pub201.procEventPublication(ctx, headerOrigin);
-                        } catch (Exception e) {
-                            getError(e);
-                            ctx.channel().attr(INFO).get().getPub202().cancel(true);
-                        }
-                    }, 5, 5, TimeUnit.SECONDS));
+                    switch (headerOrigin) {
+                        case "boryeong" -> channelInfo.setPub201boryeong(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub201.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub201boryeong().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "cheongyang" -> channelInfo.setPub201cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub201.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub201cheongyang().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "taean" -> channelInfo.setPub201taean(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub201.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub201taean().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "seocheon" -> channelInfo.setPub201seocheon(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub201.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub201seocheon().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "geumsan" -> channelInfo.setPub201geumsan(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub201.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub201geumsan().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        default -> throw new IllegalStateException("Unexpected value: " + headerOrigin);
+                    }
                 } // 버스위치정보
             }
             case Common.ARR_PRE_TIME_INFO_REQ -> {
-                if( channelInfo.getPub202() != null ){
-                    channelInfo.getPub202().cancel(true);
-                    channelInfo.setPub202(null);
-                }
+
                 if (subscriptionMode.hasSingle()) {
                     ctx.executor().schedule(()->{
                         try {
@@ -442,48 +458,66 @@ public class TagoService {
                     },0, TimeUnit.SECONDS);
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
-                    channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(() -> {
-                        log.info("[버스도착예정] 주기 구독 ( 스케줄러 {}초 )", interval);
-                        try {
-                            pub202.procPeriodicPublication(ctx, headerOrigin);
-                        } catch (Exception e) {
-                            getError(e);
-                            ctx.channel().attr(INFO).get().getPub202().cancel(true);
-                        }
-                    }, 5, interval, TimeUnit.SECONDS));
                 } else if (subscriptionMode.hasEvent_driven()) {
-                    channelInfo.setPub202(ctx.executor().scheduleWithFixedDelay(()->{
-                        log.info("[버스도착예정] 이벤트 구독 ( 스케줄러 5초 )");
-                        try {
-                            pub202.procEventPublication(ctx, headerOrigin);
-                        } catch (Exception e) {
-                            getError(e);
-                            ctx.channel().attr(INFO).get().getPub202().cancel(true);
-                        }
-                    }, 5, 5, TimeUnit.SECONDS));
-                } // 버스도착예정
+                    switch(headerOrigin){
+                        case "boryeong" -> channelInfo.setPub202boryeong(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub202.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub202boryeong().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "cheongyang" -> channelInfo.setPub202cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub202.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub202cheongyang().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "taean" -> channelInfo.setPub202taean(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub202.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub202taean().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "seocheon" -> channelInfo.setPub202seocheon(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub202.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub202seocheon().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "geumsan" ->channelInfo.setPub202geumsan(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub202.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub202geumsan().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                    }
+                }
             }
             case Common.BASE_INFO_VERSION_REQ -> {
-                if( channelInfo.getPub207() != null ){
-                    channelInfo.getPub207().cancel(true);
-                    channelInfo.setPub207(null);
-                }
+
                 if( subscriptionMode.hasSingle() ) {
                     ctx.executor().schedule(() -> {
                         try {
-                            log.info("[기반정보버전] 싱글 구독");
                             pub207.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
                         }
                     },0,TimeUnit.SECONDS);
                 } else if ( subscriptionMode.hasPeriodic() ) {
-                    log.info("[기반정보버전] 기간 구독 : 처리 로직 없음 확인 필요");
-                } else if ( subscriptionMode.hasEvent_driven() ){
-                    var info = ctx.channel().attr(INFO).get();
+                    int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
+                } else if ( subscriptionMode.hasEvent_driven() ) {
                     switch(headerOrigin){
-                        case "boryeong" -> info.setPub207boryeong(ctx.executor().scheduleWithFixedDelay(()->{
-                            log.info("[기반정보버전] 이벤트 구독 5 초");
+                        case "boryeong" -> channelInfo.setPub207boryeong(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub207.procEventPublication(ctx, headerOrigin);
                             } catch (Exception e) {
@@ -491,8 +525,7 @@ public class TagoService {
                                 ctx.channel().attr(INFO).get().getPub207boryeong().cancel(true);
                             }
                         }, 5, 5, TimeUnit.SECONDS));
-                        case "cheongyang" -> info.setPub207cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
-                              log.info("[기반정보버전] 이벤트 구독 5 초");
+                        case "cheongyang" -> channelInfo.setPub207cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
                               try {
                                   pub207.procEventPublication(ctx, headerOrigin);
                               } catch (Exception e) {
@@ -500,33 +533,47 @@ public class TagoService {
                                   ctx.channel().attr(INFO).get().getPub207cheongyang().cancel(true);
                               }
                           }, 5, 5, TimeUnit.SECONDS));
-                        case "taean" -> info.getPub207taean();
-                        case "seocheon" -> info.getPub207seocheon();
-                        case "geumsan" -> info.getPub207geumsan();
+                        case "taean" -> channelInfo.setPub207taean(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub207.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub207taean().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "seocheon" -> channelInfo.setPub207seocheon(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub207.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub207seocheon().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
+                        case "geumsan" -> channelInfo.setPub207geumsan(ctx.executor().scheduleWithFixedDelay(()->{
+                            try {
+                                pub207.procEventPublication(ctx, headerOrigin);
+                            } catch (Exception e) {
+                                getError(e);
+                                ctx.channel().attr(INFO).get().getPub207geumsan().cancel(true);
+                            }
+                        }, 5, 5, TimeUnit.SECONDS));
                       default -> throw new IllegalStateException("Unexpected value: " + headerOrigin);
                     }
-
-                } // 버스 기반 버전 정보
+                }
             }
             case Common.BASE_INFO_REQ -> {
-                if( channelInfo.getPub208() != null ){
-                    channelInfo.getPub208().cancel(true);
-                    channelInfo.setPub208(null);
-                }
                 if( subscriptionMode.hasSingle() ){
                     ctx.executor().schedule(() -> {
                         try {
-                            log.info("[기반정보] 싱글 구독");
                             pub208.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
-                            ctx.channel().attr(INFO).get().getPub208().cancel(true);
                         }
                     }, 0, TimeUnit.SECONDS);
                 }  else if ( subscriptionMode.hasPeriodic() ) {
-                    log.info("[기반정보] 기간 구독 : 처리 로직 없음");
-                } else if ( subscriptionMode.hasEvent_driven() ){
-                    log.info("[기반정보] 이벤트 구독 : 처리 로직 없음");
+
+                } else if ( subscriptionMode.hasEvent_driven() ) {
+
                 }
             }
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
