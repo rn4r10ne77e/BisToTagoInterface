@@ -98,7 +98,6 @@ public class Publication201BusLocationInfo {
         try {
             List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
 //            List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-            log.info("procEventPublication start");
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
                     .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
                     .mode("EVENT")

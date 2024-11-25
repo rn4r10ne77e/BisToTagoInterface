@@ -52,7 +52,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
-        log.info(c2c.toString());
+        log.debug("수신메세지:{}", c2c);
         switch (c2c.getPdu().getChosenFlag()) {
 
             case PDUs.login_chosen:
@@ -102,7 +102,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("exceptionCaught: {}", ExceptionUtils.getRootCauseMessage(cause));
+        log.error("exceptionCaught: {}", ExceptionUtils.getStackTrace(cause));
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
         ctx.close();

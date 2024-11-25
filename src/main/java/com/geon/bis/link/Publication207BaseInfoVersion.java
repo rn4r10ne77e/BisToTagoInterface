@@ -51,6 +51,7 @@ public class Publication207BaseInfoVersion {
 
 		List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
+				.mode("SINGLE") // ""
 				.origin(origin)
 				.build());
 
@@ -61,6 +62,7 @@ public class Publication207BaseInfoVersion {
 
 		List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
 		List<ResultBaseInfoVersion> versionList = baseInfoVersionMapper.getVersions(ParamBaseInfoVersion.builder()
+				.mode("EVENT")
 				.origin(origin)
 				.build());
 
@@ -83,17 +85,13 @@ public class Publication207BaseInfoVersion {
 				if( sendList.size() >= sendCnt ) {
 					C2CAuthenticatedMessage data = publication(pubData(sendList), origin, ctx);
 					this.testEncoding(data);
-
 					ctx.writeAndFlush(data);
 					sendList.clear();
 				}
-
 			}
-
 			if( !sendList.isEmpty() ) {
 				C2CAuthenticatedMessage data = publication(pubData(sendList), origin, ctx);
 				this.testEncoding(data);
-
 				ctx.writeAndFlush(data);
 			}
 		}

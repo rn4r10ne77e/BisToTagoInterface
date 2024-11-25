@@ -52,7 +52,7 @@ public class Publication202BusArrvlPrdcInfo {
 
                 countedList.add(el);
 
-                if( countedList.size() >= sendCnt ) {
+                if( countedList.size() >= 3 ) {
                     C2CAuthenticatedMessage data = publication(pubData(countedList), origin, ctx);
                     this.testEncoding(data);
                     ctx.writeAndFlush(data);
@@ -78,7 +78,6 @@ public class Publication202BusArrvlPrdcInfo {
 
         this.makePublicationData( ctx, requiredOrigin, busList );
     }
-
 
     public void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());

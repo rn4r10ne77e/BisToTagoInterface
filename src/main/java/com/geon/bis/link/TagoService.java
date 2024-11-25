@@ -178,7 +178,6 @@ public class TagoService {
 
         for(Account el : accountProperties.getAccount() ){
             if (el.getIp().stream().anyMatch(e -> e.equals(clientIp)) && el.getUsername().equals(userName) && el.getPassword().equals(password)) {
-                log.info("인증 성공");
                 isMatchIdAndPassword = true;
 
                 channelInfo.setOrigin(
@@ -193,9 +192,9 @@ public class TagoService {
             }
         }
         if (isMatchIdAndPassword) {
-            log.info("[Login] id & password are correct");
+            log.debug("[Login] id & password are correct");
         } else {
-            log.info("[Login] id or password is not matched");
+            log.debug("[Login] id or password is not matched");
         }
 
         // process reject
@@ -264,8 +263,6 @@ public class TagoService {
      * @return C2CAuthenticatedMessage 설명
      */
     public C2CAuthenticatedMessage responseSubscription(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
-        log.info("[Subscription] Response");
-
         // responseSubscription cancel process
         if (c2CAuthMsg.getPdu().getSubscription().getDatexSubscribe_Type().hasDatexSubscribe_CancelReason_cd()) {
             return  responseSubscriptionCancel(c2CAuthMsg, ctx);
@@ -325,9 +322,8 @@ public class TagoService {
             Accept accept = new Accept();
             accept.setDatexAccept_Packet_nbr(c2CAuthMsg.getDatex_DataPacket_number());
 
-            log.info("모드 : {}", subscriptionData.getDatexSubscribe_Mode());
             if (subscriptionData.getDatexSubscribe_Mode().hasSingle()) {
-                log.info("[서브스크립션 모드] 싱글");
+
                 accept.setDatexAccept_Type(
                         Accept
                                 .DatexAccept_Type
@@ -335,7 +331,6 @@ public class TagoService {
                 );
 
             } else if (subscriptionData.getDatexSubscribe_Mode().hasPeriodic()) {
-                log.info("[서브스크립션 모드] 주기방식");
 
                 int UpdateDelay_qty = (int) subscriptionData
                         .getDatexSubscribe_Mode()
@@ -349,7 +344,7 @@ public class TagoService {
                                 .createDatexAccept_TypeWithRegistered_subscription(UpdateDelay_qty)
                 );
             } else if (subscriptionData.getDatexSubscribe_Mode().hasEvent_driven()) {
-                log.debug("[서브스크립션 모드] 이벤트 방식");
+
                 accept.setDatexAccept_Type(
                         Accept
                                 .DatexAccept_Type
@@ -390,6 +385,7 @@ public class TagoService {
 
             case Common.BUS_LOC_INFO_REQ -> {
                 if (subscriptionMode.hasSingle()) {
+                    log.debug("구독: 201 [싱글]");
                     ctx.executor().schedule(()->{
                         try {
                             pub201.procSinglePublication(ctx, headerOrigin);
@@ -398,8 +394,10 @@ public class TagoService {
                         }
                     },0, TimeUnit.SECONDS);
                 } else if (subscriptionMode.hasPeriodic()) {
+                    log.debug("구독: 201 [주기]");
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
                 } else if (subscriptionMode.hasEvent_driven()) {
+                    log.debug("구독: 201 [이벤트]");
                     switch (headerOrigin) {
                         case "boryeong" -> channelInfo.setPub201boryeong(ctx.executor().scheduleWithFixedDelay(()->{
                             try {

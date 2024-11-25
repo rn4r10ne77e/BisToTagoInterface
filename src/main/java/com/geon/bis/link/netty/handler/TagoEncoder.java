@@ -28,7 +28,7 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 			log.error("C2C instance error");
 			return;
 		}
-//		log.info("PDU : {}",c2c.getDatex_DataPacket_number());
+		log.debug("송신메세지:{}",c2c);
 
       	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
