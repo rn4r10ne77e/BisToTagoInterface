@@ -504,25 +504,24 @@ public class TagoService {
             case Common.BASE_INFO_VERSION_REQ -> {
 
                 if( subscriptionMode.hasSingle() ) {
-                    ctx.executor().schedule(() -> {
-                        try {
-                            pub207.procSinglePublication(ctx, headerOrigin);
-                        } catch (Exception e) {
-                            getError(e);
-                        }
-                    },0,TimeUnit.SECONDS);
+                    log.error("subscriptionMode.hasSingle() - 잘못된 요청 [{}]",subscriptionMode.getSingle());
                 } else if ( subscriptionMode.hasPeriodic() ) {
-                    int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
+                    log.error("subscriptionMode.hasPeriodic() - 잘못된 요청 [{}]",subscriptionMode.getPeriodic());
                 } else if ( subscriptionMode.hasEvent_driven() ) {
+                    try {
+                        pub207.procSinglePublication(ctx, headerOrigin);
+                    } catch (Exception e) {
+                        getError(e);
+                    }
                     switch(headerOrigin){
                         case "boryeong" -> channelInfo.setPub207boryeong(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub207.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub207boryeong().cancel(true);
-                            }
-                        }, 5, 5, TimeUnit.SECONDS));
+                                try {
+                                    pub207.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub207boryeong().cancel(true);
+                                }
+                            }, 5, 5, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub207cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
                               try {
                                   pub207.procEventPublication(ctx, headerOrigin);

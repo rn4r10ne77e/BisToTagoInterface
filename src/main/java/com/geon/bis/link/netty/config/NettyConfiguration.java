@@ -54,6 +54,7 @@ public class NettyConfiguration {
         // ServerBootstarp에 다양한 Option 추가 가능
         // SO_BACKLOG: 동시에 수용 가능한 최대 incoming connections 개수
         // 이 외에도 SO_KEEPALIVE, TCP_NODELAY 등 옵션 제공
+        b.option(ChannelOption.SO_KEEPALIVE, keepAlive);
         b.option(ChannelOption.SO_BACKLOG, backlog);
 
 
