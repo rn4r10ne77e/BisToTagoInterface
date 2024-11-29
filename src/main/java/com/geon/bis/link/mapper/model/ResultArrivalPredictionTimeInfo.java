@@ -3,6 +3,7 @@ package com.geon.bis.link.mapper.model;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -12,43 +13,43 @@ import java.sql.Timestamp;
 public class ResultArrivalPredictionTimeInfo {
 
 	/** 메시지 발생시각 */
-	private Timestamp MessageGenerationTime = null;
+	private ZonedDateTime messageGenerationTime = null;
 	/** 이벤트 분류코드 */
-	private int BusEventCodeNumber = -1;
+	private int busEventCodeNumber = -1;
 	/** 정류장 ID */
-	private String BITIdentityNumber;
+	private String bITIdentityNumber;
 	/** 노선 ID */
-	private String SubRouteIdentityNumber;
+	private String subRouteIdentityNumber;
 	/** 차량 ID */
-	private String PTVehicleIDNumber;
+	private String pTVehicleIDNumber;
 	/** 도착 예정시간 */
-	private int AccesspoINTArrivalTime = -1;
+	private int accesspoINTArrivalTime = -1;
 	/** 남은 정류장 수 */
-	private int AccesspoINTArrivalCount = -1;
+	private int accesspoINTArrivalCount = -1;
 	/** 출발(최근통과) 정류장 ID */
-	private String LastBITIdentifyNumber = null;
+	private String lastBITIdentifyNumber = null;
 	/** 노선 내 순번 */
-	private int NodeRouteSequence = -1;
+	private int nodeRouteSequence = -1;
 	/** (최근통과정류장) 진입시각 */
-	private Timestamp LastBITZoneEntryTime = null;
+	private ZonedDateTime lastBITZoneEntryTime = null;
 	/** (최근통과정류장) 진출시각 */
-	private Timestamp LastBITZoneExitTime = null;
+	private ZonedDateTime lastBITZoneExitTime = null;
 	/** (최근통과정류장) 통과시간 */
-	private int LastBITZoneTripTime = -1;
+	private int lastBITZoneTripTime = -1;
 	/** 평균 통행속도 */
-	private int RollingAverageSpeedRate = -1;
+	private int rollingAverageSpeedRate = -1;
 	/** 막차 정보 */
-	private boolean LastPTVehicle = false;
+	private boolean lastPTVehicle = false;
 	/** 종점 정류장 ID */
-	private String EndNodeZoneIDNumber = null;
+	private String endNodeZoneIDNumber = null;
 	/** 종점 정류장의 노선 내 순번 */
-	private int EndNodeRouteSequence = -1;
+	private int endNodeRouteSequence = -1;
 	/** 총 좌석 수 */
-	private int BusTotalSeatsNumber = -1;
+	private int busTotalSeatsNumber = -1;
 	/** 버스 재차 인원 */
-	private int BusPassengerNumber = -1;
+	private int busPassengerNumber = -1;
 	/** 버스 잔여 좌석 정보 */
-	private int BusRemainSeatsNumber = -1;
+	private int busRemainSeatsNumber = -1;
 	/** 메세지 기록시간(DB 서버시간) */
-	private Timestamp WritedTime = null;
+	private ZonedDateTime writedTime = null;
 }

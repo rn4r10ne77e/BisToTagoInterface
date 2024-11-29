@@ -19,13 +19,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 
@@ -39,12 +39,8 @@ public class Publication202BusArrvlPrdcInfo {
 
     @Value("${server.sender}")
     private String sender;
-    @Value("${server.sendCnt}")
-    private int sendCnt;
-    @Value("${server.timeCnt}")
-    private int timeCnt;
 
-    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException {
+    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
         if (!busList.isEmpty()) {
             List<ResultArrivalPredictionTimeInfo> countedList = new ArrayList<>();
@@ -55,6 +51,7 @@ public class Publication202BusArrvlPrdcInfo {
                 if( countedList.size() >= 3 ) {
                     C2CAuthenticatedMessage data = publication(pubData(countedList), origin, ctx);
                     this.testEncoding(data);
+                    Thread.sleep(50);
                     ctx.writeAndFlush(data);
                     countedList.clear();
                 }
@@ -63,15 +60,16 @@ public class Publication202BusArrvlPrdcInfo {
             if( !countedList.isEmpty() ) {
                 C2CAuthenticatedMessage data = publication(pubData(countedList), origin, ctx);
                 this.testEncoding(data);
+                Thread.sleep(50);
                 ctx.writeAndFlush(data);
             }
         }
     }
 
-    public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException {
+    public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
-        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
-          .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
+        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
+          .beforeMinute(0)
           .mode("SINGLE")
           .origin(origin)
           .build());
@@ -79,27 +77,16 @@ public class Publication202BusArrvlPrdcInfo {
         this.makePublicationData( ctx, requiredOrigin, busList );
     }
 
-    public void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException {
+    public synchronized void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
-        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
-          .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
+        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
+          .beforeMinute(1)
           .mode("EVENT")
           .origin(origin)
           .build());
+        log.debug("data cnt : {}",busList.size());
         makePublicationData( ctx, requiredOrigin, busList );
 
-    }
-
-    public void procPeriodicPublication (ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException {
-        // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
-        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
-        List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.find(ParamArrivalPredictionTimeInfo.builder()
-                .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
-                .mode("PERIOD")
-                .origin(origin)
-                .build());
-
-        makePublicationData( ctx, requiredOrigin, busList );
     }
 
     private C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
@@ -135,49 +122,6 @@ public class Publication202BusArrvlPrdcInfo {
         return c2c;
     }
 
-    /**
-     * 테스트용 퍼블리케이션을 생성한다.
-     *
-     * @return EndApplicationMessage
-     */
-    private EndApplicationMessage pubTestData() {
-        EndApplicationMessage DatexPublish_Data = new EndApplicationMessage();
-        ArrivalPredictionTimeInfo ArrPTInfo = new ArrivalPredictionTimeInfo();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String date = sdf.format(new Date());
-
-        //메시지 발생시각
-        ArrPTInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(date));
-        //이벤트 분류코드
-        ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.valueOf(3));
-        //정류장 ID
-        ArrPTInfo.setTpif_BITIdentifyNumber(new UTF8String16("TESTBIT001"));
-        //노선 ID
-        ArrPTInfo.setTpif_SubRouteIdentityNumber(new UTF8String16("TESTROUTE001"));
-        //차량 ID
-        ArrPTInfo.setTsfc_PTVehicleIDNumber(new UTF8String16("TESTVEHICLE001"));
-        //도착 예정시간
-        ArrPTInfo.setTpif_AccesspointArrivalTime(60);
-        //남은 정류장 수
-        ArrPTInfo.setTpif_AccesspointArrivalCount(1);
-
-        Message_MESSAGE_BODY_2 message_MESSAGEBODY_2 = new Message_MESSAGE_BODY_2();
-        message_MESSAGEBODY_2.add(ArrPTInfo);
-
-
-        try {
-            DatexPublish_Data.setEndApplication_Message_id(new ObjectIdentifier(Common.ARR_PRE_TIME_INFO_RESP));
-        } catch (BadObjectIdentifierException e) {
-            log.error(e.getMessage());
-        }
-
-        DatexPublish_Data.setEndApplication_Message_msg(new OpenType(message_MESSAGEBODY_2));
-
-        return DatexPublish_Data;
-    }
-
-
     private EndApplicationMessage pubData(List<ResultArrivalPredictionTimeInfo> ArrivalPredictionTimeInfoList) {
 
         EndApplicationMessage DatexPublish_Data = new EndApplicationMessage();
@@ -193,7 +137,7 @@ public class Publication202BusArrvlPrdcInfo {
                     ArrivalPredictionTimeInfo ArrPTInfo = new ArrivalPredictionTimeInfo();
 
                     //메시지 발생시각
-                    ArrPTInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(el.getMessageGenerationTime())));
+                    ArrPTInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(Timestamp.from(el.getMessageGenerationTime().toInstant()))));
                     //이벤트 분류코드
                     ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.enter_BusStop);
                     //정류장 ID
@@ -213,10 +157,10 @@ public class Publication202BusArrvlPrdcInfo {
                     //노선 내 순번
                     ArrPTInfo.setTsvh_NodeRouteSequence(el.getNodeRouteSequence());
                     //(최근통과정류장)진입시각
-                    ArrPTInfo.setTsvh_LastBITZoneEntryTime(new GeneralizedTime(util.TimeToString(el.getLastBITZoneEntryTime())));
+                    ArrPTInfo.setTsvh_LastBITZoneEntryTime(new GeneralizedTime(util.TimeToString(Timestamp.from(el.getLastBITZoneEntryTime().toInstant()))));
                     //(최근통과정류장)진출시각
                     if (el.getLastBITZoneExitTime() != null) {
-                        ArrPTInfo.setTsvh_LastBITZoneExitTime(new GeneralizedTime(util.TimeToString(el.getLastBITZoneExitTime())));
+                        ArrPTInfo.setTsvh_LastBITZoneExitTime(new GeneralizedTime(util.TimeToString(Timestamp.from(el.getLastBITZoneExitTime().toInstant()))));
                     }
                     //(최근통과정류장)통과시간
                     ArrPTInfo.setTsvh_LastBITZoneTripTime(el.getLastBITZoneTripTime());
@@ -293,9 +237,12 @@ public class Publication202BusArrvlPrdcInfo {
 
         baos.reset();
         util.getCoder().encode(datexDataPacket, baos);
-
+        log.info("202 테스트 데이터 바이트 사이즈: {}",baos.size());
         if (baos.size() > util.getDataGramSize()) {
+            log.info("202 문제의 데이터:{}",dummy);
             throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
+        } else if ( baos.size() < 50 ) {
+            log.info("202 문제의 작은 데이터:{}", dummy);
         }
     }
 }

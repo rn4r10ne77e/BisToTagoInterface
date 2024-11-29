@@ -10,16 +10,18 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
-public class MessageQueue extends ChannelOutboundHandlerAdapter {
+public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
 
   private final Queue<C2CAuthenticatedMessage> queue = new LinkedBlockingQueue<>();
+  private ChannelHandlerContext currentCtx;
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+    currentCtx = ctx;
     ctx.executor().scheduleAtFixedRate(() -> {
       int queueSize = queue.size();
       log.info("Current queue size: {}", queueSize);
-    }, 0, 5, java.util.concurrent.TimeUnit.SECONDS);
+    },0,5,java.util.concurrent.TimeUnit.SECONDS);
   }
 
   @Override
@@ -30,6 +32,11 @@ public class MessageQueue extends ChannelOutboundHandlerAdapter {
       ctx.writeAndFlush(queue.poll());
     }
   }
+
+  public void fire(){
+    currentCtx.writeAndFlush(queue.poll());
+  }
+
   @Override
   public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
     super.handlerRemoved(ctx);

@@ -19,33 +19,29 @@ public class ZonedDateTimeTypeHandler extends BaseTypeHandler<ZonedDateTime> {
         OffsetDateTime offsetDateTime = ksDateTime.toOffsetDateTime();
         ps.setObject(i, offsetDateTime, Types.TIMESTAMP_WITH_TIMEZONE);
     }
-
     @Override
     public ZonedDateTime getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        OffsetDateTime offsetDateTime = rs.getObject(columnName, OffsetDateTime.class);
-        if (offsetDateTime != null) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.from(offsetDateTime);
-            return zonedDateTime.withZoneSameInstant(KST_ZONE_ID);
+        Timestamp timestamp = rs.getTimestamp(columnName);
+        if (timestamp != null) {
+            return timestamp.toInstant().atZone(KST_ZONE_ID); // KST로 변환
         }
         return null;
     }
 
     @Override
     public ZonedDateTime getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        OffsetDateTime offsetDateTime = rs.getObject(columnIndex, OffsetDateTime.class);
-        if (offsetDateTime != null) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.from(offsetDateTime);
-            return zonedDateTime.withZoneSameInstant(KST_ZONE_ID);
+        Timestamp timestamp = rs.getTimestamp(columnIndex);
+        if (timestamp != null) {
+            return timestamp.toInstant().atZone(KST_ZONE_ID); // KST로 변환
         }
         return null;
     }
 
     @Override
     public ZonedDateTime getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        OffsetDateTime offsetDateTime = cs.getObject(columnIndex, OffsetDateTime.class);
-        if (offsetDateTime != null) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.from(offsetDateTime);
-            return zonedDateTime.withZoneSameInstant(KST_ZONE_ID);
+        Timestamp timestamp = cs.getTimestamp(columnIndex);
+        if (timestamp != null) {
+            return timestamp.toInstant().atZone(KST_ZONE_ID); // KST로 변환
         }
         return null;
     }

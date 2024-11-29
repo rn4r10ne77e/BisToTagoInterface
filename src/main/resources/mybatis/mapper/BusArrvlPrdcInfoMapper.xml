@@ -3,31 +3,55 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BusArrvlPrdcInfoMapper">
-    <select id="find" parameterType="ParamArrivalPredictionTimeInfo" resultType="ResultArrivalPredictionTimeInfo">
+    <resultMap id="ArrivalPredictionTimeInfoMap" type="com.geon.bis.link.mapper.model.ResultArrivalPredictionTimeInfo">
+        <result column="comput_dt" property="messageGenerationTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="event_cd" property="busEventCodeNumber"/>
+        <result column="arr_stop_id" property="bITIdentityNumber"/>
+        <result column="route_id" property="subRouteIdentityNumber"/>
+        <result column="veh_id" property="pTVehicleIDNumber"/>
+        <result column="access_point_arrival_time" property="accesspoINTArrivalTime"/>
+        <result column="access_point_arrival_count" property="accesspoINTArrivalCount"/>
+        <result column="node_route_sequence" property="lastBITIdentifyNumber"/>
+        <result column="last_node_no" property="nodeRouteSequence"/>
+        <result column="last_zone_entry_time" property="lastBITZoneEntryTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="last_zone_exit_time" property="lastBITZoneExitTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="last_zone_trip_time" property="lastBITZoneTripTime"/>
+        <result column="speed_rate" property="rollingAverageSpeedRate"/>
+        <result column="is_last" property="lastPTVehicle"/>
+        <result column="end_node_zone_id" property="endNodeZoneIDNumber"/>
+        <result column="end_node_zone_sequence" property="endNodeRouteSequence"/>
+        <result column="total_seats_number" property="busTotalSeatsNumber"/>
+        <result column="passenger_number" property="busPassengerNumber"/>
+        <result column="remain_seats_number" property="busRemainSeatsNumber"/>
+    </resultMap>
+    <select id="getBusArr"
+            parameterType="com.geon.bis.link.mapper.model.ParamArrivalPredictionTimeInfo"
+            resultMap="ArrivalPredictionTimeInfoMap"
+    >
         select
-            comput_dt as MessageGenerationTime,
-            event_cd as BusEventCodeNumber,
-            arr_stop_id as BITIdentityNumber,
-            route_id as SubRouteIdentityNumber,
-            veh_id as PTVehicleIDNumber,
-            access_point_arrival_time as AccesspoINTArrivalTime,
-            access_point_arrival_count as AccesspoINTArrivalCount,
-            node_route_sequence as LastBITIdentifyNumber,
+            comput_dt,
+            event_cd,
+            arr_stop_id,
+            route_id,
+            veh_id,
+            access_point_arrival_time,
+            access_point_arrival_count,
+            node_route_sequence,
 
-            last_node_no as NodeRouteSequence,
-            last_zone_entry_time as LastBITZoneEntryTime,
-            last_zone_exit_time as LastBITZoneExitTime,
-            last_zone_trip_time as LastBITZoneTripTime,
-            speed_rate as RollingAverageSpeedRate,
-            is_last as LastPTVehicle,
+            last_node_no,
+            last_zone_entry_time,
+            last_zone_exit_time,
+            last_zone_trip_time,
+            speed_rate,
+            is_last,
 
-            end_node_zone_id as EndNodeZoneIDNumber,
-            end_node_zone_sequence as EndNodeRouteSequence,
-            total_seats_number as BusTotalSeatsNumber,
-            passenger_number as BusPassengerNumber,
-            remain_seats_number as BusRemainSeatsNumber
+            end_node_zone_id,
+            end_node_zone_sequence,
+            total_seats_number,
+            passenger_number,
+            remain_seats_number
 
-        from public.get_arrival_prediction_time_info(#{stdTime}, #{origin,jdbcType=ARRAY}, #{mode})
+        from public.get_arrival_prediction_time_info(now() - interval '${beforeMinute} minutes' , #{origin,jdbcType=ARRAY}, #{mode})
 
     </select>
 </mapper>

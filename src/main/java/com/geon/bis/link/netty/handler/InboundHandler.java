@@ -26,14 +26,6 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     private final ChannelGroup channelGroup;
     private final ChannelAttribute channelAttribute;
 
-    @Value("${server.datagram-size}")
-    private int DATAGRAM_SIZE;
-
-
-    /* @ChannelHandler.Sharable 일때는 사용하지 말것 채널 파이프라인에서 new 키워드로 인스턴스화 시킨 핸들러만 멤버변수 사용 가능 */
-//    private ScheduledFuture<?> scheduledFuture;
-//    private static final AttributeKey<ScheduledFuture<?>> SCHEDULED_FUTURE = AttributeKey.valueOf("scheduledFuture");
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
 
@@ -52,7 +44,6 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
-        log.debug("수신메세지:{}", c2c);
         switch (c2c.getPdu().getChosenFlag()) {
 
             case PDUs.login_chosen:
@@ -69,33 +60,17 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
             case PDUs.subscription_chosen:
                 C2CAuthenticatedMessage rtnC2c = tagoService.responseSubscription(c2c, ctx);
                 if (rtnC2c.getPdu().hasAccept()) {
-
-
                     tagoService.processSubscription(c2c, ctx);
                 }
                 ctx.writeAndFlush(rtnC2c);
                 break;
 
-            case PDUs.transfer_done_chosen:
-//                return tagoService.responseTransferDone(c2c);
-                break;
-
             case PDUs.accept_chosen:
-
-//                log.info(" accept ------------- : {}", c2c.getPdu().getAccept().getDatexAccept_Type());
-                break;
             case PDUs.reject_chosen:
-                log.debug(c2c.toString());
-//                tagoService.acceptRejectPublication(c2c);
+                tagoService.acceptRejectPublication(c2c, ctx);
                 break;
-            /*
-            case PDUs.publication_chosen:
-                break;
-            */
             default:
-                log.info("[" + c2c.getPdu().getChosenFlag() + "] received");
-                log.debug(c2c.toString());
-
+                log.debug("[{}] received",c2c.getPdu().getChosenFlag());
                 break;
         }
     }

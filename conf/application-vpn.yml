@@ -2,7 +2,7 @@ spring:
   datasource:
     username: postgres
     password: geo&0317
-    url: jdbc:postgresql://192.168.45.11:20001/cnbus # 릴레이 서버
+    url: jdbc:postgresql://192.168.45.11:20004/cnbus?prepareThreshold=0 # 릴레이 서버
 
 server:
   address: 127.0.0.1

@@ -1,33 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.geon.bis.link.mapper.BusLocationInfoMapper">
-    <select id="find" parameterType="ParamBusLocationInfo" resultType="ResultBusLocationInfo">
+
+    <resultMap id="BusLocationInfoMap" type="com.geon.bis.link.mapper.model.ResultBusLocationInfo">
+        <result column="veh_id" property="pTVehicleIDNumber"/>
+        <result column="route_id" property="subRouteIdentityNumber"/>
+        <result column="event_cd" property="busEventCodeNumber"/>
+        <result column="bus_run_code_number" property="busRunCodeNumber"/>
+        <result column="last_pt_vehicle" property="lastPTVehicle"/>
+        <result column="end_node_zone_id_number" property="endNodeZoneIDNumber"/>
+        <result column="end_node_route_sequence" property="endNodeRouteSequence"/>
+        <result column="bus_total_seats_number" property="busTotalSeatsNumber"/>
+        <result column="bus_passenger_number" property="busPassengerNumber"/>
+        <result column="bus_remain_seats_number" property="busRemainSeatsNumber"/>
+
+        <result column="message_generation_time" property="messageGenerationTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+
+        <result column="node_zone_id_number" property="nodeZoneIDNumber"/>
+        <result column="node_route_sequence" property="nodeRouteSequence"/>
+        <result column="node_zone_entry_time" property="nodeZoneEntryTime"  typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="node_zone_exit_time" property="nodeZoneExitTime"  typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="node_zone_trip_time" property="nodeZoneTripTime"/>
+
+        <result column="pt_vehicle_coordinate_lati" property="pTVehicleCoordinateLati"/>
+        <result column="pt_vehicle_coordinate_long" property="pTVehicleCoordinateLong"/>
+        <result column="pt_vehicle_collected_time" property="pTVehicleCollectedTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="pt_vehicle_collected_cycle_time" property="pTVehicleCollectedCycleTime"/>
+    </resultMap>
+
+    <select id="getBusLoc"
+            parameterType="com.geon.bis.link.mapper.model.ParamBusLocationInfo"
+            resultMap="BusLocationInfoMap">
         select
-            veh_id as PTVehicleIDNumber,
-            route_id as SubRouteIdentityNumber,
-            event_cd as BusEventCodeNumber,
-            bus_run_code_number as BusRunCodeNumber,
-            last_pt_vehicle as LastPTVehicle,
-            end_node_zone_id_number as EndNodeZoneIDNumber,
-            end_node_route_sequence as EndNodeRouteSequence,
-            bus_total_seats_number as BusTotalSeatsNumber,
-            bus_passenger_number as BusPassengerNumber,
-            bus_remain_seats_number as BusRemainSeatsNumber,
+            veh_id,
+            route_id,
+            event_cd,
+            bus_run_code_number,
+            last_pt_vehicle,
+            end_node_zone_id_number,
+            end_node_route_sequence,
+            bus_total_seats_number,
+            bus_passenger_number,
+            bus_remain_seats_number,
 
-            message_generation_time as MessageGenerationTime,
-            node_zone_id_number as NodeZoneIDNumber,
-            node_route_sequence as NodeRouteSequence,
-            node_zone_entry_time as NodeZoneEntryTime,
-            node_zone_exit_time as NodeZoneExitTime,
-            node_zone_trip_time as NodeZoneTripTime,
+            message_generation_time,
+            node_zone_id_number,
+            node_route_sequence,
+            node_zone_entry_time,
+            node_zone_exit_time,
+            node_zone_trip_time,
 
-            pt_vehicle_coordinate_lati as PTVehicleCoordinateLati,
-            pt_vehicle_coordinate_long as PTVehicleCoordinateLong,
-            pt_vehicle_collected_time as PTVehicleCollectedTime,
-            pt_vehicle_collected_cycle_time as PTVehicleCollectedCycleTime
+            pt_vehicle_coordinate_lati,
+            pt_vehicle_coordinate_long,
+            pt_vehicle_collected_time,
+            pt_vehicle_collected_cycle_time
         from
-            public.get_bus_location_info(#{stdTime}, #{origin,jdbcType=ARRAY}, #{mode})
+            public.get_bus_location_info(now() - interval '${beforeMinute} minutes', #{origin,jdbcType=ARRAY}, #{mode})
     </select>
 </mapper>

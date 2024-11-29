@@ -11,7 +11,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayOutputStream;
 
@@ -59,17 +58,6 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 			log.error("DatagramSize is over : " + baos.size());
 			return;
 		}
-
-//		if( ctx.channel().isWritable() ){
-//			log.info("Channel is now writable.");
-//		} else {
-//			log.error("Channel is not writable (buffer is full).");
-//		}
-		
 		out.writeBytes(baos.toByteArray());
 	}
-
-
-
-
 }

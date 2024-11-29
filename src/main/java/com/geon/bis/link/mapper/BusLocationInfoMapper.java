@@ -9,6 +9,5 @@ import java.util.List;
 
 @Mapper
 public interface BusLocationInfoMapper {
-    @Transactional
-    List<ResultBusLocationInfo> find(ParamBusLocationInfo param);
+    List<ResultBusLocationInfo> getBusLoc(ParamBusLocationInfo param);
 }

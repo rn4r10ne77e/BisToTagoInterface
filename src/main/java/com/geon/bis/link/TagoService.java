@@ -4,15 +4,15 @@ import com.geon.bis.link.config.Account;
 import com.geon.bis.link.config.AccountProperties;
 import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.config.RegionCode;
+import com.geon.bis.link.netty.handler.OutboundCacheHandler;
+import com.geon.bis.link.netty.handler.OutboundQueueHandler;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
 import com.oss.util.ASN1ValueFormat;
 import datex.iso14827_2.*;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.text.Normalizer;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.geon.bis.link.config.ChannelAttribute.*;
@@ -35,7 +30,6 @@ import static com.geon.bis.link.config.ChannelAttribute.*;
 @RequiredArgsConstructor
 public class TagoService {
 
-    private final Coder coder;
     private final Util util;
     private final AccountProperties accountProperties;
     private final ChannelGroup channelGroup;
@@ -44,7 +38,6 @@ public class TagoService {
     private final Publication207BaseInfoVersion pub207;
     private final Publication208BaseInfo pub208;
     private final ChannelAttribute channelAttribute;
-    private final NioEventLoopGroup workerGroup;
 
     private int dataPacketNumber = 0;
 
@@ -54,109 +47,10 @@ public class TagoService {
     private boolean isServerLoginPass;
 
     private String destination;
-    private String encodingRules;
 
-    public C2CAuthenticatedMessage decodeData(byte[] bytes, InputStream is) throws DecodeNotSupportedException, DecodeFailedException {
-        C2CAuthenticatedMessage c2c = null;
-        if (bytes != null) {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-
-            DatexDataPacket datexDataPacket = null;
-            datexDataPacket = (DatexDataPacket) coder.decode(bais, new DatexDataPacket());
-            datexDataPacket.getDatex_Version_number(); // nothing
-            OctetString datex_Data = datexDataPacket.getDatex_Data();
-            OctetString Crc = new OctetString(util.getCrc16(datex_Data.byteArrayValue()));
-
-            if (!Crc.equalTo(datexDataPacket.getDatex_Crc_nbr())) {
-                log.warn("[CRC error] Correct = " + Crc.toString() + ", Wrong = "
-                        + datexDataPacket.getDatex_Crc_nbr().toString());
-            }
-
-            bais = new ByteArrayInputStream(datex_Data.byteArrayValue());
-
-            c2c = (C2CAuthenticatedMessage) coder.decode(bais, new C2CAuthenticatedMessage());
-        }
-        if (is != null) {
-            c2c = (C2CAuthenticatedMessage) coder.decode(is, new C2CAuthenticatedMessage());
-        }
-        return c2c;
-    }
-
-    public C2CAuthenticatedMessage processData(C2CAuthenticatedMessage c2c, ByteBuf buf, ChannelHandlerContext ctx) {
-
-        switch (c2c.getPdu().getChosenFlag()) {
-            /*
-            case PDUs.datex_initiate_null_chosen:
-                break;
-            */
-            case PDUs.login_chosen:
-                log.info("[Login] received");
-                log.debug(c2c.toString());
-                InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-                String clientIp = inetSocketAddress.getAddress().getHostAddress();
-                return responseLogin(c2c, ctx );
-
-            case PDUs.fred_chosen:
-                log.info("[FrED] received");
-                log.debug(c2c.toString());
-                return responseFrED();
-                /*
-                case PDUs.terminate_chosen:
-                    break;
-                */
-            case PDUs.logout_chosen:
-                log.info("[Logout] received");
-                log.debug(c2c.toString());
-                return responseLogout(c2c);
-
-            case PDUs.subscription_chosen:
-                log.info("[Subscription] received");
-                log.debug(c2c.toString());
-                return responseSubscription(c2c, ctx);
-                // requestTerminate(Terminate.serverRequested);
-
-            case PDUs.transfer_done_chosen:
-                log.info("[TransferDone] received");
-                log.debug(c2c.toString());
-                return responseTransferDone(c2c);
-
-            case PDUs.accept_chosen:
-            case PDUs.reject_chosen:
-                log.debug(c2c.toString());
-                acceptRejectPublication(c2c);
-                break;
-            /*
-            case PDUs.publication_chosen:
-                break;
-            */
-            default:
-                log.info("[" + c2c.getPdu().getChosenFlag() + "] received");
-                log.debug(c2c.toString());
-
-                break;
-        }
-        return null;
-    }
-
-    private C2CAuthenticatedMessage requestInit() {
-        log.info("[Initiate] request");
-
-        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
-        c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
-        c2c.setDatex_DataPacketPriority_number(0);
-
-        c2c.setOptions(getOptions(null));
-
-        Initiate initiate = new Initiate();
-        initiate.setDatex_Sender_txt(new UTF8String16(sender));
-        initiate.setDatex_Destination_txt(new UTF8String16("dest"));
-
-        c2c.setPdu(PDUs.createPDUsWithDatex_initiate_null(initiate));
-
-        return c2c;
-    }
-
+    /**
+     * 클라이언트 검증과 로그인 처리
+     */
     public C2CAuthenticatedMessage responseLogin(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
 
         Login login = c2CAuthMsg.getPdu().getLogin();
@@ -258,9 +152,7 @@ public class TagoService {
     }
 
     /**
-     * 서브스크립션에 대한 응답을 한다.
-     * @param c2CAuthMsg 설명
-     * @return C2CAuthenticatedMessage 설명
+     * 구독 요청에 대한 응답 메세지 생성
      */
     public C2CAuthenticatedMessage responseSubscription(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
         // responseSubscription cancel process
@@ -361,6 +253,9 @@ public class TagoService {
         return c2c;
     }
 
+    /**
+     *   구독 요청에 대한 분기 처리
+     */
     public void processSubscription(C2CAuthenticatedMessage c2c, ChannelHandlerContext ctx) throws RuntimeException{
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
@@ -382,7 +277,6 @@ public class TagoService {
                 .toString(new ASN1ValueFormat().excludeValueAssignment()).replaceAll("\"","");
 
         switch (oId) {
-
             case Common.BUS_LOC_INFO_REQ -> {
                 if (subscriptionMode.hasSingle()) {
                     log.debug("구독: 201 [싱글]");
@@ -406,7 +300,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub201boryeong().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub201cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub201.procEventPublication(ctx, headerOrigin);
@@ -414,7 +308,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub201cheongyang().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "taean" -> channelInfo.setPub201taean(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub201.procEventPublication(ctx, headerOrigin);
@@ -422,7 +316,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub201taean().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "seocheon" -> channelInfo.setPub201seocheon(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub201.procEventPublication(ctx, headerOrigin);
@@ -430,7 +324,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub201seocheon().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "geumsan" -> channelInfo.setPub201geumsan(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub201.procEventPublication(ctx, headerOrigin);
@@ -438,17 +332,16 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub201geumsan().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         default -> throw new IllegalStateException("Unexpected value: " + headerOrigin);
                     }
                 } // 버스위치정보
             }
             case Common.ARR_PRE_TIME_INFO_REQ -> {
-
                 if (subscriptionMode.hasSingle()) {
                     ctx.executor().schedule(()->{
                         try {
-                            log.info("[버스도착예정] 싱글 구독");
+                            log.info("구독: 202 [싱글]");
                             pub202.procSinglePublication(ctx, headerOrigin);
                         } catch (Exception e) {
                             getError(e);
@@ -457,6 +350,7 @@ public class TagoService {
                 } else if (subscriptionMode.hasPeriodic()) {
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
                 } else if (subscriptionMode.hasEvent_driven()) {
+                    log.info("구독: 202 [이벤트]");
                     switch(headerOrigin){
                         case "boryeong" -> channelInfo.setPub202boryeong(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
@@ -465,7 +359,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub202boryeong().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub202cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub202.procEventPublication(ctx, headerOrigin);
@@ -473,7 +367,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub202cheongyang().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "taean" -> channelInfo.setPub202taean(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub202.procEventPublication(ctx, headerOrigin);
@@ -481,7 +375,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub202taean().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "seocheon" -> channelInfo.setPub202seocheon(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub202.procEventPublication(ctx, headerOrigin);
@@ -489,7 +383,7 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub202seocheon().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                         case "geumsan" ->channelInfo.setPub202geumsan(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
                                 pub202.procEventPublication(ctx, headerOrigin);
@@ -497,12 +391,11 @@ public class TagoService {
                                 getError(e);
                                 ctx.channel().attr(INFO).get().getPub202geumsan().cancel(true);
                             }
-                        }, 5, 5, TimeUnit.SECONDS));
+                        }, 5, 30, TimeUnit.SECONDS));
                     }
                 }
             }
             case Common.BASE_INFO_VERSION_REQ -> {
-
                 if( subscriptionMode.hasSingle() ) {
                     log.error("subscriptionMode.hasSingle() - 잘못된 요청 [{}]",subscriptionMode.getSingle());
                 } else if ( subscriptionMode.hasPeriodic() ) {
@@ -567,17 +460,17 @@ public class TagoService {
                             getError(e);
                         }
                     }, 0, TimeUnit.SECONDS);
-                }  else if ( subscriptionMode.hasPeriodic() ) {
-
-                } else if ( subscriptionMode.hasEvent_driven() ) {
-
                 }
             }
+
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
         }
 
     }
 
+    /**
+     * 에러 처리
+     */
     private static void getError(Exception e) {
         log.error("exceptionCaught: {}",ExceptionUtils.getStackTrace(e));
     }
@@ -607,41 +500,6 @@ public class TagoService {
     }
 
     /**
-     * Logout에 대한 응답을 한다.
-     */
-    private C2CAuthenticatedMessage responseLogout(C2CAuthenticatedMessage c2CAuthMsg) {
-        log.info("[Logout] response");
-
-        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
-        c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
-        c2c.setDatex_DataPacketPriority_number(0);
-
-        c2c.setOptions(getOptions(null));
-
-        c2c.setPdu(PDUs.createPDUsWithFred(c2CAuthMsg.getDatex_DataPacket_number()));
-        return c2c;
-    }
-
-    /**
-     * 입력된 Terminate 타입에 따라 Terminate를 요청한다.
-     */
-    private C2CAuthenticatedMessage requestTerminate(Terminate terminate) {
-        log.info("[Terminate] request");
-
-        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
-        c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
-        c2c.setDatex_DataPacketPriority_number(0);
-
-        c2c.setOptions(getOptions(null));
-
-        c2c.setPdu(PDUs.createPDUsWithTerminate(terminate));
-
-        return c2c;
-    }
-
-    /**
      * FrED에 응답을 한다.
      */
     public C2CAuthenticatedMessage responseFrED() {
@@ -650,60 +508,28 @@ public class TagoService {
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
         c2c.setDatex_DataPacket_number(dataPacketNumber++);
         c2c.setDatex_DataPacketPriority_number(0);
-
         c2c.setOptions(getOptions(null));
-
         c2c.setPdu(PDUs.createPDUsWithFred(0));
 
         return c2c;
     }
 
     /**
-     * TransferDone에 대한 응답을 처리한다.
-     * @param c2CAuthMsg
-     * @return
+     * Accept와 Reject에 대한 처리
      */
-    public C2CAuthenticatedMessage responseTransferDone(C2CAuthenticatedMessage c2CAuthMsg) {
-        log.info("[TransferDone] response");
+    public void acceptRejectPublication(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx ) {
 
-        C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
-        c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
-        c2c.setDatex_DataPacketPriority_number(0);
+        if( c2CAuthMsg.getPdu().hasAccept() ) {
+            ctx.channel().pipeline().get(OutboundQueueHandler.class).fire();
+        }
 
-        c2c.setOptions(getOptions(null));
-
-        c2c.setPdu(PDUs.createPDUsWithFred(c2CAuthMsg.getPdu().getTransfer_done()
-                .getDatexTransferDone_Publication_nbr()));
-
-        return c2c;
-    }
-
-    /**
-     * 퍼블리케이션에 대한 Accept와 Reject를 처리한다.(별도 처리없이 로그만 출력)
-     * @param c2CAuthMsg
-     */
-    private void acceptRejectPublication(C2CAuthenticatedMessage c2CAuthMsg) {
-
-        if (c2CAuthMsg.getPdu().hasAccept()) {
-            if (c2CAuthMsg.getPdu().getAccept().getDatexAccept_Type().hasPublication()) {
-
-                log.info("[Accept] Publication");
-
-            }
-        } else if (c2CAuthMsg.getPdu().hasReject()) {
-            if (c2CAuthMsg.getPdu().getReject().getDatexReject_Type().hasDatexReject_Publication_cd()) {
-
-                log.info("[Reject] Publication");
-
-            }
+        if( c2CAuthMsg.getPdu().hasReject() ) {
+            ctx.channel().pipeline().get(OutboundCacheHandler.class).fire();
         }
     }
 
     /**
      * HeaderOptions을 만든다.
-     * @param origin 지역 코드
-     * @return 옵션을 만들어서 반환
      */
     public HeaderOptions getOptions(String origin) {
         HeaderOptions options = new HeaderOptions();

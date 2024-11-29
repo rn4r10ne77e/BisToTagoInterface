@@ -8,5 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface BusArrvlPrdcInfoMapper {
-    List<ResultArrivalPredictionTimeInfo> find(ParamArrivalPredictionTimeInfo param);
+    List<ResultArrivalPredictionTimeInfo> getBusArr(ParamArrivalPredictionTimeInfo param);
 }

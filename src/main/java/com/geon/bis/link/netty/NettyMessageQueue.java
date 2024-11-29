@@ -1,11 +1,9 @@
 package com.geon.bis.link.netty;
 
 import com.geon.bis.link.config.ChannelAttribute;
-import com.geon.bis.link.netty.handler.OutboundHandler;
 import datex.iso14827_2.C2CAuthenticatedMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

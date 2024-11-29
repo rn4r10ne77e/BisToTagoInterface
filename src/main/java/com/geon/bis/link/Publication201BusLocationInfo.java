@@ -22,7 +22,6 @@ import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -31,7 +30,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
@@ -48,8 +46,6 @@ public class Publication201BusLocationInfo {
     private String sender;
     @Value("${server.sendCnt}")
     private int sendCnt;
-    @Value("${server.timeCnt}")
-    private int timeCnt;
 
     /**
      * 싱글 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
@@ -59,34 +55,13 @@ public class Publication201BusLocationInfo {
     public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws Exception {
 
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
-//        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-        List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
-                        .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")))
+        List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
+                        .beforeMinute(0)
                         .mode("SINGLE")
                         .origin(origin)
                 .build());
-
         this.makePublicationData( ctx, requiredOrigin, busList);
 
-    }
-
-    /**
-     * 주기 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
-     * @param ctx - 요청한 핸들러
-     * @throws Exception - 인코딩에 대한 예외
-     */
-    public void procPeriodicPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
-        // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
-        // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
-        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
-//        List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-        List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
-                .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
-                .mode("PERIOD")
-                .origin(origin)
-                .build());
-
-        this.makePublicationData( ctx, requiredOrigin, busList);
     }
 
     /**
@@ -94,12 +69,11 @@ public class Publication201BusLocationInfo {
      * @param ctx - 요청한 핸들러
      * @throws Exception - 인코딩에 대한 예외
      */
-    public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
+    public synchronized void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
         try {
             List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
-//            List<String> origin = ctx.channel().attr(INFO).get().getOrigin();
-            List<ResultBusLocationInfo> busList = busLocationInfoMapper.find(ParamBusLocationInfo.builder()
-                    .stdTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).minusMinutes(this.timeCnt))
+            List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
+                    .beforeMinute(1)
                     .mode("EVENT")
                     .origin(origin)
                     .build());
@@ -119,7 +93,7 @@ public class Publication201BusLocationInfo {
      * @throws EncodeFailedException 인코딩 실패시
      * @throws EncodeNotSupportedException 인코딩 실패시
      */
-    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBusLocationInfo> busList) throws EncodeFailedException, EncodeNotSupportedException {
+    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBusLocationInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         if (!busList.isEmpty()) {
             List<ResultBusLocationInfo> partPerPol = new ArrayList<>();
             List<ResultBusLocationInfo> partBusEve = new ArrayList<>();
@@ -134,6 +108,7 @@ public class Publication201BusLocationInfo {
                 if( partBusEve.size() >= sendCnt ) {
                     C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), origin, ctx);
                     this.testEncoding(data);
+                    Thread.sleep(50);
                     ctx.writeAndFlush(data);
                     partBusEve.clear();
                 }
@@ -141,6 +116,7 @@ public class Publication201BusLocationInfo {
                 if( partPerPol.size() >= sendCnt ) {
                     C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), origin, ctx);
                     this.testEncoding(data);
+                    Thread.sleep(50);
                     ctx.writeAndFlush(data);
                     partPerPol.clear();
                 }
@@ -149,12 +125,14 @@ public class Publication201BusLocationInfo {
             if( !partBusEve.isEmpty() ) {
                 C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), origin, ctx);
                 this.testEncoding(data);
+                Thread.sleep(50);
                 ctx.writeAndFlush(data);
             }
 
             if( !partPerPol.isEmpty() ) {
                 C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), origin, ctx);
                 this.testEncoding(data);
+                Thread.sleep(50);
                 ctx.writeAndFlush(data);
             }
         }
@@ -163,11 +141,9 @@ public class Publication201BusLocationInfo {
     private BusLocationInfo CommonDataGen(ResultBusLocationInfo el) {
 
         BusLocationInfo busLocationInfo = new BusLocationInfo();
-        //차량 ID
         busLocationInfo.setTsfc_PTVehicleIDNumber(new UTF8String16(el.getPTVehicleIDNumber()));
-        //노선 ID
         busLocationInfo.setTpif_SubRouteIdentityNumber(new UTF8String16(el.getSubRouteIdentityNumber()));
-        //이벤트 분류코드
+
         switch (el.getBusEventCodeNumber()){
             case 11:
                 busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.enter_BusStop);
@@ -182,44 +158,30 @@ public class Publication201BusLocationInfo {
             default: busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.pass_Cross);
         }
 
-//        if (el.getBusEventCodeNumber() != -1) {
-//            busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.valueOf(Long.valueOf(el.getBusEventCodeNumber())));
-//        } else {
-//            busLocationInfo.setTpfc_BusEventCodeNumber(BusLocationInfo.Tpfc_BusEventCodeNumber.exit_BusStop);
-//        }
-
-        // 운행 조건 코드
         if (el.getBusRunCodeNumber() != -1) {
             busLocationInfo.setTpfc_BusRunCodeNumber(
-                    BusLocationInfo.Tpfc_BusRunCodeNumber.valueOf(Long.valueOf(el.getBusRunCodeNumber())));
+                    BusLocationInfo.Tpfc_BusRunCodeNumber.valueOf(el.getBusRunCodeNumber()));
         } else {
             busLocationInfo.setTpfc_BusRunCodeNumber(BusLocationInfo.Tpfc_BusRunCodeNumber.normal_Run);
         }
 
-        //막차 정보
         busLocationInfo.setTsfc_LastPTVehicle(el.isLastPTVehicle());
-
-        // 종점 정류장 ID
         if(el.getEndNodeZoneIDNumber() != null) {
             busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
         }
 
-        // 종점 정류장의 노선 내 순번
         if(el.getEndNodeRouteSequence() != -1) {
             busLocationInfo.setTpif_EndNodeRouteSequence(el.getEndNodeRouteSequence());
         }
 
-        // 총 좌석 수
         if(el.getBusTotalSeatsNumber() != -1) {
             busLocationInfo.setTsfc_BusTotalSeatsNumber(el.getBusTotalSeatsNumber());
         }
 
-        // 버스 재차 인원
         if(el.getBusPassengerNumber() != -1) {
             busLocationInfo.setTsfc_BusPassengerNumber(el.getBusPassengerNumber());
         }
 
-        // 버스 잔여 좌석 정보
         if(el.getBusRemainSeatsNumber() != -1) {
             busLocationInfo.setTsfc_BusRemainSeatsNumber(el.getBusRemainSeatsNumber());
         }
@@ -369,7 +331,7 @@ public class Publication201BusLocationInfo {
         // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
         // Timestamp lastTime = new Timestamp(util.nowTime().getTime() - (10 * 60 * 1000)); // 10분전 타임
 
-        List<ResultBusLocationInfo> info = busLocationInfoMapper.find(ParamBusLocationInfo.builder().build());
+        List<ResultBusLocationInfo> info = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder().build());
         log.info("[버스위치정보] 전체데이터 조회건수 : {}", info.size());
 
         if (!info.isEmpty()) {
@@ -482,8 +444,12 @@ public class Publication201BusLocationInfo {
         baos.reset();
         util.getCoder().encode(datexDataPacket, baos);
 
+        log.info("201 테스트 데이터 바이트 사이즈: {}",baos.size());
         if (baos.size() > util.getDataGramSize()) {
+            log.info("201 문제의 데이터:{}",dummy);
             throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
+        } else if ( baos.size() < 50 ) {
+            log.info("201 문제의 작은 데이터:{}", dummy);
         }
     }
 
