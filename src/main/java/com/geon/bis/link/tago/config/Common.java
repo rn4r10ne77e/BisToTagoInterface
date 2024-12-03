@@ -6,7 +6,7 @@ public class Common {
 	public static final int RESPONSE_TIMEOUT_MAX = 10;
 	public static final int HEARTBEAT_DURATION_MIN = 10;
 	public static final int HEARTBEAT_DURATION_MAX = 30;
-	public static final int DEFAULT_DATAGRAM_SIZE = 1024;
+	public static final int DEFAULT_DATAGRAM_SIZE = 4096;
 
 	public static final String BER_OID = "{ 2 1 1 }";
 

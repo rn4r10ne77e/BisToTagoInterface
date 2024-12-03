@@ -7,7 +7,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 
     hikari:
-      maximum-pool-size: 20
+      maximum-pool-size: 5
       connection-timeout: 30000
       idle-timeout: 30000
       cache-prep-stmts: false
@@ -34,8 +34,8 @@ server:
   # 테스트 데이터 Publication
   server-pub-test-on: false
   # 한번에 보내는 메세지 개수
-  sendCnt: 5
-  # 한번에 가지고 올 시간 데이터의 기준 기간 현재 시간기준 n분 이전 데이터
+  sendCnt: 3
+  # 한번에 가지고 올 시간 데이터의 기준 기간 현재 시간 기준 n분 이전 데이터
   timeCnt: 1
 
   # inbound 제한시간 ( 불필요시 삭제 )

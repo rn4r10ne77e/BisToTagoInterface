@@ -280,22 +280,6 @@ public class Util {
         return String.format("%08d", beforeTimeLong);
 	}
 
-
-	private int dataPacketNumber = 0;
-	public int getDataPacketNumber() {
-		return dataPacketNumber++;
-	}
-
-	private long subSerialNbr = 0;
-	public long getSubSerialNbr() {
-		return subSerialNbr++;
-	}
-
-	private long pubSerialNbr = 0;
-	public long getPubSerialNbr() {
-		return pubSerialNbr++;
-	}
-
 	@Getter
 	@Value("${server.datagram-size}")
 	private int dataGramSize;

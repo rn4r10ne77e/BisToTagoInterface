@@ -17,7 +17,6 @@ public class BisToTagoInterfaceApplication {
 
         String activeProfile = System.getProperty("spring.profiles.active");
         String configLocation = "conf/application.yml,conf/accounts.yml";
-        log.info("profile:{}",activeProfile);
         configLocation = switch (activeProfile) {
             case "dev" -> "conf/application.yml,conf/application-dev.yml,conf/accounts.yml";
             case "vpn" -> "file:conf/application.yml,file:conf/application-vpn.yml,file:conf/accounts.yml";

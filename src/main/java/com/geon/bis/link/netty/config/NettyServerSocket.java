@@ -1,6 +1,6 @@
 package com.geon.bis.link.netty.config;
 
-import com.geon.bis.link.netty.NettyMessageQueue;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Component
 public class NettyServerSocket {
-    private final NettyMessageQueue nettyMessageQueue;
+
     private final ServerBootstrap serverBootstrap;
     private final EventLoopGroup workerGroup;
     private final InetSocketAddress tcpPort;
@@ -26,7 +26,6 @@ public class NettyServerSocket {
     public void start() {
         try {
             ChannelFuture serverChannelFuture = serverBootstrap.bind(tcpPort).sync();
-            workerGroup.next().scheduleAtFixedRate(nettyMessageQueue::send,0, 5, TimeUnit.SECONDS );
             serverChannel = serverChannelFuture.channel().closeFuture().sync().channel();
         }
         catch (InterruptedException e) {

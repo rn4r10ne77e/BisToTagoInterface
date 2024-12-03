@@ -76,3 +76,17 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources','conf']
+        }
+    }
+    test {
+        resources {
+            srcDirs = ['src/main/resources','conf']
+        }
+    }
+}

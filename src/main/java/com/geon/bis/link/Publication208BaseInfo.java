@@ -57,8 +57,7 @@ public class Publication208BaseInfo {
 	private String sender;
 	@Value("${server.sendCnt}")
 	private int sendCnt;
-	@Value("${server.timeCnt}")
-	private int timeCnt;
+
 
 	public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
@@ -248,20 +247,20 @@ public class Publication208BaseInfo {
 	 * @return boolean - true : 정상 수행, false : 비정상 수행
 	 */
 	private C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx) {
-
+		ChannelAttribute.ChannelInfo info = ctx.channel().attr(INFO).get();
 		EndApplicationMessage DatexPublish_Data = EndAppMsg;
 
 		C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
 		
 		c2c.setDatex_AuthenticationInfo_text(new OctetString());
-		c2c.setDatex_DataPacket_number(util.getDataPacketNumber() + 1);
+		c2c.setDatex_DataPacket_number(info.getDataPacketNumber());
 		c2c.setDatex_DataPacketPriority_number(0);
 
 		c2c.setOptions(this.getOptions(origin, ctx));
 
 		PublicationData publicationData = new PublicationData();
-		publicationData.setDatexPublish_SubscribeSerial_nbr(util.getSubSerialNbr());
-		publicationData.setDatexPublish_Serial_nbr(util.getPubSerialNbr());
+		publicationData.setDatexPublish_SubscribeSerial_nbr(info.getSubSerialNbr());
+		publicationData.setDatexPublish_Serial_nbr(info.getPubSerialNbr());
 		publicationData.setDatexPublish_LatePublicationFlag(false);
 		publicationData.setDatexPublish_Type(
 				PublicationType.createPublicationTypeWithDatexPublish_Data(DatexPublish_Data));

@@ -39,8 +39,6 @@ public class TagoService {
     private final Publication208BaseInfo pub208;
     private final ChannelAttribute channelAttribute;
 
-    private int dataPacketNumber = 0;
-
     @Value("${server.sender}")
     private String sender;
     @Value("${server.server-login-pass}")
@@ -52,6 +50,7 @@ public class TagoService {
      * 클라이언트 검증과 로그인 처리
      */
     public C2CAuthenticatedMessage responseLogin(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx) {
+
 
         Login login = c2CAuthMsg.getPdu().getLogin();
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get(); // 채널에 대한 설정 및 기본값 세팅
@@ -116,7 +115,7 @@ public class TagoService {
         reject.setDatexReject_Type(RejectType.createRejectTypeWithDatexReject_Login_cd(datexReject_Login_cd));
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacket_number(channelInfo.getDataPacketNumber());
         c2c.setDatex_DataPacketPriority_number(0);
 
         c2c.setOptions(getOptions(null));
@@ -167,6 +166,7 @@ public class TagoService {
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
         channelInfo.setSubGuarantee(subscriptionData.getDatexSubscribe_Guarantee_bool());
+        log.info("subGuarantee {}",subscriptionData.getDatexSubscribe_Guarantee_bool());
 
         String endAppMsgId = subscriptionData.getDatexSubscribe_Pdu().getEndApplication_Message_id()
                 .toString(new ASN1ValueFormat().excludeValueAssignment());
@@ -202,7 +202,7 @@ public class TagoService {
         log.debug("[Subscription] reject code : {}",reject.getDatexReject_Type().getDatexReject_Subscription_cd());
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacket_number(channelInfo.getDataPacketNumber());
         c2c.setDatex_DataPacketPriority_number(0);
 
         c2c.setOptions(getOptions(null));
@@ -254,7 +254,7 @@ public class TagoService {
     }
 
     /**
-     *   구독 요청에 대한 분기 처리
+     * 구독 요청에 대한 분기 처리
      */
     public void processSubscription(C2CAuthenticatedMessage c2c, ChannelHandlerContext ctx) throws RuntimeException{
 
@@ -291,7 +291,7 @@ public class TagoService {
                     log.debug("구독: 201 [주기]");
                     int interval = (int)subscriptionMode.getPeriodic().getContinuous().getDatexRegistered_UpdateDelay_qty();
                 } else if (subscriptionMode.hasEvent_driven()) {
-                    log.debug("구독: 201 [이벤트]");
+                    log.info("구독: 201 [이벤트]");
                     switch (headerOrigin) {
                         case "boryeong" -> channelInfo.setPub201boryeong(ctx.executor().scheduleWithFixedDelay(()->{
                             try {
@@ -465,7 +465,6 @@ public class TagoService {
 
             default -> log.info("[Subscription] 일치하는 oId가 없습니다. ({})", oId);
         }
-
     }
 
     /**
@@ -479,13 +478,14 @@ public class TagoService {
      * 서브스크립션 취소에 대한 처리와 응답을 한다.
      */
     private C2CAuthenticatedMessage responseSubscriptionCancel(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx ) {
+        ChannelInfo info = ctx.channel().attr(INFO).get();
         log.info("[Subscription] Cancel");
         // 모든 구독 프로세스 종료
         channelAttribute.release(ctx);
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacket_number(info.getDataPacketNumber());
         c2c.setDatex_DataPacketPriority_number(0);
 
         c2c.setOptions(getOptions(null));
@@ -502,11 +502,12 @@ public class TagoService {
     /**
      * FrED에 응답을 한다.
      */
-    public C2CAuthenticatedMessage responseFrED() {
+    public C2CAuthenticatedMessage responseFrED(ChannelHandlerContext ctx) {
+        ChannelInfo info = ctx.channel().attr(INFO).get();
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(dataPacketNumber++);
+        c2c.setDatex_DataPacket_number(info.getDataPacketNumber());
         c2c.setDatex_DataPacketPriority_number(0);
         c2c.setOptions(getOptions(null));
         c2c.setPdu(PDUs.createPDUsWithFred(0));
@@ -518,13 +519,17 @@ public class TagoService {
      * Accept와 Reject에 대한 처리
      */
     public void acceptRejectPublication(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx ) {
+        if( c2CAuthMsg.getPdu().hasAccept() &&
+            c2CAuthMsg.getPdu().getAccept().getDatexAccept_Type().getChosenFlag() == Accept.DatexAccept_Type.publication_chosen ) {
 
-        if( c2CAuthMsg.getPdu().hasAccept() ) {
-            ctx.channel().pipeline().get(OutboundQueueHandler.class).fire();
+            long packetNo = c2CAuthMsg.getPdu().getAccept().getDatexAccept_Packet_nbr();
+            log.info("엑셉트을 받음 패킷 번호{}",packetNo);
+            ctx.channel().pipeline().get(OutboundQueueHandler.class).fire(packetNo, true);
         }
-
-        if( c2CAuthMsg.getPdu().hasReject() ) {
-            ctx.channel().pipeline().get(OutboundCacheHandler.class).fire();
+        if( c2CAuthMsg.getPdu().hasReject()) {
+            long packetNo = c2CAuthMsg.getPdu().getReject().getDatexReject_Packet_nbr();
+            log.info("잘못된 데이터를 보내서 Reject 메세지를 받음, 그래서 재전송");
+            ctx.channel().pipeline().get(OutboundQueueHandler.class).fire(packetNo, false);
         }
     }
 

@@ -39,6 +39,9 @@ public class Publication202BusArrvlPrdcInfo {
 
     @Value("${server.sender}")
     private String sender;
+    @Value("${server.sendCnt}")
+    private int sendCnt;
+
 
     private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
@@ -48,10 +51,9 @@ public class Publication202BusArrvlPrdcInfo {
 
                 countedList.add(el);
 
-                if( countedList.size() >= 3 ) {
+                if( countedList.size() >= sendCnt ) {
                     C2CAuthenticatedMessage data = publication(pubData(countedList), origin, ctx);
                     this.testEncoding(data);
-                    Thread.sleep(50);
                     ctx.writeAndFlush(data);
                     countedList.clear();
                 }
@@ -60,7 +62,6 @@ public class Publication202BusArrvlPrdcInfo {
             if( !countedList.isEmpty() ) {
                 C2CAuthenticatedMessage data = publication(pubData(countedList), origin, ctx);
                 this.testEncoding(data);
-                Thread.sleep(50);
                 ctx.writeAndFlush(data);
             }
         }
@@ -90,19 +91,20 @@ public class Publication202BusArrvlPrdcInfo {
     }
 
     private C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
+        ChannelAttribute.ChannelInfo info = ctx.channel().attr(INFO).get();
 
         EndApplicationMessage DatexPublish_Data = EndAppMsg;
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number( util.getDataPacketNumber() + 1);
+        c2c.setDatex_DataPacket_number( info.getDataPacketNumber() );
         c2c.setDatex_DataPacketPriority_number(0);
 
         c2c.setOptions(this.getOptions(origin, ctx));
 
         PublicationData publicationData = new PublicationData();
-        publicationData.setDatexPublish_SubscribeSerial_nbr(util.getSubSerialNbr());
-        publicationData.setDatexPublish_Serial_nbr(util.getPubSerialNbr());
+        publicationData.setDatexPublish_SubscribeSerial_nbr(info.getSubSerialNbr());
+        publicationData.setDatexPublish_Serial_nbr(info.getPubSerialNbr());
         publicationData.setDatexPublish_LatePublicationFlag(false);
         publicationData.setDatexPublish_Type(
                 PublicationType.createPublicationTypeWithDatexPublish_Data(DatexPublish_Data));
@@ -237,12 +239,8 @@ public class Publication202BusArrvlPrdcInfo {
 
         baos.reset();
         util.getCoder().encode(datexDataPacket, baos);
-        log.info("202 테스트 데이터 바이트 사이즈: {}",baos.size());
         if (baos.size() > util.getDataGramSize()) {
-            log.info("202 문제의 데이터:{}",dummy);
             throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
-        } else if ( baos.size() < 50 ) {
-            log.info("202 문제의 작은 데이터:{}", dummy);
         }
     }
 }

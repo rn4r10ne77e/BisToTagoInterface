@@ -19,15 +19,20 @@ import java.io.ByteArrayOutputStream;
 public class TagoEncoder extends MessageToByteEncoder<Object> {
 
 	private final Util util;
+	private long testCnt = 0;
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+	protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) {
 
 		if (!(msg instanceof C2CAuthenticatedMessage c2c)) {
 			log.error("C2C instance error");
 			return;
 		}
-		log.debug("송신메세지:{}",c2c);
+
+		long packetNumber = c2c.getDatex_DataPacket_number();
+
+		log.info("패킷번호 {}",packetNumber);
+		log.info("패킷내용 {}",c2c);
 
       	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -58,6 +63,19 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 			log.error("DatagramSize is over : " + baos.size());
 			return;
 		}
+//		if( testCnt % 100 == 0 && testCnt != 0 && c2c.getPdu().hasPublication()) {
+//			log.info("잘못된 데이터 보냄");
+//			byte[] result = baos.toByteArray();
+//			byte[] invalidByte = new byte[result.length-10];
+//			System.arraycopy(result, 0, invalidByte, 0, result.length-10);
+//			out.writeBytes(invalidByte);
+//		} else {
+//			out.writeBytes(baos.toByteArray());
+//		}
+
+
 		out.writeBytes(baos.toByteArray());
+
+		testCnt++;
 	}
 }

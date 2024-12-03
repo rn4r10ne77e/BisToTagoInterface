@@ -12,7 +12,6 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;

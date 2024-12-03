@@ -18,7 +18,6 @@ public class ApplicationStartupTask implements ApplicationListener<ApplicationRe
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-
         log.info(event.getTimeTaken().toString());
         nettyServerSocket.start();
     }

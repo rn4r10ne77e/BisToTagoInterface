@@ -4,8 +4,6 @@ import com.geon.bis.link.TagoService;
 import com.geon.bis.link.config.ChannelAttribute;
 import datex.iso14827_2.C2CAuthenticatedMessage;
 import datex.iso14827_2.PDUs;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -13,7 +11,6 @@ import io.netty.channel.group.ChannelGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -44,6 +41,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
+        log.info("수신 메세지 {}", c2c);
         switch (c2c.getPdu().getChosenFlag()) {
 
             case PDUs.login_chosen:
@@ -51,7 +49,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
                 break;
 
             case PDUs.fred_chosen:
-                ctx.writeAndFlush(tagoService.responseFrED());
+                ctx.writeAndFlush(tagoService.responseFrED(ctx));
                 break;
 
             case PDUs.logout_chosen:
@@ -67,6 +65,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
             case PDUs.accept_chosen:
             case PDUs.reject_chosen:
+                log.info("accept or reject : {}",c2c);
                 tagoService.acceptRejectPublication(c2c, ctx);
                 break;
             default:
@@ -84,14 +83,15 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     }
 
 
-
-
-
-
-
-
-
-
-
+    @Override
+    public void channelWritabilityChanged( ChannelHandlerContext ctx ){
+        boolean writable = ctx.channel().isWritable();
+        if( writable ){
+            log.error("Channel writable");
+        } else {
+            log.error("Channel not writable");
+        }
+        ctx.fireChannelWritabilityChanged();
+    }
 
 }

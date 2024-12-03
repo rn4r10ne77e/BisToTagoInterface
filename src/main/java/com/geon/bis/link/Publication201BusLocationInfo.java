@@ -8,7 +8,6 @@ import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
-//import com.geon.bis.link.tago.datex.iso14827_2.*;
 import datex.businfomation.BusLocationEvent;
 import datex.businfomation.BusLocationInfo;
 import datex.businfomation.BusLocationPolling;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,12 +53,11 @@ public class Publication201BusLocationInfo {
 
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
-                        .beforeMinute(0)
-                        .mode("SINGLE")
-                        .origin(origin)
-                .build());
+            .beforeMinute(0)
+            .mode("SINGLE")
+            .origin(origin)
+          .build());
         this.makePublicationData( ctx, requiredOrigin, busList);
-
     }
 
     /**
@@ -69,7 +65,7 @@ public class Publication201BusLocationInfo {
      * @param ctx - 요청한 핸들러
      * @throws Exception - 인코딩에 대한 예외
      */
-    public synchronized void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
+    public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
         try {
             List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
@@ -108,7 +104,6 @@ public class Publication201BusLocationInfo {
                 if( partBusEve.size() >= sendCnt ) {
                     C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), origin, ctx);
                     this.testEncoding(data);
-                    Thread.sleep(50);
                     ctx.writeAndFlush(data);
                     partBusEve.clear();
                 }
@@ -116,7 +111,6 @@ public class Publication201BusLocationInfo {
                 if( partPerPol.size() >= sendCnt ) {
                     C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), origin, ctx);
                     this.testEncoding(data);
-                    Thread.sleep(50);
                     ctx.writeAndFlush(data);
                     partPerPol.clear();
                 }
@@ -125,14 +119,12 @@ public class Publication201BusLocationInfo {
             if( !partBusEve.isEmpty() ) {
                 C2CAuthenticatedMessage data = publication(makePublishDataBusEvent(partBusEve), origin, ctx);
                 this.testEncoding(data);
-                Thread.sleep(50);
                 ctx.writeAndFlush(data);
             }
 
             if( !partPerPol.isEmpty() ) {
                 C2CAuthenticatedMessage data = publication(makePublishDataPeriodPolling(partPerPol), origin, ctx);
                 this.testEncoding(data);
-                Thread.sleep(50);
                 ctx.writeAndFlush(data);
             }
         }
@@ -261,17 +253,12 @@ public class Publication201BusLocationInfo {
 
         if (!BusLocationList.isEmpty()) {
             for (ResultBusLocationInfo el : BusLocationList) {
-                log.debug("pubPeriodicEventData 2" + el.toString());
                 //공통메세지 생성
                 BusLocationInfo busLocationInfo = CommonDataGen(el);
-
                 //이벤트 정보
                 if(el.getMessageGenerationTime() != null || el.getNodeZoneIDNumber() != null || el.getNodeRouteSequence() != -1) {
-
                     busLocationInfo.setBusLocationInfoType(BusLocationInfo.BusLocationInfoType.createBusLocationInfoTypeWithBusLocationEvent(EventDataGen(el)));
-
                     message_MESSAGEBODY_1.add(busLocationInfo);
-                    log.debug("버스이벤트 추가 : " + message_MESSAGEBODY_1);
                 }
             }
         }
@@ -299,16 +286,13 @@ public class Publication201BusLocationInfo {
 
         if (!BusLocationList.isEmpty()) {
             for (ResultBusLocationInfo el : BusLocationList) {
-                //공통메세지 생성
-                BusLocationInfo busLocationInfo = CommonDataGen(el);
 
+                BusLocationInfo busLocationInfo = CommonDataGen(el);
                 //정주기 정보
                 if(el.getPTVehicleCoordinateLati() != 0.0f && el.getPTVehicleCoordinateLong() != 0.0f ) {
-
                     busLocationInfo.setBusLocationInfoType(BusLocationInfo.BusLocationInfoType.createBusLocationInfoTypeWithBusLocationPolling(pollingDataGen(el)));
-
                     message_MESSAGEBODY_1.add(busLocationInfo);
-                    log.debug("버스정주기 추가 : " + message_MESSAGEBODY_1);
+
                 }
             }
         }
@@ -326,82 +310,21 @@ public class Publication201BusLocationInfo {
         return DatexPublish_Data;
     }
 
-    private void periodicPubProc(){
-        // 일정주기 10분이내 데이터(col, msg 둘중 하나라도 10분이내) 조회하여 전체 전송
-        // 주기적으로 전체 데이터 가져와서 publication(중복데이터 전송)
-        // Timestamp lastTime = new Timestamp(util.nowTime().getTime() - (10 * 60 * 1000)); // 10분전 타임
-
-        List<ResultBusLocationInfo> info = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder().build());
-        log.info("[버스위치정보] 전체데이터 조회건수 : {}", info.size());
-
-        if (!info.isEmpty()) {
-            List<ResultBusLocationInfo> part = new ArrayList<>();
-
-            for (ResultBusLocationInfo el : info) {
-                // 메세지를 정의된 개수만큼 쪼개서 보내기
-                log.debug("vo결과 : " + el.toString());
-                part.add(el);
-
-//                if(part.size() >= sendCnt) {
-//                    boolean result = publication(makePublishDataBusEvent(part), subSerialNbr, pubSerialNbr);
-//                    // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-//                    if (result) {
-//                        pubSerialNbr++;
-//                    }
-//                    result = publication(makePublishDataPeriodPolling(part), subSerialNbr, pubSerialNbr);
-//                    // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-//                    if (result) {
-//                        pubSerialNbr++;
-//                    }
-//                    part.clear();
-//                }
-                log.debug("PartList 결과 : {}", part);
-
-            }
-
-            // 남은거 보내기
-//            if(!part.isEmpty()) {
-//                boolean result = publication(makePublishDataBusEvent(part), subSerialNbr, pubSerialNbr);
-//                // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-//                if (result) {
-//                    pubSerialNbr++;
-//                }
-//                result = publication(makePublishDataPeriodPolling(part), subSerialNbr, pubSerialNbr);
-//                // 퍼블리케이션 할 데이터가 있을 경우만 pubSerialNbr를 증가시킴
-//                if (result) {
-//                    pubSerialNbr++;
-//                }
-//            }
-        }
-    }
-
     public C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
-        EndApplicationMessage DatexPublishData = EndAppMsg;
+        ChannelAttribute.ChannelInfo info = ctx.channel().attr(INFO).get();
 
-//        if (serverPubTestOn) {
-//            log.info("[Publication Test]");
-//            // 실시간 정보 테스트 데이터 생성
-//            DatexPublishData = pubTestData();
-//        } else {
-//            // 데이터가 없을 경우 패킷을 생성하지 않음.
-//            if (DatexPublishData == null) {
-//                log.info("[No Publication]");
-//                return false;
-//            }
-//
-//            log.info("[Publication]");
-//        }
+        EndApplicationMessage DatexPublishData = EndAppMsg;
 
         C2CAuthenticatedMessage c2c = new C2CAuthenticatedMessage();
         c2c.setDatex_AuthenticationInfo_text(new OctetString());
-        c2c.setDatex_DataPacket_number(util.getDataPacketNumber() + 1);
+        c2c.setDatex_DataPacket_number(info.getDataPacketNumber());
         c2c.setDatex_DataPacketPriority_number(0);
 
         c2c.setOptions(getOptions(origin , ctx));
 
         PublicationData publicationData = new PublicationData();
-        publicationData.setDatexPublish_SubscribeSerial_nbr(util.getPubSerialNbr());
-        publicationData.setDatexPublish_Serial_nbr(util.getPubSerialNbr());
+        publicationData.setDatexPublish_SubscribeSerial_nbr(info.getPubSerialNbr());
+        publicationData.setDatexPublish_Serial_nbr(info.getPubSerialNbr());
         publicationData.setDatexPublish_LatePublicationFlag(false);
         publicationData.setDatexPublish_Type(PublicationType.createPublicationTypeWithDatexPublish_Data(DatexPublishData));
 		/*
@@ -443,13 +366,8 @@ public class Publication201BusLocationInfo {
 
         baos.reset();
         util.getCoder().encode(datexDataPacket, baos);
-
-        log.info("201 테스트 데이터 바이트 사이즈: {}",baos.size());
         if (baos.size() > util.getDataGramSize()) {
-            log.info("201 문제의 데이터:{}",dummy);
             throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
-        } else if ( baos.size() < 50 ) {
-            log.info("201 문제의 작은 데이터:{}", dummy);
         }
     }
 

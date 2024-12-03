@@ -148,5 +148,20 @@ public class  ChannelAttribute {
         private int responseTimeOut;
         private List<String> origin;
         private String destination;
+
+        private long dataPacketNumber;
+
+        public long getDataPacketNumber(){
+            return ++dataPacketNumber;
+        }
+        private long subSerialNbr;
+        public long getSubSerialNbr(){
+            return ++subSerialNbr;
+        }
+        private long pubSerialNbr;
+        public long getPubSerialNbr(){
+            return ++pubSerialNbr;
+        }
+
     }
 }

@@ -28,7 +28,7 @@
     </appender>
 
     <!-- 로그 레벨 설정 -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </root>
