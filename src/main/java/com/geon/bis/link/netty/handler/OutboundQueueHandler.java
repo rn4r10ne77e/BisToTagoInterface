@@ -40,7 +40,6 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
         super.write(ctx, msg, promise);
       }
       queue.offer((C2CAuthenticatedMessage)msg);
-      promise.setSuccess();
     } else {
       super.write(ctx, msg, promise);
     }

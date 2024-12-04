@@ -29,11 +29,6 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 			return;
 		}
 
-		long packetNumber = c2c.getDatex_DataPacket_number();
-
-		log.info("패킷번호 {}",packetNumber);
-		log.info("패킷내용 {}",c2c);
-
       	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {

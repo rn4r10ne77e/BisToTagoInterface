@@ -14,6 +14,8 @@ import datex.iso14827_2.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -38,6 +40,10 @@ public class TagoService {
     private final Publication207BaseInfoVersion pub207;
     private final Publication208BaseInfo pub208;
     private final ChannelAttribute channelAttribute;
+
+    private static final int EXECUTOR_THREAD_COUNT = 20; // 블로킹 작업 처리용 스레드
+    private final DefaultEventExecutorGroup executorGroup = new DefaultEventExecutorGroup(EXECUTOR_THREAD_COUNT);
+
 
     @Value("${server.sender}")
     private String sender;
@@ -166,8 +172,6 @@ public class TagoService {
 
         ChannelInfo channelInfo = ctx.channel().attr(INFO).get();
         channelInfo.setSubGuarantee(subscriptionData.getDatexSubscribe_Guarantee_bool());
-        log.info("subGuarantee {}",subscriptionData.getDatexSubscribe_Guarantee_bool());
-
         String endAppMsgId = subscriptionData.getDatexSubscribe_Pdu().getEndApplication_Message_id()
                 .toString(new ASN1ValueFormat().excludeValueAssignment());
         int datexSubscribeMode = subscriptionData.getDatexSubscribe_Mode().getChosenFlag();
@@ -294,44 +298,59 @@ public class TagoService {
                     log.info("구독: 201 [이벤트]");
                     switch (headerOrigin) {
                         case "boryeong" -> channelInfo.setPub201boryeong(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub201.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub201boryeong().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub201.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub201boryeong().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub201cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub201.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub201cheongyang().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub201.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub201cheongyang().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "taean" -> channelInfo.setPub201taean(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub201.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub201taean().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub201.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub201taean().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "seocheon" -> channelInfo.setPub201seocheon(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub201.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub201seocheon().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub201.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub201seocheon().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "geumsan" -> channelInfo.setPub201geumsan(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub201.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub201geumsan().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub201.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub201geumsan().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         default -> throw new IllegalStateException("Unexpected value: " + headerOrigin);
                     }
@@ -353,44 +372,59 @@ public class TagoService {
                     log.info("구독: 202 [이벤트]");
                     switch(headerOrigin){
                         case "boryeong" -> channelInfo.setPub202boryeong(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub202.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub202boryeong().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub202.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub202boryeong().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub202cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub202.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub202cheongyang().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub202.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub202cheongyang().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "taean" -> channelInfo.setPub202taean(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub202.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub202taean().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub202.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub202taean().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "seocheon" -> channelInfo.setPub202seocheon(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub202.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub202seocheon().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub202.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub202seocheon().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "geumsan" ->channelInfo.setPub202geumsan(ctx.executor().scheduleWithFixedDelay(()->{
-                            try {
-                                pub202.procEventPublication(ctx, headerOrigin);
-                            } catch (Exception e) {
-                                getError(e);
-                                ctx.channel().attr(INFO).get().getPub202geumsan().cancel(true);
-                            }
+                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            executorGroup.submit(()->{
+                                try {
+                                    pub202.procEventPublication(ctx, headerOrigin);
+                                } catch (Exception e) {
+                                    getError(e);
+                                    ctx.channel().attr(INFO).get().getPub202geumsan().cancel(true);
+                                }
+                            });
                         }, 5, 30, TimeUnit.SECONDS));
                     }
                 }

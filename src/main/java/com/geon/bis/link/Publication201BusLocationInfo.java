@@ -92,7 +92,7 @@ public class Publication201BusLocationInfo {
      * @throws EncodeFailedException 인코딩 실패시
      * @throws EncodeNotSupportedException 인코딩 실패시
      */
-    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBusLocationInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+    private synchronized void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultBusLocationInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         if (!busList.isEmpty()) {
             List<ResultBusLocationInfo> partPerPol = new ArrayList<>();
             List<ResultBusLocationInfo> partBusEve = new ArrayList<>();
@@ -359,6 +359,7 @@ public class Publication201BusLocationInfo {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.reset();
+        log.info("test Data : {}",dummy);
         util.getCoder().encode(dummy, baos);
         byte[] encoding = baos.toByteArray();
 

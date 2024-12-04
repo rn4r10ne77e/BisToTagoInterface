@@ -7,7 +7,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 
     hikari:
-      maximum-pool-size: 5
+      maximum-pool-size: 10
       connection-timeout: 30000
       idle-timeout: 30000
       cache-prep-stmts: false
@@ -28,13 +28,13 @@ server:
   # 원천데이터제공처(지자체ID), 여러지자체 데이터 제공시 ',' 로 구분
   origin: cnbis
   # ASN.1 메세지 사이즈(1024 넘기면 네트워크 전송간 오류 발생)
-  datagram-size: 1024
+  datagram-size: 4096
   # 로그인 절차, 비밀번호 검증 절차 시행여부
   server-login-pass: true
   # 테스트 데이터 Publication
   server-pub-test-on: false
   # 한번에 보내는 메세지 개수
-  sendCnt: 3
+  sendCnt: 10
   # 한번에 가지고 올 시간 데이터의 기준 기간 현재 시간 기준 n분 이전 데이터
   timeCnt: 1
 

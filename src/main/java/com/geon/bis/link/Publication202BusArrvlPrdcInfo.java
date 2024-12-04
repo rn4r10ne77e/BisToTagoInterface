@@ -40,7 +40,7 @@ public class Publication202BusArrvlPrdcInfo {
     private int sendCnt;
 
 
-    private void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+    private synchronized void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
         if (!busList.isEmpty()) {
             List<ResultArrivalPredictionTimeInfo> countedList = new ArrayList<>();
@@ -82,7 +82,6 @@ public class Publication202BusArrvlPrdcInfo {
           .mode("EVENT")
           .origin(origin)
           .build());
-        log.debug("data cnt : {}",busList.size());
         makePublicationData( ctx, requiredOrigin, busList );
 
     }
@@ -226,6 +225,7 @@ public class Publication202BusArrvlPrdcInfo {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.reset();
+        log.info("test Data : {}",dummy);
         util.getCoder().encode(dummy, baos);
         byte[] encoding = baos.toByteArray();
 
