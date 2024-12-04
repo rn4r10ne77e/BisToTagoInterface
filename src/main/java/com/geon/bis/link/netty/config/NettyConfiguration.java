@@ -3,6 +3,7 @@ package com.geon.bis.link.netty.config;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -43,6 +44,7 @@ public class NettyConfiguration {
           .channel(NioServerSocketChannel.class)
           .handler(new LoggingHandler(LogLevel.DEBUG))
           .childOption(ChannelOption.SO_RCVBUF, 10 * 1024 * 1024)
+          .childOption(ChannelOption.SO_SNDBUF, 10 * 1024 * 1024)
           .childOption(ChannelOption.SO_KEEPALIVE, keepAlive)
           .childHandler(nettyChannelInitializer);
         b.option(ChannelOption.SO_BACKLOG, backlog);

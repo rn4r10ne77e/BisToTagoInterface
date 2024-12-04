@@ -10,6 +10,6 @@ public class OutboundCacheHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        ctx.writeAndFlush(msg);
+        super.write(ctx, msg, promise);
     }
 }

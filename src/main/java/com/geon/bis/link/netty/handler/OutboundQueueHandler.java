@@ -18,7 +18,7 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
   private final Queue<C2CAuthenticatedMessage> queue = new LinkedList<>();
   private ScheduledFuture<?> scheduledFuture;
   private ChannelHandlerContext currentCtx;
-  private final int queueMaxSize= 1000;
+  private final int queueMaxSize = 1000;
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -26,7 +26,6 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
     scheduledFuture = ctx.executor().scheduleAtFixedRate(() -> {
       int queueSize = queue.size();
       log.info("Current queue size: {}/{}", queueSize,queueMaxSize);
-      log.info("Current queue packet numbers : {}",queue.stream().map(C2CAuthenticatedMessage::getDatex_DataPacket_number).toList());
 
       if( queueSize >= queueMaxSize ) { queue.clear(); }
 
@@ -41,6 +40,7 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
         super.write(ctx, msg, promise);
       }
       queue.offer((C2CAuthenticatedMessage)msg);
+      promise.setSuccess();
     } else {
       super.write(ctx, msg, promise);
     }

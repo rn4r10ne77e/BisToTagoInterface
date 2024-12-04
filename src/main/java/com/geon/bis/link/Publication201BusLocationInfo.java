@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
@@ -49,6 +50,7 @@ public class Publication201BusLocationInfo {
      * @param ctx 요청한 핸들러
      * @throws Exception 인코딩에 대한 예외
      */
+    @Transactional
     public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws Exception {
 
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
@@ -65,6 +67,7 @@ public class Publication201BusLocationInfo {
      * @param ctx - 요청한 핸들러
      * @throws Exception - 인코딩에 대한 예외
      */
+    @Transactional
     public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
         try {
             List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());

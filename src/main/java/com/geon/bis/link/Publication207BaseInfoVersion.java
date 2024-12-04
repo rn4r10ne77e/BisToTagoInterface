@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -44,7 +45,7 @@ public class Publication207BaseInfoVersion {
 	private String sender;
 	@Value("${server.sendCnt}")
 	private int sendCnt;
-
+	@Transactional
 	public  void procSinglePublication(ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
 		List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
@@ -55,7 +56,7 @@ public class Publication207BaseInfoVersion {
 
 		makePublicationData( ctx, requiredOrigin, versionList );
 	}
-
+	@Transactional
 	public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
 		List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());

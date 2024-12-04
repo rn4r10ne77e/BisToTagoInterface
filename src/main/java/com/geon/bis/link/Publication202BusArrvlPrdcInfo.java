@@ -17,14 +17,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
@@ -66,7 +63,7 @@ public class Publication202BusArrvlPrdcInfo {
             }
         }
     }
-
+    @Transactional
     public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
@@ -77,8 +74,8 @@ public class Publication202BusArrvlPrdcInfo {
 
         this.makePublicationData( ctx, requiredOrigin, busList );
     }
-
-    public synchronized void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+    @Transactional
+    public void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
           .beforeMinute(1)

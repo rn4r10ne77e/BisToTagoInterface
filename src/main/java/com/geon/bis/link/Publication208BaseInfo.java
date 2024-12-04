@@ -27,17 +27,15 @@ import io.netty.handler.codec.TooLongFrameException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 /**
@@ -58,7 +56,7 @@ public class Publication208BaseInfo {
 	@Value("${server.sendCnt}")
 	private int sendCnt;
 
-
+	@Transactional
 	public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
 		List<Integer> requiredRegion = List.of( RegionCode.findByRegion(requiredOrigin).getCode() );
