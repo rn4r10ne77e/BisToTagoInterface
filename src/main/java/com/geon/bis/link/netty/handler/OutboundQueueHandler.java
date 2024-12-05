@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 
@@ -15,7 +16,7 @@ import java.util.concurrent.ScheduledFuture;
 @RequiredArgsConstructor
 public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
 
-  private final Queue<C2CAuthenticatedMessage> queue = new LinkedList<>();
+  private final Queue<C2CAuthenticatedMessage> queue = new ConcurrentLinkedQueue<>();
   private ScheduledFuture<?> scheduledFuture;
   private ChannelHandlerContext currentCtx;
   private final int queueMaxSize = 1000;
