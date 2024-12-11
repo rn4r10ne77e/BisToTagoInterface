@@ -45,7 +45,6 @@ public class NettyConfiguration {
           .handler(new LoggingHandler(LogLevel.DEBUG))
           .childOption(ChannelOption.SO_RCVBUF, 40 * 1024 * 1024)
           .childOption(ChannelOption.SO_SNDBUF, 40 * 1024 * 1024)
-          .childOption(ChannelOption.SO_KEEPALIVE, keepAlive)
           .childHandler(nettyChannelInitializer);
         b.option(ChannelOption.SO_BACKLOG, backlog);
         return b;

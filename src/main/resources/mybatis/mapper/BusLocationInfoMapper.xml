@@ -57,6 +57,6 @@
             pt_vehicle_collected_time,
             pt_vehicle_collected_cycle_time
         from
-            public.get_bus_location_info(now() - interval '${beforeMinute} minutes', #{origin,jdbcType=ARRAY}, #{mode})
+            public.get_bus_location_info(now() - interval '${beforeMinute} seconds', #{origin,jdbcType=ARRAY}, #{mode})
     </select>
 </mapper>

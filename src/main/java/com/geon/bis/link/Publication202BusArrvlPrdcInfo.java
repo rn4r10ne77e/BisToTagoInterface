@@ -64,7 +64,7 @@ public class Publication202BusArrvlPrdcInfo {
         }
     }
     @Transactional
-    public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+    public synchronized void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
           .beforeMinute(0)
@@ -75,10 +75,10 @@ public class Publication202BusArrvlPrdcInfo {
         this.makePublicationData( ctx, requiredOrigin, busList );
     }
     @Transactional
-    public void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
+    public synchronized void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
-          .beforeMinute(1)
+          .beforeMinute(10)
           .mode("EVENT")
           .origin(origin)
           .build());
@@ -86,7 +86,7 @@ public class Publication202BusArrvlPrdcInfo {
 
     }
 
-    private C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
+    private synchronized C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
         ChannelAttribute.ChannelInfo info = ctx.channel().attr(INFO).get();
 
         EndApplicationMessage DatexPublish_Data = EndAppMsg;
@@ -120,7 +120,7 @@ public class Publication202BusArrvlPrdcInfo {
         return c2c;
     }
 
-    private EndApplicationMessage pubData(List<ResultArrivalPredictionTimeInfo> ArrivalPredictionTimeInfoList) {
+    private synchronized EndApplicationMessage pubData(List<ResultArrivalPredictionTimeInfo> ArrivalPredictionTimeInfoList) {
 
         EndApplicationMessage DatexPublish_Data = new EndApplicationMessage();
 
@@ -196,7 +196,7 @@ public class Publication202BusArrvlPrdcInfo {
         return DatexPublish_Data;
     }
 
-    public HeaderOptions getOptions(String origin, ChannelHandlerContext ctx) {
+    public synchronized HeaderOptions getOptions(String origin, ChannelHandlerContext ctx) {
         HeaderOptions options = new HeaderOptions();
         options.setDatex_Sender_text(new UTF8String16(sender));
 
@@ -221,11 +221,10 @@ public class Publication202BusArrvlPrdcInfo {
      * @throws EncodeFailedException -
      * @throws EncodeNotSupportedException -
      */
-    void testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
+    private synchronized void  testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.reset();
-        log.info("test Data : {}",dummy);
         util.getCoder().encode(dummy, baos);
         byte[] encoding = baos.toByteArray();
 

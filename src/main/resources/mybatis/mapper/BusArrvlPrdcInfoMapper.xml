@@ -51,7 +51,7 @@
             passenger_number,
             remain_seats_number
 
-        from public.get_arrival_prediction_time_info(now() - interval '${beforeMinute} minutes' , #{origin,jdbcType=ARRAY}, #{mode})
+        from public.get_arrival_prediction_time_info(now() - interval '${beforeMinute} seconds' , #{origin,jdbcType=ARRAY}, #{mode})
 
     </select>
 </mapper>

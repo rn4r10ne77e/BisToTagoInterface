@@ -41,7 +41,6 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         C2CAuthenticatedMessage c2c = (C2CAuthenticatedMessage) msg;
-        log.info("수신 메세지 {}", c2c);
         switch (c2c.getPdu().getChosenFlag()) {
 
             case PDUs.login_chosen:

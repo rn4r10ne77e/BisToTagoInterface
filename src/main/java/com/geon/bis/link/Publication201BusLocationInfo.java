@@ -51,7 +51,7 @@ public class Publication201BusLocationInfo {
      * @throws Exception 인코딩에 대한 예외
      */
     @Transactional
-    public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws Exception {
+    public synchronized void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws Exception {
 
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
@@ -68,11 +68,11 @@ public class Publication201BusLocationInfo {
      * @throws Exception - 인코딩에 대한 예외
      */
     @Transactional
-    public void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
+    public synchronized void procEventPublication (ChannelHandlerContext ctx, String requiredOrigin) throws Exception {
         try {
             List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
-                    .beforeMinute(1)
+                .beforeMinute(10)
                     .mode("EVENT")
                     .origin(origin)
                     .build());
@@ -133,7 +133,7 @@ public class Publication201BusLocationInfo {
         }
     }
 
-    private BusLocationInfo CommonDataGen(ResultBusLocationInfo el) {
+    private synchronized BusLocationInfo CommonDataGen(ResultBusLocationInfo el) {
 
         BusLocationInfo busLocationInfo = new BusLocationInfo();
         busLocationInfo.setTsfc_PTVehicleIDNumber(new UTF8String16(el.getPTVehicleIDNumber()));
@@ -161,25 +161,33 @@ public class Publication201BusLocationInfo {
         }
 
         busLocationInfo.setTsfc_LastPTVehicle(el.isLastPTVehicle());
-        if(el.getEndNodeZoneIDNumber() != null) {
-            busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
-        }
 
-        if(el.getEndNodeRouteSequence() != -1) {
-            busLocationInfo.setTpif_EndNodeRouteSequence(el.getEndNodeRouteSequence());
-        }
 
-        if(el.getBusTotalSeatsNumber() != -1) {
-            busLocationInfo.setTsfc_BusTotalSeatsNumber(el.getBusTotalSeatsNumber());
-        }
 
-        if(el.getBusPassengerNumber() != -1) {
-            busLocationInfo.setTsfc_BusPassengerNumber(el.getBusPassengerNumber());
-        }
-
-        if(el.getBusRemainSeatsNumber() != -1) {
-            busLocationInfo.setTsfc_BusRemainSeatsNumber(el.getBusRemainSeatsNumber());
-        }
+        busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
+        busLocationInfo.setTpif_EndNodeRouteSequence(100);
+        busLocationInfo.setTsfc_BusTotalSeatsNumber(0);
+        busLocationInfo.setTsfc_BusPassengerNumber(0);
+        busLocationInfo.setTsfc_BusRemainSeatsNumber(0);
+//        if(el.getEndNodeZoneIDNumber() != null) {
+//            busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
+//        }
+//
+//        if(el.getEndNodeRouteSequence() != -1) {
+//            busLocationInfo.setTpif_EndNodeRouteSequence(el.getEndNodeRouteSequence());
+//        }
+//
+//        if(el.getBusTotalSeatsNumber() != -1) {
+//            busLocationInfo.setTsfc_BusTotalSeatsNumber(el.getBusTotalSeatsNumber());
+//        }
+//
+//        if(el.getBusPassengerNumber() != -1) {
+//            busLocationInfo.setTsfc_BusPassengerNumber(el.getBusPassengerNumber());
+//        }
+//
+//        if(el.getBusRemainSeatsNumber() != -1) {
+//            busLocationInfo.setTsfc_BusRemainSeatsNumber(el.getBusRemainSeatsNumber());
+//        }
 
         return busLocationInfo;
     }
@@ -188,7 +196,7 @@ public class Publication201BusLocationInfo {
      *
      * @return BusLocationEvent
      */
-    private BusLocationEvent EventDataGen(ResultBusLocationInfo el) {
+    private synchronized BusLocationEvent EventDataGen(ResultBusLocationInfo el) {
 
         //메시지 발생시각, 이벤트 정보 수집 노드 ID, 노선 내 순번
         BusLocationEvent busLocationEvent = new BusLocationEvent(
@@ -215,7 +223,7 @@ public class Publication201BusLocationInfo {
      * @param el ResultBusLocationInfo
      * @return BusLocationPolling
      */
-    private BusLocationPolling pollingDataGen(ResultBusLocationInfo el) {
+    private synchronized BusLocationPolling pollingDataGen(ResultBusLocationInfo el) {
         BusLocationPolling busLocationPolling = new BusLocationPolling();
 
         //GPS_LATI
@@ -249,7 +257,7 @@ public class Publication201BusLocationInfo {
      * @param BusLocationList List of ResultBusLocationInfo
      * @return EndApplicationMessage
      */
-    private EndApplicationMessage makePublishDataBusEvent(List<ResultBusLocationInfo> BusLocationList ) {
+    private synchronized EndApplicationMessage makePublishDataBusEvent(List<ResultBusLocationInfo> BusLocationList ) {
 
         Message_MESSAGE_BODY_1 message_MESSAGEBODY_1 = new Message_MESSAGE_BODY_1();
         log.debug("pubPeriodicEventData 1" + BusLocationList.toString());
@@ -283,7 +291,7 @@ public class Publication201BusLocationInfo {
      *
      * @return EndApplicationMessage
      */
-    private EndApplicationMessage makePublishDataPeriodPolling(List<ResultBusLocationInfo> BusLocationList) {
+    private synchronized EndApplicationMessage makePublishDataPeriodPolling(List<ResultBusLocationInfo> BusLocationList) {
 
         Message_MESSAGE_BODY_1 message_MESSAGEBODY_1 = new Message_MESSAGE_BODY_1();
 
@@ -313,7 +321,7 @@ public class Publication201BusLocationInfo {
         return DatexPublish_Data;
     }
 
-    public C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
+    public synchronized C2CAuthenticatedMessage publication(EndApplicationMessage EndAppMsg, String origin, ChannelHandlerContext ctx ) {
         ChannelAttribute.ChannelInfo info = ctx.channel().attr(INFO).get();
 
         EndApplicationMessage DatexPublishData = EndAppMsg;
@@ -355,11 +363,10 @@ public class Publication201BusLocationInfo {
      * @throws EncodeFailedException - 인코딩 할때 발생하는 예외를 던짐.
      * @throws EncodeNotSupportedException - 지원하지 않는 인코딩 포맷일 경우.
      */
-    void testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
+    private synchronized void testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.reset();
-        log.info("test Data : {}",dummy);
         util.getCoder().encode(dummy, baos);
         byte[] encoding = baos.toByteArray();
 
@@ -375,7 +382,7 @@ public class Publication201BusLocationInfo {
         }
     }
 
-    public HeaderOptions getOptions(String origin, ChannelHandlerContext ctx) {
+    public synchronized HeaderOptions getOptions(String origin, ChannelHandlerContext ctx) {
         HeaderOptions options = new HeaderOptions();
         options.setDatex_Sender_text(new UTF8String16(sender));
 

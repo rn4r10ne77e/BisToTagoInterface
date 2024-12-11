@@ -41,7 +41,7 @@ public class TagoService {
     private final Publication208BaseInfo pub208;
     private final ChannelAttribute channelAttribute;
 
-    private static final int EXECUTOR_THREAD_COUNT = 20; // 블로킹 작업 처리용 스레드
+    private static final int EXECUTOR_THREAD_COUNT = 100; // 블로킹 작업 처리용 스레드
     private final DefaultEventExecutorGroup executorGroup = new DefaultEventExecutorGroup(EXECUTOR_THREAD_COUNT);
 
 
@@ -304,7 +304,7 @@ public class TagoService {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub201boryeong().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub201boryeong().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -315,7 +315,7 @@ public class TagoService {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub201cheongyang().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub201cheongyang().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -326,7 +326,7 @@ public class TagoService {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub201taean().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub201taean().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -337,7 +337,7 @@ public class TagoService {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub201seocheon().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub201seocheon().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -348,7 +348,7 @@ public class TagoService {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub201geumsan().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub201geumsan().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -378,7 +378,7 @@ public class TagoService {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub202boryeong().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub202boryeong().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -389,7 +389,7 @@ public class TagoService {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub202cheongyang().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub202cheongyang().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -400,7 +400,7 @@ public class TagoService {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub202taean().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub202taean().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -411,7 +411,7 @@ public class TagoService {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub202seocheon().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub202seocheon().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -422,7 +422,7 @@ public class TagoService {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
                                     getError(e);
-                                    ctx.channel().attr(INFO).get().getPub202geumsan().cancel(true);
+//                                    ctx.channel().attr(INFO).get().getPub202geumsan().cancel(true);
                                 }
                             });
                         }, 5, 30, TimeUnit.SECONDS));
@@ -554,7 +554,7 @@ public class TagoService {
      */
     public void acceptRejectPublication(C2CAuthenticatedMessage c2CAuthMsg, ChannelHandlerContext ctx ) {
         if( c2CAuthMsg.getPdu().hasAccept() &&
-            c2CAuthMsg.getPdu().getAccept().getDatexAccept_Type().getChosenFlag() == Accept.DatexAccept_Type.publication_chosen ) {
+          c2CAuthMsg.getPdu().getAccept().getDatexAccept_Type().getChosenFlag() == Accept.DatexAccept_Type.publication_chosen ) {
 
             long packetNo = c2CAuthMsg.getPdu().getAccept().getDatexAccept_Packet_nbr();
             log.info("엑셉트을 받음 패킷 번호{}",packetNo);
