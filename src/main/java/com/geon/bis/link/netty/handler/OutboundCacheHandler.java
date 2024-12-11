@@ -14,6 +14,6 @@ public class OutboundCacheHandler extends ChannelOutboundHandlerAdapter {
 
         C2CAuthenticatedMessage packet = (C2CAuthenticatedMessage) msg;
         log.info("아웃바운드 캐시 핸들러에서 받은 메시지: {}",packet.getDatex_DataPacket_number());
-        super.write(ctx, msg, promise);
+        ctx.writeAndFlush(msg, promise);
     }
 }
