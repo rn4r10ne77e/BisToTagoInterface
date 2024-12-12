@@ -27,19 +27,19 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
     currentCtx = ctx;
-//    currentCtx.executor().scheduleAtFixedRate(() -> {
-//      executors.submit(()->{
-//        synchronized (queue) {
-//          int queueSize = queue.size();
-//          log.info("Current queue size: {}/{}", queueSize, queueMaxSize);
-//          currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.poll());
-//          if (queueSize >= queueMaxSize) {
-//            queue.clear();
-//          }
-//        }
-//      });
-//
-//    }, 0, 5, TimeUnit.SECONDS);
+    currentCtx.executor().scheduleAtFixedRate(() -> {
+      executors.submit(()->{
+
+        int queueSize = queue.size();
+        log.info("Current queue size: {}/{}", queueSize, queueMaxSize);
+        currentCtx.writeAndFlush(queue.poll());
+        if (queueSize >= queueMaxSize) {
+          queue.clear();
+        }
+
+      });
+
+    }, 0, 5, TimeUnit.SECONDS);
 
   }
   @Override
@@ -47,26 +47,30 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
     // 데이터 전송일 경우에 만 큐에 담아 두기
     if (((C2CAuthenticatedMessage)msg).getPdu().hasPublication()) {
       if( queue.isEmpty() ) {
-        super.write(ctx, msg, promise);
+        ctx.writeAndFlush(msg, promise);
       }
       queue.offer((C2CAuthenticatedMessage)msg);
     } else {
-      super.write(ctx, msg, promise);
+      ctx.writeAndFlush(msg, promise);
     }
   }
   // 퍼블리케이션에 대한 Accept 를 받았을 때 메세지 큐에서 삭제 한다.
   public void fire( long packetNo, boolean isAccept ) {
+
     if( isAccept ){ // case accept
 //      queue.removeIf( e -> e.getDatex_DataPacket_number() == packetNo );
       queue.poll();
-      if( !queue.isEmpty() ) {
+      if(!queue.isEmpty()) {
         currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.peek());
       }
+
+
     } else { // case reject
-      if( !queue.isEmpty() ) {
-        log.info("가져온 메시지: {}",queue.peek().getDatex_DataPacket_number());
-        currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.peek());
-      }
+
+      log.info("가져온 메시지: {}",queue.peek().getDatex_DataPacket_number());
+      currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.peek());
+
+
     }
 
   }
