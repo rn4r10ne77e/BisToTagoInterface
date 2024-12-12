@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -19,15 +20,13 @@ import java.util.Date;
 
 @Slf4j
 @Getter
+@Primary
 @Component
 public class Util {
 
 	private final TagoServerConfig tagoServerConfig;
 	private final Coder coder;
 
-
-
-	
 	public Util(TagoServerConfig tagoServerConfig) {
         this.tagoServerConfig = tagoServerConfig;
         coder = Datex.getBERCoder();

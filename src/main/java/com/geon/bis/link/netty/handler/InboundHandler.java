@@ -2,30 +2,30 @@ package com.geon.bis.link.netty.handler;
 
 import com.geon.bis.link.TagoService;
 import com.geon.bis.link.config.ChannelAttribute;
+import com.geon.bis.link.tago.config.BeanUtil;
 import datex.iso14827_2.C2CAuthenticatedMessage;
 import datex.iso14827_2.PDUs;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
-@ChannelHandler.Sharable
-@RequiredArgsConstructor
+
 public class InboundHandler extends ChannelInboundHandlerAdapter {
 
-    private final TagoService tagoService;
-    private final ChannelGroup channelGroup;
-    private final ChannelAttribute channelAttribute;
+    private TagoService tagoService;
+    private ChannelGroup channelGroup;
+    private ChannelAttribute channelAttribute;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
 
+        channelGroup = BeanUtil.getBeanByName("tagoChannelGroup", ChannelGroup.class);
+        channelAttribute = BeanUtil.getBeanByType(ChannelAttribute.class);
+
+        this.tagoService = new TagoService();
         channelAttribute.init(ctx);
         channelGroup.add(ctx.channel());
     }
@@ -56,7 +56,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
             case PDUs.subscription_chosen:
                 C2CAuthenticatedMessage rtnC2c = tagoService.responseSubscription(c2c, ctx);
-                if (rtnC2c.getPdu().hasAccept()) {
+                if ( rtnC2c.getPdu().hasAccept() ) {
                     tagoService.processSubscription(c2c, ctx);
                 }
                 ctx.writeAndFlush(rtnC2c);

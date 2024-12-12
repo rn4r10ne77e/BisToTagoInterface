@@ -5,6 +5,7 @@ import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BusArrvlPrdcInfoMapper;
 import com.geon.bis.link.mapper.model.ParamArrivalPredictionTimeInfo;
 import com.geon.bis.link.mapper.model.ResultArrivalPredictionTimeInfo;
+import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -16,7 +17,6 @@ import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
@@ -27,7 +27,6 @@ import java.util.List;
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class Publication202BusArrvlPrdcInfo {
 
@@ -39,6 +38,12 @@ public class Publication202BusArrvlPrdcInfo {
     @Value("${server.sendCnt}")
     private int sendCnt;
 
+    public Publication202BusArrvlPrdcInfo(){
+        this.sender = BeanUtil.getProperty("server.sender");
+        this.sendCnt = Integer.parseInt(BeanUtil.getProperty("server.sendCnt"));
+        this.util = BeanUtil.getBeanByType(Util.class);
+        this.busArrvlPrdcInfoMapper = BeanUtil.getBeanByType(BusArrvlPrdcInfoMapper.class);
+    }
 
     private synchronized void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 

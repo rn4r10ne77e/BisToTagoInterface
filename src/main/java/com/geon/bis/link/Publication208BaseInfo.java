@@ -8,6 +8,7 @@ import com.geon.bis.link.mapper.model.ParamBaseInfo;
 import com.geon.bis.link.mapper.model.ParamBaseInfoVersion;
 import com.geon.bis.link.mapper.model.ResultBaseInfoVersion;
 import com.geon.bis.link.mapper.model.baseinfo.*;
+import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -25,7 +26,6 @@ import datex.iso14827_2.Publish_Format.DatexPublish_Data;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.TooLongFrameException;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,8 +43,6 @@ import static com.geon.bis.link.config.ChannelAttribute.INFO;
  * 버스기반정보는 기반정보 버전정보를 모듈 시동시 동기화 하고, 이후 버전정보를 이벤트로 수신하며, 버전정보 변경시 해당 정보 전송하는 방식으로 진행
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
 public class Publication208BaseInfo {
 
 	private final Util util;
@@ -55,6 +53,14 @@ public class Publication208BaseInfo {
 	private String sender;
 	@Value("${server.sendCnt}")
 	private int sendCnt;
+
+	public Publication208BaseInfo(){
+		this.sender = BeanUtil.getProperty("server.sender");
+		this.sendCnt = Integer.parseInt(BeanUtil.getProperty("server.sendCnt"));
+		this.util = BeanUtil.getBeanByType(Util.class);
+		this.baseInfoMapper = BeanUtil.getBeanByType(BaseInfoMapper.class);
+		this.baseInfoVersionMapper = BeanUtil.getBeanByType(BaseInfoVersionMapper.class);
+	}
 
 	@Transactional
 	public void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {

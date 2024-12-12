@@ -6,6 +6,7 @@ import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.netty.handler.OutboundCacheHandler;
 import com.geon.bis.link.netty.handler.OutboundQueueHandler;
+import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -28,12 +29,11 @@ import java.util.concurrent.TimeUnit;
 import static com.geon.bis.link.config.ChannelAttribute.*;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class TagoService {
 
-    private final Util util;
-    private final AccountProperties accountProperties;
+    private Util util;
+    private AccountProperties accountProperties;
     private final ChannelGroup channelGroup;
     private final Publication201BusLocationInfo pub201;
     private final Publication202BusArrvlPrdcInfo pub202;
@@ -44,13 +44,27 @@ public class TagoService {
     private static final int EXECUTOR_THREAD_COUNT = 100; // 블로킹 작업 처리용 스레드
     private final DefaultEventExecutorGroup executorGroup = new DefaultEventExecutorGroup(EXECUTOR_THREAD_COUNT);
 
-
-    @Value("${server.sender}")
     private String sender;
-    @Value("${server.server-login-pass}")
     private boolean isServerLoginPass;
 
     private String destination;
+
+    public TagoService(){
+        this.util = BeanUtil.getBeanByType(Util.class);
+        this.accountProperties = BeanUtil.getBeanByName("accountProperties",AccountProperties.class);
+        this.channelGroup = BeanUtil.getBeanByName("tagoChannelGroup",ChannelGroup.class);
+        this.channelAttribute = BeanUtil.getBeanByType(ChannelAttribute.class);
+
+        this.pub201 = new Publication201BusLocationInfo();
+        this.pub202 = new Publication202BusArrvlPrdcInfo();
+        this.pub207 = new Publication207BaseInfoVersion();
+        this.pub208 = new Publication208BaseInfo();
+
+        this.sender =  BeanUtil.getProperty("server.sender");
+        this.isServerLoginPass = Boolean.parseBoolean(BeanUtil.getProperty("server.server-login-pass"));
+
+
+    }
 
     /**
      * 클라이언트 검증과 로그인 처리

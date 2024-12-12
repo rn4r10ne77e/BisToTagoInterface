@@ -6,6 +6,7 @@ import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BusLocationInfoMapper;
 import com.geon.bis.link.mapper.model.ParamBusLocationInfo;
 import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
+import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import datex.businfomation.BusLocationEvent;
@@ -33,17 +34,25 @@ import static com.geon.bis.link.config.ChannelAttribute.INFO;
 import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class Publication201BusLocationInfo {
 
     private final Util util;
-    private final BusLocationInfoMapper busLocationInfoMapper;
+    private BusLocationInfoMapper busLocationInfoMapper;
 
     @Value("${server.sender}")
     private String sender;
     @Value("${server.sendCnt}")
     private int sendCnt;
+
+    public Publication201BusLocationInfo(){
+
+        this.sender = BeanUtil.getProperty("server.sender");
+        this.sendCnt = Integer.parseInt(BeanUtil.getProperty("server.sendCnt"));
+
+        this.util = BeanUtil.getBeanByType(Util.class);
+        this.busLocationInfoMapper = BeanUtil.getBeanByType(BusLocationInfoMapper.class);
+    }
 
     /**
      * 싱글 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )

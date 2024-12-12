@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private final InboundHandler inboundHandler;
     private final Util util;
 
     @Override
@@ -24,6 +23,6 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
           .addLast("TagoCache",new OutboundCacheHandler())
           .addLast("TagoQueue", new OutboundQueueHandler())
           .addLast("TagoDecoder", new TagoDecoder(util))
-          .addLast(inboundHandler);
+          .addLast("TagoIn", new InboundHandler());
     }
 }

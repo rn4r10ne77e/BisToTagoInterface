@@ -5,6 +5,7 @@ import com.geon.bis.link.config.RegionCode;
 import com.geon.bis.link.mapper.BaseInfoVersionMapper;
 import com.geon.bis.link.mapper.model.ParamBaseInfoVersion;
 import com.geon.bis.link.mapper.model.ResultBaseInfoVersion;
+import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
@@ -34,8 +35,6 @@ import static com.geon.bis.link.config.ChannelAttribute.INFO;
 //버스기반정보에대한 퍼블리케이션 모듈 이벤트, 주기방식 구독에대한 스케쥴 실행
 //버스기반정보는 기반정보 버전정보를 모듈 시동시 동기화 하고, 이후 버전정보를 이벤트로 수신하며, 버전정보 변경시 해당 정보 전송하는 방식으로 진행
 @Slf4j
-@Component
-@RequiredArgsConstructor
 public class Publication207BaseInfoVersion {
 
 	private final Util util;
@@ -45,6 +44,15 @@ public class Publication207BaseInfoVersion {
 	private String sender;
 	@Value("${server.sendCnt}")
 	private int sendCnt;
+
+	public Publication207BaseInfoVersion(){
+		this.sender = BeanUtil.getProperty("server.sender");
+		this.sendCnt = Integer.parseInt(BeanUtil.getProperty("server.sendCnt"));
+		this.util = BeanUtil.getBeanByType(Util.class);
+		this.baseInfoVersionMapper = BeanUtil.getBeanByType(BaseInfoVersionMapper.class);
+	}
+
+
 	@Transactional
 	public  void procSinglePublication(ChannelHandlerContext ctx, String requiredOrigin) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 

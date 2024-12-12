@@ -13,9 +13,11 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import java.net.InetSocketAddress;
 
@@ -55,7 +57,9 @@ public class NettyConfiguration {
         return new NioEventLoopGroup(bossCount);
     }
 
-    @Bean
+
+    @Bean(name = "tagoChannelGroup")
+    @Primary
     public ChannelGroup channelGroup() {
         return new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     }

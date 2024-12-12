@@ -26,7 +26,7 @@ public class Config {
     }
 
     @Bean
-    public ChannelGroup getChannelGroup(){
+    public ChannelGroup getTagoChannelGroup(){
         return new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     }
 
