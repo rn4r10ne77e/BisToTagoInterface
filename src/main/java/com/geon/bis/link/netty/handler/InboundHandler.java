@@ -8,23 +8,21 @@ import datex.iso14827_2.PDUs;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 @Slf4j
-
+@RequiredArgsConstructor
 public class InboundHandler extends ChannelInboundHandlerAdapter {
 
     private TagoService tagoService;
-    private ChannelGroup channelGroup;
-    private ChannelAttribute channelAttribute;
+    private final ChannelGroup channelGroup;
+    private final ChannelAttribute channelAttribute;
+
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-
-        channelGroup = BeanUtil.getBeanByName("tagoChannelGroup", ChannelGroup.class);
-        channelAttribute = BeanUtil.getBeanByType(ChannelAttribute.class);
-
         this.tagoService = new TagoService();
         channelAttribute.init(ctx);
         channelGroup.add(ctx.channel());
@@ -32,7 +30,6 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
     }
