@@ -186,7 +186,7 @@ public class Publication207BaseInfoVersion {
 		BaseinfoVersion.setBase_RouteAllocate_version(new UTF8String16(date));
 		BaseinfoVersion.setBase_Company_version(new UTF8String16(date));
 		BaseinfoVersion.setBase_Admin_version(new UTF8String16(date));
-		BaseinfoVersion.setBase_Remark(new UTF8String16("버스 기반정보버전 테스트 메세지"));
+		BaseinfoVersion.setBase_Remark(new UTF8String16(""));
 
 		Message_MESSAGE_BODY_3 message_MESSAGE_BODY_3 = new Message_MESSAGE_BODY_3();
 		message_MESSAGE_BODY_3.add(BaseinfoVersion);
