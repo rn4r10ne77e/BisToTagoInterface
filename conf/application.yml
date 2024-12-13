@@ -10,6 +10,7 @@ spring:
       connection-timeout: 30000
       idle-timeout: 3000
       cache-prep-stmts: false
+      maximum-pool-size: 30
 mybatis:
   config-location: classpath:mybatis/sqlmap-config.xml
   mapper-locations: classpath:mybatis/mapper/*.xml

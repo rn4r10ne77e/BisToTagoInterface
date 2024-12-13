@@ -72,7 +72,7 @@ public class Publication202BusArrvlPrdcInfo {
     public synchronized void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
-          .beforeMinute(0)
+          .beforeSec(0)
           .mode("SINGLE")
           .origin(origin)
           .build());
@@ -83,7 +83,7 @@ public class Publication202BusArrvlPrdcInfo {
     public synchronized void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
-          .beforeMinute(10)
+          .beforeSec(10)
           .mode("EVENT")
           .origin(origin)
           .build());
