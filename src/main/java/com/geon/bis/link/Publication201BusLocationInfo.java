@@ -22,7 +22,6 @@ import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
@@ -64,7 +63,7 @@ public class Publication201BusLocationInfo {
 
         List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
         List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
-            .beforeMinute(0)
+            .beforeSec(0)
             .mode("SINGLE")
             .origin(origin)
           .build());
@@ -81,7 +80,7 @@ public class Publication201BusLocationInfo {
         try {
             List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
             List<ResultBusLocationInfo> busList = busLocationInfoMapper.getBusLoc(ParamBusLocationInfo.builder()
-                .beforeMinute(10)
+                .beforeSec(10)
                     .mode("EVENT")
                     .origin(origin)
                     .build());
