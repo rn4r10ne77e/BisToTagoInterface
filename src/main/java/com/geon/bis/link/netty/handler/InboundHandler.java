@@ -33,6 +33,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
 
+        this.tagoService = null;
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
     }

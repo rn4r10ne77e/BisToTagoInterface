@@ -2,7 +2,7 @@ spring:
   datasource:
     username: postgres
     password: geo&0317
-    url: jdbc:postgresql://geonworks.iptime.org:33333/cnbus?prepareThreshold=0 # 개발 서버
+    url: jdbc:log4jdbc:postgresql://geonworks.iptime.org:33333/cnbus?prepareThreshold=0 # 개발 서버
 
 server:
   address: 127.0.0.1

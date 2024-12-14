@@ -28,7 +28,7 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 			log.error("C2C instance error");
 			return;
 		}
-		log.info("인코딩 데이터 {}",c2c);
+//		log.info("인코딩 데이터 {}",c2c);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {

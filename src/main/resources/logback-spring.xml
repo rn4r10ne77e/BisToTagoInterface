@@ -34,6 +34,15 @@
     </root>
 
 
+    <logger name="jdbc.resultset" level="WARN" />
+    <logger name="jdbc.audit" level="WARN" />
+    <logger name="jdbc.sqlonly" level="WARN" />
+    <logger name="jdbc.sqltiming" level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </logger>
+
+
 <!---->
 
 </configuration>
