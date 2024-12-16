@@ -8,6 +8,7 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -23,6 +24,7 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
   private final int queueMaxSize = 10000;
 
   private final DefaultEventExecutorGroup executors = new DefaultEventExecutorGroup(10);
+  private LocalDateTime stamp = LocalDateTime.now();
 
   @Override
   public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -31,8 +33,13 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
       executors.submit(()->{
 
         int queueSize = queue.size();
-        log.info("Current queue size: {}/{}", queueSize, queueMaxSize);
-        currentCtx.writeAndFlush(queue.poll());
+        log.info("CURRENT QUEUE SIZE : {}/{}", queueSize, queueMaxSize);
+        if( stamp.isBefore(LocalDateTime.now().minusSeconds(5))){
+          log.info("RECENT ACCEPT DATE : {}", stamp);
+          C2CAuthenticatedMessage msg = queue.poll();
+          log.info("RESEND AFTER 5 SECONDS: {}", msg);
+          currentCtx.writeAndFlush(msg);
+        }
         if (queueSize >= queueMaxSize) {
           queue.clear();
         }
@@ -58,19 +65,16 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
   public void fire( long packetNo, boolean isAccept ) {
 
     if( isAccept ){ // case accept
-//      queue.removeIf( e -> e.getDatex_DataPacket_number() == packetNo );
+      this.stamp = LocalDateTime.now();
       queue.poll();
       if(!queue.isEmpty()) {
         currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.peek());
       }
-
-
     } else { // case reject
-
-      log.info("가져온 메시지: {}",queue.peek().getDatex_DataPacket_number());
-      currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.peek());
-
-
+      if( !queue.isEmpty() ) {
+        log.info("가져온 메시지: {}",queue.peek().getDatex_DataPacket_number());
+        currentCtx.pipeline().context(OutboundCacheHandler.class).writeAndFlush(queue.peek());
+      }
     }
 
   }
