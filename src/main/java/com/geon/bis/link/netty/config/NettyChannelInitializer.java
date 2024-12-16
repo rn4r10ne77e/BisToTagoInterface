@@ -1,8 +1,11 @@
 package com.geon.bis.link.netty.config;
 
+import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.netty.handler.*;
+import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Util;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +21,15 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel ch) {
+
+        ChannelGroup tagoChannelGroup = BeanUtil.getBeanByName("tagoChannelGroup", ChannelGroup.class);
+        ChannelAttribute channelAttribute = BeanUtil.getBeanByType(ChannelAttribute.class);
+
         ch.pipeline()
           .addLast("TagoEncoder", new TagoEncoder(util))
           .addLast("TagoCache",new OutboundCacheHandler())
           .addLast("TagoQueue", new OutboundQueueHandler())
           .addLast("TagoDecoder", new TagoDecoder(util))
-          .addLast("TagoIn", new InboundHandler());
+          .addLast("TagoIn", new InboundHandler(tagoChannelGroup, channelAttribute));
     }
 }

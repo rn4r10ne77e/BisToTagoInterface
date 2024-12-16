@@ -5,6 +5,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class NettyServerSocket {
 
     private final ServerBootstrap serverBootstrap;
     private final EventLoopGroup workerGroup;
+    private final EventLoopGroup bossGroup;
     private final InetSocketAddress tcpPort;
     private Channel serverChannel;
 
@@ -35,6 +37,13 @@ public class NettyServerSocket {
 
     @PreDestroy
     public void stop() {
+
+        if( bossGroup != null ) {
+            bossGroup.shutdownGracefully().syncUninterruptibly();
+        }
+        if( workerGroup != null ) {
+            workerGroup.shutdownGracefully().syncUninterruptibly();
+        }
         if (serverChannel != null) {
             serverChannel.close();
             serverChannel.parent().closeFuture();

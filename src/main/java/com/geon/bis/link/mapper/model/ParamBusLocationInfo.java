@@ -13,7 +13,7 @@ import java.util.List;
 public class ParamBusLocationInfo {
 
     /** 시간 텀 */
-    private int beforeMinute;
+    private int beforeSec;
     /** 조회할 시군*/
     private List<Integer> origin;
     /** 조회 기준 시간. 기준 시간부터 가장 최근 데이터까지 조회 */
