@@ -1,6 +1,8 @@
 package com.geon.bis.link.netty.handler;
 
 import com.geon.bis.link.tago.config.Util;
+import com.oss.asn1.Coder;
+import datex.Datex;
 import datex.iso14827_2.C2CAuthenticatedMessage;
 import datex.iso14827_2.DatexDataPacket;
 import com.oss.asn1.DecodeFailedException;
@@ -58,12 +60,21 @@ public class TagoDecoder extends ByteToMessageDecoder {
         return;
       }
 
+
+      Coder coder = Datex.getBERCoder();
+      coder.enableAutomaticEncoding(); // for OpenType
+      coder.enableAutomaticDecoding(); // for OpenType
+      coder.disableContainedValueDecoding();
+      coder.disableContainedValueEncoding();
+      coder.disableDecoderConstraints();
+      coder.disableEncoderConstraints();
+
       ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 
       DatexDataPacket datexDataPacket = null;
       C2CAuthenticatedMessage c2c = null;
       try {
-        datexDataPacket = util.getCoder().decode(bais, new DatexDataPacket());
+        datexDataPacket = coder.decode(bais, new DatexDataPacket());
         datexDataPacket.getDatex_Version_number(); // nothing
         OctetString datex_Data = datexDataPacket.getDatex_Data();
 
@@ -74,7 +85,7 @@ public class TagoDecoder extends ByteToMessageDecoder {
 
         bais = new ByteArrayInputStream(datex_Data.byteArrayValue());
 
-        c2c = util.getCoder().decode(bais, new C2CAuthenticatedMessage());
+        c2c = coder.decode(bais, new C2CAuthenticatedMessage());
 
       } catch (DecodeFailedException | DecodeNotSupportedException e) {
         throw new DecoderException("ASN.1 디코딩 오류: "+e.getMessage());

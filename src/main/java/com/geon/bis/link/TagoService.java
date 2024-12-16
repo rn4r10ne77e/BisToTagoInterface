@@ -29,11 +29,12 @@ import java.util.concurrent.TimeUnit;
 import static com.geon.bis.link.config.ChannelAttribute.*;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class TagoService {
 
-    private Util util;
-    private AccountProperties accountProperties;
+    private final Util util;
+    private final AccountProperties accountProperties;
     private final ChannelGroup channelGroup;
     private final Publication201BusLocationInfo pub201;
     private final Publication202BusArrvlPrdcInfo pub202;
@@ -42,29 +43,13 @@ public class TagoService {
     private final ChannelAttribute channelAttribute;
 
     private static final int EXECUTOR_THREAD_COUNT = 100; // 블로킹 작업 처리용 스레드
-    private final DefaultEventExecutorGroup executorGroup = new DefaultEventExecutorGroup(EXECUTOR_THREAD_COUNT);
 
+    @Value("${server.sender}")
     private String sender;
+    @Value("${server.server-login-pass}")
     private boolean isServerLoginPass;
 
     private String destination;
-
-    public TagoService(){
-        this.util = BeanUtil.getBeanByType(Util.class);
-        this.accountProperties = BeanUtil.getBeanByName("accountProperties",AccountProperties.class);
-        this.channelGroup = BeanUtil.getBeanByName("tagoChannelGroup",ChannelGroup.class);
-        this.channelAttribute = BeanUtil.getBeanByType(ChannelAttribute.class);
-
-        this.pub201 = new Publication201BusLocationInfo();
-        this.pub202 = new Publication202BusArrvlPrdcInfo();
-        this.pub207 = new Publication207BaseInfoVersion();
-        this.pub208 = new Publication208BaseInfo();
-
-        this.sender =  BeanUtil.getProperty("server.sender");
-        this.isServerLoginPass = Boolean.parseBoolean(BeanUtil.getProperty("server.server-login-pass"));
-
-
-    }
 
     /**
      * 클라이언트 검증과 로그인 처리
@@ -312,8 +297,8 @@ public class TagoService {
                     log.info("구독: 201 [이벤트]");
                     switch (headerOrigin) {
                         case "boryeong" -> channelInfo.setPub201boryeong(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -323,8 +308,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub201cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -334,8 +319,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "taean" -> channelInfo.setPub201taean(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -345,8 +330,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "seocheon" -> channelInfo.setPub201seocheon(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -356,8 +341,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "geumsan" -> channelInfo.setPub201geumsan(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub201.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -372,7 +357,7 @@ public class TagoService {
             }
             case Common.ARR_PRE_TIME_INFO_REQ -> {
                 if (subscriptionMode.hasSingle()) {
-                    ctx.executor().schedule(()->{
+                    channelInfo.getEventExecutor().schedule(()->{
                         try {
                             log.info("구독: 202 [싱글]");
                             pub202.procSinglePublication(ctx, headerOrigin);
@@ -386,8 +371,8 @@ public class TagoService {
                     log.info("구독: 202 [이벤트]");
                     switch(headerOrigin){
                         case "boryeong" -> channelInfo.setPub202boryeong(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -397,8 +382,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "cheongyang" -> channelInfo.setPub202cheongyang(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -408,8 +393,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "taean" -> channelInfo.setPub202taean(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -419,8 +404,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "seocheon" -> channelInfo.setPub202seocheon(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {
@@ -430,8 +415,8 @@ public class TagoService {
                             });
                         }, 5, 30, TimeUnit.SECONDS));
                         case "geumsan" ->channelInfo.setPub202geumsan(ctx.executor().scheduleWithFixedDelay(()->{
-                            if( executorGroup.executorCount() > EXECUTOR_THREAD_COUNT ) return;
-                            executorGroup.submit(()->{
+                            if( channelInfo.getEventExecutor().executorCount() > EXECUTOR_THREAD_COUNT ) return;
+                            channelInfo.getEventExecutor().submit(()->{
                                 try {
                                     pub202.procEventPublication(ctx, headerOrigin);
                                 } catch (Exception e) {

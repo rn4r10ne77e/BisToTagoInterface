@@ -1,6 +1,8 @@
 package com.geon.bis.link.netty.handler;
 
 import com.geon.bis.link.tago.config.Util;
+import com.oss.asn1.Coder;
+import datex.Datex;
 import datex.iso14827_2.C2CAuthenticatedMessage;
 import datex.iso14827_2.DatexDataPacket;
 import com.oss.asn1.EncodeFailedException;
@@ -30,10 +32,18 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 		}
 //		log.info("인코딩 데이터 {}",c2c);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		Coder coder = Datex.getBERCoder();
+		coder.enableAutomaticEncoding(); // for OpenType
+		coder.enableAutomaticDecoding(); // for OpenType
+		coder.disableContainedValueDecoding();
+		coder.disableContainedValueEncoding();
+		coder.disableDecoderConstraints();
+		coder.disableEncoderConstraints();
 
 		try {
 			baos.reset();
-			util.getCoder().encode(c2c, baos);
+
+			coder.encode(c2c, baos);
 		} catch (EncodeFailedException | EncodeNotSupportedException e) {
 			log.error(e.getMessage());
 			return;
@@ -48,7 +58,7 @@ public class TagoEncoder extends MessageToByteEncoder<Object> {
 
 		try {
 			baos.reset();
-			util.getCoder().encode(datexDataPacket, baos);
+			coder.encode(datexDataPacket, baos);
 		} catch (EncodeFailedException | EncodeNotSupportedException e) {
 			log.error(e.getMessage());
 			return;

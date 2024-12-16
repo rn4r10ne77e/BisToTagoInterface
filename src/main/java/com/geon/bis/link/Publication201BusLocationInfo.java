@@ -9,6 +9,7 @@ import com.geon.bis.link.mapper.model.ResultBusLocationInfo;
 import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
+import datex.Datex;
 import datex.businfomation.BusLocationEvent;
 import datex.businfomation.BusLocationInfo;
 import datex.businfomation.BusLocationPolling;
@@ -22,6 +23,7 @@ import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
@@ -33,25 +35,17 @@ import static com.geon.bis.link.config.ChannelAttribute.INFO;
 import static datex.iso14827_2.Publish_Format.createPublish_FormatWithDatexPublish_Data;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class Publication201BusLocationInfo {
 
     private final Util util;
-    private BusLocationInfoMapper busLocationInfoMapper;
+    private final BusLocationInfoMapper busLocationInfoMapper;
 
     @Value("${server.sender}")
     private String sender;
     @Value("${server.sendCnt}")
     private int sendCnt;
-
-    public Publication201BusLocationInfo(){
-
-        this.sender = BeanUtil.getProperty("server.sender");
-        this.sendCnt = Integer.parseInt(BeanUtil.getProperty("server.sendCnt"));
-
-        this.util = BeanUtil.getBeanByType(Util.class);
-        this.busLocationInfoMapper = BeanUtil.getBeanByType(BusLocationInfoMapper.class);
-    }
 
     /**
      * 싱글 구독 요청에 대한 응답 엔트리 ( 중복데이터 허용 )
@@ -172,30 +166,30 @@ public class Publication201BusLocationInfo {
 
 
 
-        busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
-        busLocationInfo.setTpif_EndNodeRouteSequence(100);
-        busLocationInfo.setTsfc_BusTotalSeatsNumber(0);
-        busLocationInfo.setTsfc_BusPassengerNumber(0);
-        busLocationInfo.setTsfc_BusRemainSeatsNumber(0);
-//        if(el.getEndNodeZoneIDNumber() != null) {
-//            busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
-//        }
-//
-//        if(el.getEndNodeRouteSequence() != -1) {
-//            busLocationInfo.setTpif_EndNodeRouteSequence(el.getEndNodeRouteSequence());
-//        }
-//
-//        if(el.getBusTotalSeatsNumber() != -1) {
-//            busLocationInfo.setTsfc_BusTotalSeatsNumber(el.getBusTotalSeatsNumber());
-//        }
-//
-//        if(el.getBusPassengerNumber() != -1) {
-//            busLocationInfo.setTsfc_BusPassengerNumber(el.getBusPassengerNumber());
-//        }
-//
-//        if(el.getBusRemainSeatsNumber() != -1) {
-//            busLocationInfo.setTsfc_BusRemainSeatsNumber(el.getBusRemainSeatsNumber());
-//        }
+//        busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
+//        busLocationInfo.setTpif_EndNodeRouteSequence(100);
+//        busLocationInfo.setTsfc_BusTotalSeatsNumber(0);
+//        busLocationInfo.setTsfc_BusPassengerNumber(0);
+//        busLocationInfo.setTsfc_BusRemainSeatsNumber(-1);
+        if(el.getEndNodeZoneIDNumber() != null) {
+            busLocationInfo.setTpif_EndNodeZoneIDNumber(new UTF8String16(el.getEndNodeZoneIDNumber()));
+        }
+
+        if(el.getEndNodeRouteSequence() != -1) {
+            busLocationInfo.setTpif_EndNodeRouteSequence(el.getEndNodeRouteSequence());
+        }
+
+        if(el.getBusTotalSeatsNumber() != -1) {
+            busLocationInfo.setTsfc_BusTotalSeatsNumber(el.getBusTotalSeatsNumber());
+        }
+
+        if(el.getBusPassengerNumber() != -1) {
+            busLocationInfo.setTsfc_BusPassengerNumber(el.getBusPassengerNumber());
+        }
+
+        if(el.getBusRemainSeatsNumber() != -1) {
+            busLocationInfo.setTsfc_BusRemainSeatsNumber(el.getBusRemainSeatsNumber());
+        }
 
         return busLocationInfo;
     }
@@ -373,9 +367,17 @@ public class Publication201BusLocationInfo {
      */
     private synchronized void testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
 
+        Coder coder = Datex.getBERCoder();
+        coder.enableAutomaticEncoding(); // for OpenType
+        coder.enableAutomaticDecoding(); // for OpenType
+        coder.disableContainedValueDecoding();
+        coder.disableContainedValueEncoding();
+        coder.disableDecoderConstraints();
+        coder.disableEncoderConstraints();
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.reset();
-        util.getCoder().encode(dummy, baos);
+        coder.encode(dummy, baos);
         byte[] encoding = baos.toByteArray();
 
         DatexDataPacket datexDataPacket = new DatexDataPacket();
@@ -384,7 +386,7 @@ public class Publication201BusLocationInfo {
         datexDataPacket.setDatex_Crc_nbr(new OctetString(util.getCrc16(encoding)));
 
         baos.reset();
-        util.getCoder().encode(datexDataPacket, baos);
+        coder.encode(datexDataPacket, baos);
         if (baos.size() > util.getDataGramSize()) {
             throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
         }

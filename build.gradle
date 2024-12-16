@@ -28,7 +28,7 @@ tasks.register('copyDeployFiles',Copy){
 
 tasks.register('copyPropertiesFiles',Copy){
     from 'conf'
-    include 'application.yml', 'application-dev.yml','application-vpn.yml','application-prod.yml','accounts.yml'
+    include 'application.yml', 'application-dev.yml', 'application-vpn.yml', 'application-prod.yml', 'accounts.yml', 'log4jdbc.log4j2.properties'
     into(layout.buildDirectory.dir('libs/conf'))
 }
 

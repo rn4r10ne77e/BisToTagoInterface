@@ -5,31 +5,36 @@ import com.geon.bis.link.config.ChannelAttribute;
 import com.geon.bis.link.tago.config.BeanUtil;
 import datex.iso14827_2.C2CAuthenticatedMessage;
 import datex.iso14827_2.PDUs;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
+@ChannelHandler.Sharable
+@Component
 public class InboundHandler extends ChannelInboundHandlerAdapter {
 
-    private TagoService tagoService;
+    private final TagoService tagoService;
     private final ChannelGroup channelGroup;
     private final ChannelAttribute channelAttribute;
 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        this.tagoService = new TagoService();
+
         channelAttribute.init(ctx);
         channelGroup.add(ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
+
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
     }
@@ -73,6 +78,7 @@ public class InboundHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error("exceptionCaught: {}", ExceptionUtils.getStackTrace(cause));
+
         channelAttribute.release(ctx);
         channelGroup.remove(ctx.channel());
         ctx.close();

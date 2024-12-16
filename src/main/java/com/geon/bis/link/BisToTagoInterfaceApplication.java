@@ -24,6 +24,11 @@ public class BisToTagoInterfaceApplication {
             default -> configLocation;
         };
 
+        // Log4jdbc 설정 파일 경로 설정
+        String log4jdbcConfigPath = "file:conf/log4jdbc.log4j2.properties";
+        System.setProperty("log4jdbc.config.file", log4jdbcConfigPath);
+        log.info("Log4jdbc configuration set to: {}", log4jdbcConfigPath);
+
         new SpringApplicationBuilder(BisToTagoInterfaceApplication.class)
                 .properties(String.format("spring.config.location=%s",configLocation))
                 .run(args);

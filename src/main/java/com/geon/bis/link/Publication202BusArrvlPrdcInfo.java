@@ -9,6 +9,7 @@ import com.geon.bis.link.tago.config.BeanUtil;
 import com.geon.bis.link.tago.config.Common;
 import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
+import datex.Datex;
 import datex.businfomation.ArrivalPredictionTimeInfo;
 import datex.iso14827_1.Message_MESSAGE_BODY_2;
 import datex.iso14827_2.*;
@@ -17,6 +18,7 @@ import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
@@ -27,6 +29,7 @@ import java.util.List;
 import static com.geon.bis.link.config.ChannelAttribute.INFO;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class Publication202BusArrvlPrdcInfo {
 
@@ -37,13 +40,6 @@ public class Publication202BusArrvlPrdcInfo {
     private String sender;
     @Value("${server.sendCnt}")
     private int sendCnt;
-
-    public Publication202BusArrvlPrdcInfo(){
-        this.sender = BeanUtil.getProperty("server.sender");
-        this.sendCnt = Integer.parseInt(BeanUtil.getProperty("server.sendCnt"));
-        this.util = BeanUtil.getBeanByType(Util.class);
-        this.busArrvlPrdcInfoMapper = BeanUtil.getBeanByType(BusArrvlPrdcInfoMapper.class);
-    }
 
     private synchronized void makePublicationData(ChannelHandlerContext ctx, String origin, List<ResultArrivalPredictionTimeInfo> busList) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
 
@@ -228,9 +224,17 @@ public class Publication202BusArrvlPrdcInfo {
      */
     private synchronized void  testEncoding(C2CAuthenticatedMessage dummy) throws EncodeFailedException, EncodeNotSupportedException, TooLongFrameException {
 
+        Coder coder = Datex.getBERCoder();
+        coder.enableAutomaticEncoding(); // for OpenType
+        coder.enableAutomaticDecoding(); // for OpenType
+        coder.disableContainedValueDecoding();
+        coder.disableContainedValueEncoding();
+        coder.disableDecoderConstraints();
+        coder.disableEncoderConstraints();
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.reset();
-        util.getCoder().encode(dummy, baos);
+        coder.encode(dummy, baos);
         byte[] encoding = baos.toByteArray();
 
         DatexDataPacket datexDataPacket = new DatexDataPacket();
@@ -239,7 +243,7 @@ public class Publication202BusArrvlPrdcInfo {
         datexDataPacket.setDatex_Crc_nbr(new OctetString(util.getCrc16(encoding)));
 
         baos.reset();
-        util.getCoder().encode(datexDataPacket, baos);
+        coder.encode(datexDataPacket, baos);
         if (baos.size() > util.getDataGramSize()) {
             throw new TooLongFrameException( "The maximum size of the datagram has been exceeded. Maximum size: %d".formatted(util.getDataGramSize()) );
         }

@@ -58,8 +58,8 @@ public class NettyConfiguration {
     }
 
 
-    @Bean(name = "tagoChannelGroup")
-    @Primary
+
+    @Bean
     public ChannelGroup channelGroup() {
         return new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     }

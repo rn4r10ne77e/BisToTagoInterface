@@ -18,18 +18,16 @@ import org.springframework.stereotype.Component;
 public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private final Util util;
+    private final InboundHandler inboundHandler;
 
     @Override
     protected void initChannel(SocketChannel ch) {
-
-        ChannelGroup tagoChannelGroup = BeanUtil.getBeanByName("tagoChannelGroup", ChannelGroup.class);
-        ChannelAttribute channelAttribute = BeanUtil.getBeanByType(ChannelAttribute.class);
 
         ch.pipeline()
           .addLast("TagoEncoder", new TagoEncoder(util))
           .addLast("TagoCache",new OutboundCacheHandler())
           .addLast("TagoQueue", new OutboundQueueHandler())
           .addLast("TagoDecoder", new TagoDecoder(util))
-          .addLast("TagoIn", new InboundHandler(tagoChannelGroup, channelAttribute));
+          .addLast(inboundHandler);
     }
 }

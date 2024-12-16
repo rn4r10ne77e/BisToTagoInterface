@@ -6,6 +6,7 @@ import datex.iso14827_2.DatexDataPacket;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.ScheduledFuture;
 import lombok.*;
 import org.springframework.context.annotation.Primary;
@@ -91,6 +92,12 @@ public class  ChannelAttribute {
             channelInfo.setPub207geumsan(null);
         }
 
+
+        if( channelInfo.getEventExecutor() != null ) {
+            channelInfo.getEventExecutor().shutdownGracefully();
+        }
+
+
         if( channelInfo.getPub208() != null ) {
             channelInfo.getPub208().cancel(true);
             channelInfo.setPub208(null);
@@ -102,6 +109,7 @@ public class  ChannelAttribute {
                         .sessionConnected(false)
                         .heartbeatDurationMax(0)
                         .responseTimeOut(0)
+                        .eventExecutor(new DefaultEventExecutorGroup(100))
                         .messages(new LinkedBlockingQueue<>())
                         .origin(new ArrayList<>())
                         .storage(new ArrayList<>())
@@ -146,6 +154,8 @@ public class  ChannelAttribute {
         private ScheduledFuture<?> pub207geumsan;
 
         private ScheduledFuture<?> pub208;
+
+        private DefaultEventExecutorGroup eventExecutor;
 
         private int responseTimeOut;
         private List<String> origin;

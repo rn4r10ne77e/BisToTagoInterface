@@ -4,7 +4,9 @@ import datex.Datex;
 import datex.iso14827_2.Time;
 import com.oss.asn1.Coder;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,28 +24,26 @@ import java.util.Date;
 @Getter
 @Primary
 @Component
+@RequiredArgsConstructor
 public class Util {
 
 	private final TagoServerConfig tagoServerConfig;
-	private final Coder coder;
+	private Coder coder;
 
-	public Util(TagoServerConfig tagoServerConfig) {
-        this.tagoServerConfig = tagoServerConfig;
-        coder = Datex.getBERCoder();
+	@PostConstruct
+	public void init(){
+		coder = Datex.getBERCoder();
 		coder.enableAutomaticEncoding(); // for OpenType
 		coder.enableAutomaticDecoding(); // for OpenType
 		coder.disableContainedValueDecoding();
 		coder.disableContainedValueEncoding();
 		coder.disableDecoderConstraints();
 		coder.disableEncoderConstraints();
-		//coder.enableEncoderDebugging();
-		//coder.enableDecoderDebugging();
 	}
 	
 	
 	/**
 	 * Get CRC16 code
-	 * @param Input data
 	 * @return CRC16
 	 */
 	public byte[] getCrc16(byte[] bytes) {
