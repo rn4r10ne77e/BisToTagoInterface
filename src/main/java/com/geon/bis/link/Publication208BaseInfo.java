@@ -35,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -346,7 +348,9 @@ public class Publication208BaseInfo {
                     node.setNode_Coordinate(nMEACoord);
 
                     node.setNode_Turn_P(new UTF8String16(el.getTurnLimit()));
-                    node.setNode_Reg_date(new UTF8String16(el.getRegDate()));
+                    node.setNode_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         node.setNode_Remark(new UTF8String16(el.getRemark()));
                     }
@@ -415,7 +419,9 @@ public class Publication208BaseInfo {
 					}
 					link.setLink_Restw(el.getResTw());
 					link.setLink_Resth(el.getResTh());
-					link.setLink_Reg_date(new UTF8String16(el.getRegDate()));
+					link.setLink_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 					if(el.getRemark() != null) {
 						link.setLink_Remark(new UTF8String16(el.getRemark()));
 					}
@@ -478,7 +484,9 @@ public class Publication208BaseInfo {
                     NMEACoord nMEACoord = new NMEACoord(latitude, longitude);
                     linkcoords.setLinkcoords_Coordinate(nMEACoord);
 
-                    linkcoords.setLinkcoords_Reg_date(new UTF8String16(el.getRegDate()));
+                    linkcoords.setLinkcoords_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         linkcoords.setLinkcoords_Remark(new UTF8String16(el.getRemark()));
                     }
@@ -568,7 +576,9 @@ public class Publication208BaseInfo {
                     station.setStation_Coordinate(nMEACoord);
 
                     station.setStation_Install_link_id(new UTF8String16(el.getInstallLinkId()));
-                    station.setStation_Reg_date(new UTF8String16(el.getRegDate()));
+                    station.setStation_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 
                     if(el.getRemark() != null) {
                         station.setStation_Remark(new UTF8String16(el.getRemark()));
@@ -650,7 +660,9 @@ public class Publication208BaseInfo {
 				route.setRoute_Distance(el.getDistance());
 				route.setRoute_Req_time(el.getReqTime());
 				route.setRoute_Charge(el.getCharge());
-				route.setRoute_Reg_date(new UTF8String16(el.getRegDate()));
+				route.setRoute_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+								DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+						.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 				route.setRoute_Remark(new UTF8String16(el.getRemark()));
 				
 				version = el.getVer();
@@ -714,7 +726,9 @@ public class Publication208BaseInfo {
 				routeplan.setRouteplan_Ed_last_tm(new UTF8String16(Vo.getEndLastTm()));
 				routeplan.setRouteplan_Min_head(Vo.getMinHead());
                 routeplan.setRouteplan_Max_head(Vo.getMaxHead());
-                routeplan.setRouteplan_Reg_date(new UTF8String16(Vo.getRegDate()));
+                routeplan.setRouteplan_Reg_date(new UTF8String16(LocalDateTime.parse(Vo.getRegDate().split("\\+")[0],
+								DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+						.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 				if(Vo.getRemark() != null) {
 					routeplan.setRouteplan_Remark(new UTF8String16(Vo.getRemark()));	
 				}			
@@ -786,7 +800,9 @@ public class Publication208BaseInfo {
 					
 					default: break;
 				}
-				routeStation.setRoutestation_Reg_date(new UTF8String16(el.getRegDate()));
+				routeStation.setRoutestation_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+								DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+						.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
 				if(el.getRemark() != null) {
 					routeStation.setRoutestation_Remark(new UTF8String16(el.getRemark()));
 				}
@@ -858,7 +874,9 @@ public class Publication208BaseInfo {
                     if(el.getCompanyId() != null) {
                         vehicle.setVehicle_Company_id(new UTF8String16(el.getCompanyId()));
                     }
-                    vehicle.setVehicle_Reg_date(new UTF8String16(el.getRegDate()));
+                    vehicle.setVehicle_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         vehicle.setVehicle_Remark(new UTF8String16(el.getRemark()));
                     }
@@ -924,7 +942,9 @@ public class Publication208BaseInfo {
                         case 2 : routeLink.setRoutelink_Up_down(Routelink.Routelink_Up_down.no_division); break;
                         default: break;
                     }
-                    routeLink.setRoutelink_Reg_date(new UTF8String16(el.getRegDate()));
+                    routeLink.setRoutelink_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         routeLink.setRoutelink_Remark(new UTF8String16(el.getRemark()));
                     }
@@ -993,7 +1013,9 @@ public class Publication208BaseInfo {
                     if(el.getEndStation() != null) {
                         routeAllocate.setRouteallocate_Ed_station_id(new UTF8String16(el.getEndStation()));
                     }
-                    routeAllocate.setRouteallocate_Reg_date(new UTF8String16(el.getRegDate()));
+                    routeAllocate.setRouteallocate_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         routeAllocate.setRouteallocate_Remark(new UTF8String16(el.getRemark()));
                     }
@@ -1057,7 +1079,9 @@ public class Publication208BaseInfo {
                     company.setCompany_Reg_cnt(el.getRegCnt());
                     company.setCompany_Spare_cnt(el.getSpareCnt());
                     company.setCompany_Admin_id(new UTF8String16(el.getAdminId()));
-                    company.setCompany_Reg_date(new UTF8String16(el.getRegDate()));
+                    company.setCompany_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         company.setCompany_Remark(new UTF8String16(el.getRemark()));
                     }
@@ -1113,7 +1137,9 @@ public class Publication208BaseInfo {
                     admin.setAdmin_Moi_id(new UTF8String16(el.getMoiId()));
                     admin.setAdmin_Admin_nm1(new UTF8String16(el.getAdminNm1()));
                     admin.setAdmin_Admin_nm2(new UTF8String16(el.getAdminNm2()));
-                    admin.setAdmin_Reg_date(new UTF8String16(el.getRegDate()));
+                    admin.setAdmin_Reg_date(new UTF8String16(LocalDateTime.parse(el.getRegDate().split("\\+")[0],
+									DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+							.format(DateTimeFormatter.ofPattern("yyyyMMdd"))));
                     if(el.getRemark() != null) {
                         admin.setAdmin_Remark(new UTF8String16(el.getRemark()));
                     }
