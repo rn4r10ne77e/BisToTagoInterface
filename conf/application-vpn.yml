@@ -1,7 +1,7 @@
 spring:
   datasource:
-    username: postgres
-    password: geo&0317
+    username: tago_module
+    password: geon0801
     url: jdbc:log4jdbc:postgresql://192.168.45.11:20010/cnbus?prepareThreshold=0 # 릴레이 서버
 
 server:
