@@ -88,7 +88,19 @@
         select 1;
     </select>
     <select id="getRoutePlan" parameterType="ParamBaseInfo" resultType="RoutePlanModel">
-        select 1;
+        select
+            route_id as routeId,
+            operation_week as operationWeek,
+            operation_cnt as operationCnt,
+            start_first_tm as startFirstTm,
+            start_last_tm as startLastTm,
+            end_first_tm as endFirstTm,
+            end_last_tm as endLastTm,
+            min_head as minHead,
+            max_head as maxHead,
+            reg_date as regDate,
+            ver as ver
+        from public.get_route_plan(#{origin}, #{ver});
     </select>
     <select id="getRouteLink" parameterType="ParamBaseInfo" resultType="RouteLinkModel">
         select 1;

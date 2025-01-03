@@ -708,10 +708,10 @@ public class Publication208BaseInfo {
 					default: break;
 				}
 				routeplan.setRouteplan_Oper_cnt(Vo.getOperationCnt());
-				routeplan.setRouteplan_St_first_tm(new UTF8String16(Vo.getStartFirstTm()));
-				routeplan.setRouteplan_St_last_tm(new UTF8String16(Vo.getStartLastTm()));
-				routeplan.setRouteplan_Ed_first_tm(new UTF8String16(Vo.getEndFirstTm()));
-				routeplan.setRouteplan_Ed_last_tm(new UTF8String16(Vo.getEndLastTm()));
+				routeplan.setRouteplan_St_first_tm(new UTF8String16(Vo.getStartFirstTm() == null ? "" : Vo.getStartFirstTm()));
+				routeplan.setRouteplan_St_last_tm(new UTF8String16(Vo.getStartLastTm() == null ? "" : Vo.getStartLastTm()));
+				routeplan.setRouteplan_Ed_first_tm(new UTF8String16(Vo.getEndFirstTm() == null ? "" : Vo.getEndFirstTm()));
+				routeplan.setRouteplan_Ed_last_tm(new UTF8String16(Vo.getEndLastTm() == null ? "" : Vo.getEndLastTm()));
 				routeplan.setRouteplan_Min_head(Vo.getMinHead());
                 routeplan.setRouteplan_Max_head(Vo.getMaxHead());
                 routeplan.setRouteplan_Reg_date(new UTF8String16(Vo.getRegDate()));
