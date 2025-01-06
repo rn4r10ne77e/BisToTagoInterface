@@ -1,6 +1,7 @@
 package com.geon.bis.link.mapper.model.baseinfo;
 
 import lombok.*;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -23,7 +24,7 @@ public class NodeModel {
 	/** 회전 제한 유무 */
 	private String turnLimit = null;
 	/** 등록일자 */
-	private String regDate = null;
+	private ZonedDateTime regDate = null;
 	/** 비고 */
 	private String remark = null;
 	/** 버전 */

@@ -12,8 +12,8 @@
     <typeHandlers>
         <typeHandler
           handler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"
-          javaType="java.time.ZonedDateTime"
-          jdbcType="TIMESTAMP_WITH_TIMEZONE" />
+          javaType="java.time.ZonedDateTime"/>
+      <!-- jdbcType="TIMESTAMP_WITH_TIMEZONE" 지정 하지 말것 -->
         <typeHandler
           handler="com.geon.bis.link.mapper.handler.IntegerArrayTypeHandler"
           javaType="java.util.List"
