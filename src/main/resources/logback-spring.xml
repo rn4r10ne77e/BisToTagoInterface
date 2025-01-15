@@ -37,7 +37,7 @@
     <logger name="jdbc.resultset" level="WARN" />
     <logger name="jdbc.audit" level="WARN" />
     <logger name="jdbc.sqlonly" level="WARN" />
-    <logger name="jdbc.sqltiming" level="INFO">
+    <logger name="jdbc.sqltiming" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
     </logger>
