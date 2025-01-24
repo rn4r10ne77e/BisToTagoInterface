@@ -4,22 +4,22 @@
 
 <mapper namespace="com.geon.bis.link.mapper.BusArrvlPrdcInfoMapper">
     <resultMap id="ArrivalPredictionTimeInfoMap" type="com.geon.bis.link.mapper.model.ResultArrivalPredictionTimeInfo">
-        <result column="comput_dt" property="messageGenerationTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="updt_dt" property="messageGenerationTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
         <result column="event_cd" property="busEventCodeNumber"/>
-        <result column="arr_stop_id" property="bITIdentityNumber"/>
+        <result column="station_id" property="bITIdentityNumber"/>
         <result column="route_id" property="subRouteIdentityNumber"/>
         <result column="veh_id" property="pTVehicleIDNumber"/>
-        <result column="access_point_arrival_time" property="accesspoINTArrivalTime"/>
-        <result column="access_point_arrival_count" property="accesspoINTArrivalCount"/>
-        <result column="node_route_sequence" property="lastBITIdentifyNumber"/>
-        <result column="last_node_no" property="nodeRouteSequence"/>
-        <result column="last_zone_entry_time" property="lastBITZoneEntryTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
-        <result column="last_zone_exit_time" property="lastBITZoneExitTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
-        <result column="last_zone_trip_time" property="lastBITZoneTripTime"/>
+        <result column="remain_duration" property="accesspoINTArrivalTime"/>
+        <result column="remain_station_cnt" property="accesspoINTArrivalCount"/>
+        <result column="prev_station_id" property="lastBITIdentifyNumber"/>
+        <result column="station_seq" property="nodeRouteSequence"/>
+        <result column="prev_station_entry_dt" property="lastBITZoneEntryTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="prev_station_exit_dt" property="lastBITZoneExitTime" typeHandler="com.geon.bis.link.mapper.handler.ZonedDateTimeTypeHandler"/>
+        <result column="prev_station_stay_time" property="lastBITZoneTripTime"/>
         <result column="speed_rate" property="rollingAverageSpeedRate"/>
         <result column="is_last" property="lastPTVehicle"/>
-        <result column="end_node_zone_id" property="endNodeZoneIDNumber"/>
-        <result column="end_node_zone_sequence" property="endNodeRouteSequence"/>
+        <result column="end_station_id" property="endNodeZoneIDNumber"/>
+        <result column="end_station_seq" property="endNodeRouteSequence"/>
         <result column="total_seats_number" property="busTotalSeatsNumber"/>
         <result column="passenger_number" property="busPassengerNumber"/>
         <result column="remain_seats_number" property="busRemainSeatsNumber"/>
@@ -29,29 +29,30 @@
             resultMap="ArrivalPredictionTimeInfoMap"
     >
         select
-            comput_dt,
-            event_cd,
-            arr_stop_id,
-            route_id,
-            veh_id,
-            access_point_arrival_time,
-            access_point_arrival_count,
-            node_route_sequence,
+            arrv.updt_dt,
+            arrv.event_cd::integer,
+            arrv.station_id,
+            arrv.route_id,
+            arrv.veh_id,
+            arrv.remain_duration,
+            arrv.remain_station_cnt,
+            arrv.prev_station_id,
+            arrv.station_seq,
 
-            last_node_no,
-            last_zone_entry_time,
-            last_zone_exit_time,
-            last_zone_trip_time,
-            speed_rate,
-            is_last,
+            arrv.prev_station_entry_dt,
+            arrv.prev_station_exit_dt,
+            arrv.prev_station_stay_time,
 
-            end_node_zone_id,
-            end_node_zone_sequence,
-            total_seats_number,
-            passenger_number,
-            remain_seats_number
+            30 as speed_rate,
+            false as is_last,
 
-        from public.get_arrival_prediction_time_info(now() - interval '${beforeSec} seconds' , #{origin,jdbcType=ARRAY}, #{mode})
+            arrv.end_station_id,
+            arrv.end_station_seq,
 
+            ( select b.veh_capa from bus b where b.veh_id = arrv.veh_id ) as total_seats_number,
+            -1 as passenger_number,
+            -1 as remain_seats_number
+
+        from get_bus_arrv(#{targetOrigin}) arrv;
     </select>
 </mapper>

@@ -11,11 +11,13 @@ import com.geon.bis.link.tago.config.Util;
 import com.oss.asn1.*;
 import datex.Datex;
 import datex.businfomation.ArrivalPredictionTimeInfo;
+import datex.businfomation.BusLocationInfo;
 import datex.iso14827_1.Message_MESSAGE_BODY_2;
 import datex.iso14827_2.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -66,22 +68,20 @@ public class Publication202BusArrvlPrdcInfo {
     }
     @Transactional
     public synchronized void procSinglePublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
-        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
+        int origin = RegionCode.findByRegion(requiredOrigin).getCode();
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
-          .beforeSec(0)
+          .targetOrigin(origin)
           .mode("SINGLE")
-          .origin(origin)
           .build());
 
         this.makePublicationData( ctx, requiredOrigin, busList );
     }
     @Transactional
     public synchronized void procEventPublication ( ChannelHandlerContext ctx, String requiredOrigin ) throws EncodeFailedException, EncodeNotSupportedException, InterruptedException {
-        List<Integer> origin = List.of(RegionCode.findByRegion(requiredOrigin).getCode());
+        int origin = RegionCode.findByRegion(requiredOrigin).getCode();
         List<ResultArrivalPredictionTimeInfo> busList = busArrvlPrdcInfoMapper.getBusArr(ParamArrivalPredictionTimeInfo.builder()
-          .beforeSec(10)
+          .targetOrigin(origin)
           .mode("EVENT")
-          .origin(origin)
           .build());
         makePublicationData( ctx, requiredOrigin, busList );
 
@@ -138,7 +138,20 @@ public class Publication202BusArrvlPrdcInfo {
                     //메시지 발생시각
                     ArrPTInfo.setTsmg_MessageGenerationTime(new GeneralizedTime(util.TimeToString(Timestamp.from(el.getMessageGenerationTime().toInstant()))));
                     //이벤트 분류코드
-                    ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.enter_BusStop);
+                    switch (el.getBusEventCodeNumber()){
+                        case 11:
+                            ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.enter_BusStop);
+                            break;
+                        case 12:
+                            ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.exit_BusStop);
+                            break;
+                        case 21:
+                            ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.fixed_Cycle);
+                            break;
+
+                        default: ArrPTInfo.setTpfc_BusEventCodeNumber(ArrivalPredictionTimeInfo.Tpfc_BusEventCodeNumber.pass_Cross);
+                    }
+
                     //정류장 ID
                     ArrPTInfo.setTpif_BITIdentifyNumber(new UTF8String16(el.getBITIdentityNumber()));
                     //노선 ID
