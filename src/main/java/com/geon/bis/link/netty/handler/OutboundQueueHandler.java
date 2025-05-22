@@ -22,7 +22,7 @@ public class OutboundQueueHandler extends ChannelOutboundHandlerAdapter {
   private final Queue<C2CAuthenticatedMessage> queue = new ConcurrentLinkedQueue<>();
   private ScheduledFuture<?> scheduledFuture;
   private ChannelHandlerContext currentCtx;
-  private final int queueMaxSize = 10000;
+  private final int queueMaxSize = 50000;
 
   private final DefaultEventExecutorGroup executors = new DefaultEventExecutorGroup(10);
   private final AtomicReference<LocalDateTime> stamp = new AtomicReference<>(LocalDateTime.now());
